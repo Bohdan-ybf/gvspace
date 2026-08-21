@@ -4,7 +4,7 @@ import { isLocale } from "@/i18n";
 import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gvspace.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

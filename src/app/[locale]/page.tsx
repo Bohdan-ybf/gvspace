@@ -32,7 +32,7 @@ export function generateStaticParams() {
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gvspace.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",

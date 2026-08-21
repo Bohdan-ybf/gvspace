@@ -3,7 +3,7 @@ import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://gvspace.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com"),
   robots: { index: false, follow: true },
 };
 
