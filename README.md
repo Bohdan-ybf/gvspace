@@ -2,6 +2,10 @@
 
 Multilingual corporate website built with Next.js App Router, TypeScript, Tailwind CSS and Geist.
 
+## Live website
+
+[View the deployed website](https://gvspace-eta.vercel.app/uk)
+
 ## Requirements
 
 - Node.js 22 LTS
@@ -45,4 +49,14 @@ public/images/       Optimized public image assets
 
 ## Deployment
 
-Run `npm run build` before deployment. The application requires a Next.js-compatible Node.js runtime. Configure `NEXT_PUBLIC_SITE_URL` with the final production domain.
+The website is deployed on Vercel and connected to the GitHub repository. Pushes to the production branch trigger a new deployment automatically.
+
+Production URL: [https://gvspace-eta.vercel.app/uk](https://gvspace-eta.vercel.app/uk)
+
+Configure the following environment variable in Vercel without a trailing slash or locale path:
+
+```env
+NEXT_PUBLIC_SITE_URL=https://gvspace-eta.vercel.app
+```
+
+Run `npm run build` before deployment to verify the production build locally.
