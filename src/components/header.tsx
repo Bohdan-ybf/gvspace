@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getDictionary } from "@/i18n";
 import { ChevronDown } from "./icons/chevron-down";
@@ -11,6 +12,13 @@ const routes = ["services", "cases", "expertise", "about", "blog", "contacts"];
 export function Header({ locale, forceSolid = false }: { locale: string; forceSolid?: boolean }) {
   const text = getDictionary(locale);
   const alternateLanguage = locale === "en" ? "uk" : "en";
+  const pathname = usePathname();
+  const languageHref = (language: "uk" | "en") => {
+    const localizedPath = pathname.replace(/^\/(uk|en)(?=\/|$)/, `/${language}`);
+    return localizedPath === pathname && !pathname.match(/^\/(uk|en)(?=\/|$)/)
+      ? `/${language}${pathname === "/" ? "" : pathname}`
+      : localizedPath;
+  };
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
@@ -94,7 +102,7 @@ export function Header({ locale, forceSolid = false }: { locale: string; forceSo
             aria-hidden={!isLanguageOpen}
           >
             <Link
-              href="/uk"
+              href={languageHref("uk")}
               hrefLang="uk"
               role="menuitem"
               aria-current={locale === "uk" ? "page" : undefined}
@@ -105,7 +113,7 @@ export function Header({ locale, forceSolid = false }: { locale: string; forceSo
               <span>UK</span>
             </Link>
             <Link
-              href="/en"
+              href={languageHref("en")}
               hrefLang="en"
               role="menuitem"
               aria-current={locale === "en" ? "page" : undefined}
@@ -155,7 +163,7 @@ export function Header({ locale, forceSolid = false }: { locale: string; forceSo
           +38 012 345 67 89
         </a>
         <Link
-          href={`/${alternateLanguage}`}
+          href={languageHref(alternateLanguage)}
           hrefLang={alternateLanguage}
           tabIndex={isMenuOpen ? 0 : -1}
           onClick={() => setIsMenuOpen(false)}
