@@ -951,6 +951,9 @@ footer {
 .legal a:hover {
   color: #fff;
 }
+.footer-mobile-wordmark {
+  display: none;
+}
 .legal-page {
   max-width: 900px;
   padding-top: 145px;
@@ -1239,7 +1242,7 @@ footer {
     left: 50%;
     right: auto;
     bottom: 46px;
-    min-width: 204px;
+    /* min-width: 204px; */
     min-height: 41px;
     padding: 12px 24px;
     font-size: 13px;
@@ -1470,14 +1473,17 @@ footer {
     display: none;
   }
   .legal {
+    width: calc(100% - 28px);
     display: block;
-    line-height: 2;
+    line-height: 1.5;
+    padding-top: 10px;
+    border-top: 1px solid rgb(255 255 255 / 18%);
   }
   .legal nav {
     display: flex;
-    margin-top: 20px;
+    margin-top: 6px;
     flex-direction: column;
-    gap: 4px;
+    gap: 0;
   }
   .legal a {
     display: block;
@@ -1490,5 +1496,16 @@ footer {
   footer {
     min-height: 602px;
     padding: 24px 0 0;
+    overflow: hidden;
+  }
+  .footer-mobile-wordmark {
+    width: 100%;
+    margin: 45px 0 0;
+    display: block;
+  }
+  .footer-mobile-wordmark img {
+    width: max(300px, calc(100vw + 32px));
+    height: auto;
+    display: block;
   }
 }

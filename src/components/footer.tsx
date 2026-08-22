@@ -60,6 +60,9 @@ export function Footer({ locale }: { locale: string }) {
           <Link href={`/${locale}/terms-of-use`}>{footer.terms}</Link>
         </nav>
       </div>
+      <div className="footer-mobile-wordmark" aria-hidden="true">
+        <Logo variant="footer" />
+      </div>
     </footer>
   );
 }

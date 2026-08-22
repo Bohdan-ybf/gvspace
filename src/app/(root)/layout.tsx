@@ -10,7 +10,9 @@ export const metadata: Metadata = {
 export default function RedirectLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="uk">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
+      <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }

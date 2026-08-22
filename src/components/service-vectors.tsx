@@ -9,7 +9,7 @@ import { ArrowRight } from "./icons/arrow-right";
 type ServiceVectorsProps = { locale: string; text: Messages["vectors"] };
 
 export function ServiceVectors({ locale, text }: ServiceVectorsProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number | null>(0);
 
   return (
     <section className="section container vectors-section">
@@ -34,7 +34,9 @@ export function ServiceVectors({ locale, text }: ServiceVectorsProps) {
                   type="button"
                   aria-expanded={isOpen}
                   aria-controls={panelId}
-                  onClick={() => setActiveIndex(index)}
+                  onClick={() =>
+                    setActiveIndex((currentIndex) => (currentIndex === index ? null : index))
+                  }
                 >
                   <span>{item}</span>
                   <span className="vector-toggle" aria-hidden="true">
