@@ -1,13 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary } from "@/i18n";
+import { getDictionary, type Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
-import { Footer } from "./footer";
-import { Header } from "./header";
 import { ArrowRight } from "./icons/arrow-right";
 import { ServiceVectors } from "./service-vectors";
 
-export function Home({ locale }: { locale: string }) {
+export function Home({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
 
   return (
@@ -22,7 +20,6 @@ export function Home({ locale }: { locale: string }) {
           sizes="100vw"
           className="hero-img"
         />
-        <Header locale={locale} />
         <div className="hero-copy">
           <span className="tag mono">{text.hero.eyebrow}</span>
           <h1>
@@ -54,7 +51,6 @@ export function Home({ locale }: { locale: string }) {
         </section>
         <Contact text={text} />
       </main>
-      <Footer locale={locale} />
     </>
   );
 }
@@ -79,7 +75,7 @@ function Problems({ text }: { text: Messages }) {
   );
 }
 
-function Approach({ text, locale }: { text: Messages; locale: string }) {
+function Approach({ text, locale }: { text: Messages; locale: Locale }) {
   return (
     <section className="section container approach-section">
       <h2>{text.approach.title}</h2>
@@ -121,7 +117,7 @@ function Technology({ text }: { text: Messages }) {
   );
 }
 
-function MobileClarity({ text, locale }: { text: Messages; locale: string }) {
+function MobileClarity({ text, locale }: { text: Messages; locale: Locale }) {
   return (
     <section className="mobile-clarity container">
       <h2>{text.clarity.title}</h2>
@@ -134,7 +130,7 @@ function MobileClarity({ text, locale }: { text: Messages; locale: string }) {
   );
 }
 
-function Cases({ text, locale }: { text: Messages; locale: string }) {
+function Cases({ text, locale }: { text: Messages; locale: Locale }) {
   return (
     <section className="section container cases">
       <aside>

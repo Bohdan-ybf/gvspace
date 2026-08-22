@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Footer } from "./footer";
-import { Header } from "./header";
+import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 
@@ -53,7 +52,7 @@ const content = {
     ],
     social: "SOCIAL MEDIA",
   },
-} as const;
+} as const satisfies Record<Locale, unknown>;
 
 function ContactIcon({ type }: { type: "telegram" | "email" | "phone" }) {
   const paths = {
@@ -77,111 +76,106 @@ const socials = [
   { name: "Facebook", handle: "t.me/[gvspace]", Icon: FacebookIcon },
 ];
 
-export function ContactsPage({ locale }: { locale: string }) {
-  const language = locale === "en" ? "en" : "uk";
-  const text = content[language];
+export function ContactsPage({ locale }: { locale: Locale }) {
+  const text = content[locale];
   const cards = [text.telegram, text.email, text.phone];
   const types = ["telegram", "email", "phone"] as const;
 
   return (
-    <>
-      <Header locale={language} forceSolid />
-      <main className="contacts-page">
-        <section className="contacts-hero container">
-          <div>
-            <span className="privacy-eyebrow mono">LEGAL</span>
-            <h1>{text.title}</h1>
-            <p>{text.intro}</p>
-          </div>
-          <div className="response-badge mono">
-            <i />
-            {text.response}
-          </div>
-        </section>
+    <main className="contacts-page">
+      <section className="contacts-hero container">
+        <div>
+          <span className="privacy-eyebrow mono">LEGAL</span>
+          <h1>{text.title}</h1>
+          <p>{text.intro}</p>
+        </div>
+        <div className="response-badge mono">
+          <i />
+          {text.response}
+        </div>
+      </section>
 
-        <section className="contacts-main container">
-          <div className="direct-contacts">
-            <h2 className="contact-label mono">{text.direct}</h2>
-            <div className="contact-cards">
-              {cards.map((card, index) => (
-                <a
-                  href={
-                    index === 0
-                      ? "https://t.me/"
-                      : index === 1
-                        ? "mailto:email@gvspace.com"
-                        : "tel:+380000000000"
-                  }
-                  key={card[0]}
-                >
-                  <ContactIcon type={types[index]} />
-                  <span>
-                    <small className="mono">{card[0]}</small>
-                    <strong>{card[1]}</strong>
-                    <em>{card[2]}</em>
-                  </span>
-                </a>
-              ))}
-            </div>
-
-            <div className="location-block">
-              <h2 className="contact-label mono">{text.location}</h2>
-              <div className="location-map">
-                <span aria-hidden="true">📍</span>
-                <b className="mono">{text.city}</b>
-              </div>
-              <dl>
-                {text.details.map(([term, value]) => (
-                  <div key={term}>
-                    <dt className="mono">{term}</dt>
-                    <dd>{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
-
-          <form className="contacts-form">
-            <h2 className="contact-label mono">{text.form}</h2>
-            <div className="contacts-form-row">
-              <input aria-label={text.name} placeholder={text.name} required />
-              <input aria-label="Phone" inputMode="tel" placeholder="+38 0__" />
-            </div>
-            <input aria-label="Email" type="email" placeholder="Email" required />
-            <input aria-label={text.topic} placeholder={text.topic} required />
-            <textarea aria-label={text.message} placeholder={text.message} required />
-            <button className="btn btn-primary" type="submit">
-              {text.submit}
-            </button>
-            <p className="mono">{text.consent}</p>
-          </form>
-        </section>
-
-        <section className="contacts-social container">
-          <h2 className="contact-label mono">{text.social}</h2>
-          <div>
-            {socials.map(({ name, handle, Icon }) => (
-              <Link href="#" key={name}>
-                <Icon />
+      <section className="contacts-main container">
+        <div className="direct-contacts">
+          <h2 className="contact-label mono">{text.direct}</h2>
+          <div className="contact-cards">
+            {cards.map((card, index) => (
+              <a
+                href={
+                  index === 0
+                    ? "https://t.me/"
+                    : index === 1
+                      ? "mailto:email@gvspace.com"
+                      : "tel:+380000000000"
+                }
+                key={card[0]}
+              >
+                <ContactIcon type={types[index]} />
                 <span>
-                  <strong>{name}</strong>
-                  <small>{handle}</small>
+                  <small className="mono">{card[0]}</small>
+                  <strong>{card[1]}</strong>
+                  <em>{card[2]}</em>
                 </span>
-                <ArrowRight />
-              </Link>
+              </a>
             ))}
-            <Link href="#">
-              <ContactIcon type="telegram" />
+          </div>
+
+          <div className="location-block">
+            <h2 className="contact-label mono">{text.location}</h2>
+            <div className="location-map">
+              <span aria-hidden="true">📍</span>
+              <b className="mono">{text.city}</b>
+            </div>
+            <dl>
+              {text.details.map(([term, value]) => (
+                <div key={term}>
+                  <dt className="mono">{term}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+
+        <form className="contacts-form">
+          <h2 className="contact-label mono">{text.form}</h2>
+          <div className="contacts-form-row">
+            <input aria-label={text.name} placeholder={text.name} required />
+            <input aria-label="Phone" inputMode="tel" placeholder="+38 0__" />
+          </div>
+          <input aria-label="Email" type="email" placeholder="Email" required />
+          <input aria-label={text.topic} placeholder={text.topic} required />
+          <textarea aria-label={text.message} placeholder={text.message} required />
+          <button className="btn btn-primary" type="submit">
+            {text.submit}
+          </button>
+          <p className="mono">{text.consent}</p>
+        </form>
+      </section>
+
+      <section className="contacts-social container">
+        <h2 className="contact-label mono">{text.social}</h2>
+        <div>
+          {socials.map(({ name, handle, Icon }) => (
+            <Link href="#" key={name}>
+              <Icon />
               <span>
-                <strong>Telegram-канал</strong>
-                <small>t.me/[gvspace]</small>
+                <strong>{name}</strong>
+                <small>{handle}</small>
               </span>
               <ArrowRight />
             </Link>
-          </div>
-        </section>
-      </main>
-      <Footer locale={language} />
-    </>
+          ))}
+          <Link href="#">
+            <ContactIcon type="telegram" />
+            <span>
+              <strong>Telegram-канал</strong>
+              <small>t.me/[gvspace]</small>
+            </span>
+            <ArrowRight />
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }

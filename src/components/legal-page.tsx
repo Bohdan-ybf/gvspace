@@ -1,6 +1,5 @@
-import { Footer } from "./footer";
-import { Header } from "./header";
 import { LegalNavigation } from "./legal-navigation";
+import type { Locale } from "@/i18n";
 
 type LegalKind = "privacy" | "terms";
 type LegalSection = {
@@ -203,7 +202,7 @@ const privacyContent = {
       },
     ] satisfies LegalSection[],
   },
-} as const;
+} as const satisfies Record<Locale, unknown>;
 
 const termsContent = {
   uk: {
@@ -350,9 +349,9 @@ const termsContent = {
       },
     ] satisfies LegalSection[],
   },
-} as const;
+} as const satisfies Record<Locale, unknown>;
 
-function LegalDocument({ locale, kind }: { locale: "uk" | "en"; kind: LegalKind }) {
+function LegalDocument({ locale, kind }: { locale: Locale; kind: LegalKind }) {
   const document = kind === "privacy" ? privacyContent[locale] : termsContent[locale];
   const sections = document.sections as readonly LegalSection[];
   const navigationSections = sections.map((section) => ({
@@ -401,13 +400,6 @@ function LegalDocument({ locale, kind }: { locale: "uk" | "en"; kind: LegalKind 
   );
 }
 
-export function LegalPage({ locale, kind }: { locale: string; kind: LegalKind }) {
-  const language = locale === "en" ? "en" : "uk";
-  return (
-    <>
-      <Header locale={language} forceSolid />
-      <LegalDocument locale={language} kind={kind} />
-      <Footer locale={language} />
-    </>
-  );
+export function LegalPage({ locale, kind }: { locale: Locale; kind: LegalKind }) {
+  return <LegalDocument locale={locale} kind={kind} />;
 }

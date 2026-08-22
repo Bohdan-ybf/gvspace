@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getDictionary } from "@/i18n";
+import { getDictionary, localeNames, locales, type Locale } from "@/i18n";
 import { ChevronDown } from "./icons/chevron-down";
 import { Logo } from "./logo";
 
 const routes = ["services", "cases", "expertise", "about", "blog", "contacts"];
 
-export function Header({ locale, forceSolid = false }: { locale: string; forceSolid?: boolean }) {
+export function Header({ locale, forceSolid = false }: { locale: Locale; forceSolid?: boolean }) {
   const text = getDictionary(locale);
-  const alternateLanguage = locale === "en" ? "uk" : "en";
+  const alternateLanguages = locales.filter((language) => language !== locale);
   const pathname = usePathname();
-  const languageHref = (language: "uk" | "en") => {
-    const localizedPath = pathname.replace(/^\/(uk|en)(?=\/|$)/, `/${language}`);
-    return localizedPath === pathname && !pathname.match(/^\/(uk|en)(?=\/|$)/)
+  const languageHref = (language: Locale) => {
+    const localePattern = new RegExp(`^/(${locales.join("|")})(?=/|$)`);
+    const localizedPath = pathname.replace(localePattern, `/${language}`);
+    return localizedPath === pathname && !localePattern.test(pathname)
       ? `/${language}${pathname === "/" ? "" : pathname}`
       : localizedPath;
   };
@@ -101,28 +102,20 @@ export function Header({ locale, forceSolid = false }: { locale: string; forceSo
             role="menu"
             aria-hidden={!isLanguageOpen}
           >
-            <Link
-              href={languageHref("uk")}
-              hrefLang="uk"
-              role="menuitem"
-              aria-current={locale === "uk" ? "page" : undefined}
-              tabIndex={isLanguageOpen ? 0 : -1}
-              onClick={() => setIsLanguageOpen(false)}
-            >
-              <span>Українська</span>
-              <span>UK</span>
-            </Link>
-            <Link
-              href={languageHref("en")}
-              hrefLang="en"
-              role="menuitem"
-              aria-current={locale === "en" ? "page" : undefined}
-              tabIndex={isLanguageOpen ? 0 : -1}
-              onClick={() => setIsLanguageOpen(false)}
-            >
-              <span>English</span>
-              <span>EN</span>
-            </Link>
+            {locales.map((language) => (
+              <Link
+                key={language}
+                href={languageHref(language)}
+                hrefLang={language}
+                role="menuitem"
+                aria-current={locale === language ? "page" : undefined}
+                tabIndex={isLanguageOpen ? 0 : -1}
+                onClick={() => setIsLanguageOpen(false)}
+              >
+                <span>{localeNames[language]}</span>
+                <span>{language.toUpperCase()}</span>
+              </Link>
+            ))}
           </div>
         </div>
         <button
@@ -162,14 +155,17 @@ export function Header({ locale, forceSolid = false }: { locale: string; forceSo
         >
           +38 012 345 67 89
         </a>
-        <Link
-          href={languageHref(alternateLanguage)}
-          hrefLang={alternateLanguage}
-          tabIndex={isMenuOpen ? 0 : -1}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          {alternateLanguage.toUpperCase()}
-        </Link>
+        {alternateLanguages.map((language) => (
+          <Link
+            key={language}
+            href={languageHref(language)}
+            hrefLang={language}
+            tabIndex={isMenuOpen ? 0 : -1}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {language.toUpperCase()}
+          </Link>
+        ))}
       </nav>
     </header>
   );

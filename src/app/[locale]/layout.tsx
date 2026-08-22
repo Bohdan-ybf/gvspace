@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { isLocale } from "@/i18n";
+import { isLocale, locales } from "@/i18n";
+import { SiteShell } from "@/components/site-shell";
 import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
 
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export function generateStaticParams() {
-  return [{ locale: "uk" }, { locale: "en" }];
+  return locales.map((locale) => ({ locale }));
 }
 
 export default async function LocaleLayout({
@@ -51,7 +52,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <SiteShell locale={locale}>{children}</SiteShell>
       </body>
     </html>
   );

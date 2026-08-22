@@ -1,33 +1,52 @@
 import { notFound } from "next/navigation";
 import { Home } from "@/components/home";
 import type { Metadata } from "next";
-import { isLocale } from "@/i18n";
+import { defaultLocale, isLocale, locales, type Locale } from "@/i18n";
+
+const localizedMetadata = {
+  uk: {
+    title: "GVSPACE — простір вашого масштабування",
+    description:
+      "Проєктуємо керовані системи маркетингу, IT та стратегії для масштабування бізнесу.",
+    openGraphLocale: "uk_UA",
+  },
+  en: {
+    title: "GVSPACE — Space for your growth",
+    description:
+      "We design manageable marketing, IT, and strategy systems that help businesses scale.",
+    openGraphLocale: "en_US",
+  },
+} satisfies Record<Locale, { title: string; description: string; openGraphLocale: string }>;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
-  const isEnglish = locale === "en";
+  const { locale: localeParam } = await params;
+  const locale = isLocale(localeParam) ? localeParam : defaultLocale;
+  const pageMetadata = localizedMetadata[locale];
 
   return {
-    title: isEnglish ? "GVSPACE — Space for your growth" : "GVSPACE — простір вашого масштабування",
-    description: isEnglish
-      ? "We design manageable marketing, IT, and strategy systems that help businesses scale."
-      : "Проєктуємо керовані системи маркетингу, IT та стратегії для масштабування бізнесу.",
+    title: pageMetadata.title,
+    description: pageMetadata.description,
     alternates: {
       canonical: `/${locale}`,
-      languages: { uk: "/uk", en: "/en", "x-default": "/uk" },
+      languages: {
+        ...Object.fromEntries(locales.map((language) => [language, `/${language}`])),
+        "x-default": `/${defaultLocale}`,
+      },
     },
     openGraph: {
-      locale: isEnglish ? "en_US" : "uk_UA",
-      alternateLocale: isEnglish ? ["uk_UA"] : ["en_US"],
+      locale: pageMetadata.openGraphLocale,
+      alternateLocale: locales
+        .filter((language) => language !== locale)
+        .map((language) => localizedMetadata[language].openGraphLocale),
     },
   };
 }
 export function generateStaticParams() {
-  return [{ locale: "uk" }, { locale: "en" }];
+  return locales.map((locale) => ({ locale }));
 }
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

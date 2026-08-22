@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
 import { ArrowRight } from "@/components/icons/arrow-right";
+import { defaultLocale, isLocale, type Locale } from "@/i18n";
 
 const content = {
   uk: {
@@ -21,40 +20,37 @@ const content = {
     linksLabel: "OR CONTINUE TO",
     links: ["Cases", "Technology stack", "Blog", "Contacts"],
   },
-} as const;
+} as const satisfies Record<Locale, unknown>;
 
 const routes = ["cases", "technology", "blog", "contacts"];
 
 export default function NotFound() {
   const pathname = usePathname();
-  const locale = pathname.split("/")[1] === "en" ? "en" : "uk";
+  const pathLocale = pathname.split("/")[1];
+  const locale = isLocale(pathLocale) ? pathLocale : defaultLocale;
   const text = content[locale];
 
   return (
-    <>
-      <Header locale={locale} forceSolid />
-      <main className="not-found-page">
-        <div className="not-found-content container">
-          <div className="not-found-copy">
-            <p className="not-found-eyebrow mono">{text.eyebrow}</p>
-            <h1>{text.title}</h1>
-            <p className="not-found-description">{text.description}</p>
-            <nav className="not-found-links" aria-label={text.linksLabel}>
-              <span className="mono">{text.linksLabel}</span>
-              {text.links.map((label, index) => (
-                <Link key={label} href={`/${locale}/${routes[index]}`}>
-                  {label}
-                  <ArrowRight />
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div className="not-found-code mono" aria-hidden="true">
-            404
-          </div>
+    <main className="not-found-page">
+      <div className="not-found-content container">
+        <div className="not-found-copy">
+          <p className="not-found-eyebrow mono">{text.eyebrow}</p>
+          <h1>{text.title}</h1>
+          <p className="not-found-description">{text.description}</p>
+          <nav className="not-found-links" aria-label={text.linksLabel}>
+            <span className="mono">{text.linksLabel}</span>
+            {text.links.map((label, index) => (
+              <Link key={label} href={`/${locale}/${routes[index]}`}>
+                {label}
+                <ArrowRight />
+              </Link>
+            ))}
+          </nav>
         </div>
-      </main>
-      <Footer locale={locale} />
-    </>
+        <div className="not-found-code mono" aria-hidden="true">
+          404
+        </div>
+      </div>
+    </main>
   );
 }

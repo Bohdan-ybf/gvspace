@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getDictionary } from "@/i18n";
+import { getDictionary, type Locale } from "@/i18n";
 import { Logo } from "./logo";
 import { ClutchIcon, FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 
 const routes = ["services", "about", "blog"];
 
-export function Footer({ locale }: { locale: string }) {
+export function Footer({ locale }: { locale: Locale }) {
   const { footer } = getDictionary(locale);
 
   return (

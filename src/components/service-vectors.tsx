@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import type { Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
 
-type ServiceVectorsProps = { locale: string; text: Messages["vectors"] };
+type ServiceVectorsProps = { locale: Locale; text: Messages["vectors"] };
 
 export function ServiceVectors({ locale, text }: ServiceVectorsProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
