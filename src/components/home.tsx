@@ -4,6 +4,9 @@ import { getDictionary, type Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
 import { ServiceVectors } from "./service-vectors";
+import { CasesSection } from "./cases-section";
+import { ContactSection } from "./contact-section";
+import { TechnologySection } from "./technology-section";
 
 export function Home({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
@@ -39,8 +42,8 @@ export function Home({ locale }: { locale: Locale }) {
         <Approach text={text} locale={locale} />
         <ServiceVectors text={text.vectors} locale={locale} />
         <MobileClarity text={text} locale={locale} />
-        <Technology text={text} />
-        <Cases text={text} locale={locale} />
+        <TechnologySection locale={locale} />
+        <CasesSection text={text.cases} locale={locale} />
         <People text={text} />
         <Reviews text={text} />
         <Blog text={text} />
@@ -49,7 +52,7 @@ export function Home({ locale }: { locale: Locale }) {
           <b>{text.mission.statement}</b>
           <p>{text.mission.description}</p>
         </section>
-        <Contact text={text} />
+        <ContactSection text={text.contact} />
       </main>
     </>
   );
@@ -99,24 +102,6 @@ function Approach({ text, locale }: { text: Messages; locale: Locale }) {
   );
 }
 
-function Technology({ text }: { text: Messages }) {
-  return (
-    <section className="section container technology-section">
-      <h2>{text.technology.title}</h2>
-      <p className="mono filters">[ MARKETING ]　[ DEVELOPMENT ]　[ SYSTEMS ]　[ CONTENT ]</p>
-      <div className="logos">
-        {Array.from({ length: 32 }, (_, index) => (
-          <div key={index}>
-            {text.technology.logo}
-            <br />
-            <b>{text.technology.name}</b>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function MobileClarity({ text, locale }: { text: Messages; locale: Locale }) {
   return (
     <section className="mobile-clarity container">
@@ -126,38 +111,6 @@ function MobileClarity({ text, locale }: { text: Messages; locale: Locale }) {
         <span>{text.clarity.action}</span>
         <ArrowRight />
       </Link>
-    </section>
-  );
-}
-
-function Cases({ text, locale }: { text: Messages; locale: Locale }) {
-  return (
-    <section className="section container cases">
-      <aside>
-        <h2>{text.cases.title}</h2>
-        <p>{text.cases.subtitle}</p>
-        <Link className="btn" href={`/${locale}/cases`}>
-          <span>{text.cases.all}</span>
-          <ArrowRight />
-        </Link>
-      </aside>
-      <div>
-        {Array.from({ length: 3 }, (_, index) => (
-          <article key={index}>
-            <div>
-              <span className="mono">0{index + 1}</span>
-              <h3>{text.cases.caseTitle}</h3>
-              <p>[{text.cases.result}]</p>
-              <b>
-                +140% ROAS　　−30% CPL
-                <br />
-                {text.cases.revenue}
-              </b>
-            </div>
-            <div className="case-image">{text.cases.badge}</div>
-          </article>
-        ))}
-      </div>
     </section>
   );
 }
@@ -237,37 +190,6 @@ function Faq({ text }: { text: Messages }) {
           <p className="muted">{text.faq.answer}</p>
         </details>
       ))}
-    </section>
-  );
-}
-
-function Contact({ text }: { text: Messages }) {
-  return (
-    <section className="contact">
-      <div>
-        <span className="mono">{text.contact.eyebrow}</span>
-        <h2>
-          {text.contact.title}
-          <br />
-          {text.contact.titleSecond}
-        </h2>
-        <p>{text.contact.intro}</p>
-      </div>
-      <form>
-        <div>
-          <input aria-label={text.contact.name} placeholder={text.contact.name} required />
-          <input aria-label={text.contact.phone} placeholder="+38 0..." />
-        </div>
-        <input type="email" aria-label="Email" placeholder="Email" required />
-        <input aria-label={text.contact.topic} placeholder={text.contact.topic} required />
-        <textarea
-          aria-label={text.contact.description}
-          placeholder={text.contact.description}
-          required
-        />
-        <button className="btn btn-primary">{text.contact.submit}</button>
-        <p className="contact-consent mono">{text.contact.consent}</p>
-      </form>
     </section>
   );
 }

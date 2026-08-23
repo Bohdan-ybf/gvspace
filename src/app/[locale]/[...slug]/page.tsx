@@ -1,9 +1,27 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ServicesPage } from "@/components/services-page";
+import { CasesPage } from "@/components/cases-page";
+import { AboutPage } from "@/components/about-page";
+import { isLocale } from "@/i18n";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
-export default function UnknownRoute() {
-  notFound();
+export default async function RoutedPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string[] }>;
+}) {
+  const { locale, slug } = await params;
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "services") {
+    return <ServicesPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "cases") {
+    return <CasesPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "about") {
+    return <AboutPage locale={locale} />;
+  }
+  return notFound();
 }
