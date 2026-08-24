@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { ServicesPage } from "@/components/services-page";
 import { CasesPage } from "@/components/cases-page";
 import { AboutPage } from "@/components/about-page";
+import { TeamPage } from "@/components/team-page";
+import { CareersPage } from "@/components/careers-page";
+import { VacancyDetailPage } from "@/components/vacancy-detail-page";
+import { TechnologiesPage } from "@/components/technologies-page";
 import { isLocale } from "@/i18n";
 
 export const metadata: Metadata = {
@@ -22,6 +26,18 @@ export default async function RoutedPage({
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "about") {
     return <AboutPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "team") {
+    return <TeamPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "careers") {
+    return <CareersPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 2 && slug[0] === "careers") {
+    return <VacancyDetailPage locale={locale} slug={slug[1]} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "technologies") {
+    return <TechnologiesPage locale={locale} />;
   }
   return notFound();
 }

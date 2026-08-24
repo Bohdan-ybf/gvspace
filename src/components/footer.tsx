@@ -36,14 +36,22 @@ export function Footer({ locale }: { locale: Locale }) {
         {footer.columns.map((column, columnIndex) => (
           <div key={column[0]}>
             <b>{column[0]}</b>
-            {column.slice(1).map((item, index) => (
-              <Link
-                key={item}
-                href={`/${locale}/${routes[columnIndex]}${index ? `/${index}` : ""}`}
-              >
-                {item}
-              </Link>
-            ))}
+            {column.slice(1).map((item, index) => {
+              const href =
+                columnIndex === 1 && index === 1
+                  ? `/${locale}/team`
+                  : columnIndex === 2 && index === 1
+                    ? `/${locale}/technologies`
+                    : columnIndex === 2 && index === 2
+                      ? `/${locale}/careers`
+                      : `/${locale}/${routes[columnIndex]}${index ? `/${index}` : ""}`;
+
+              return (
+                <Link key={item} href={href}>
+                  {item}
+                </Link>
+              );
+            })}
           </div>
         ))}
         <div>
