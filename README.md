@@ -35,6 +35,7 @@ npm run build
 | Variable               | Description                                          |
 | ---------------------- | ---------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL` | Canonical production origin without a trailing slash |
+| `SITE_INDEXING_ENABLED` | Set to `true` only when the production site should be indexed; defaults to disabled |
 
 Copy `.env.example` to `.env.local`. Never commit `.env.local` or production secrets.
 

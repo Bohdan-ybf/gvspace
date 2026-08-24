@@ -7,12 +7,23 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
+
+const indexingHeaders = indexingEnabled
+  ? []
+  : [
+      {
+        key: "X-Robots-Tag",
+        value: "noindex, nofollow, noarchive, nosnippet",
+      },
+    ];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   images: { formats: ["image/avif", "image/webp"] },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [{ source: "/(.*)", headers: [...securityHeaders, ...indexingHeaders] }];
   },
 };
 
