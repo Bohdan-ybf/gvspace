@@ -3,9 +3,11 @@ import type { Locale } from "@/i18n";
 import { CareersValuesSection } from "./careers-values-section";
 import { OpenApplicationBanner } from "./open-application-banner";
 import { VacancyCard } from "./vacancy-card";
+import { getVacancies } from "./wordpress-vacancies";
 
-export function CareersPage({ locale }: { locale: Locale }) {
+export async function CareersPage({ locale }: { locale: Locale }) {
   const uk = locale === "uk";
+  const vacancies = await getVacancies(locale);
 
   return (
     <main className="careers-page">
@@ -58,9 +60,9 @@ export function CareersPage({ locale }: { locale: Locale }) {
         <section className="vacancies-section">
           <span className="mono">{uk ? "НАШІ ВАКАНСІЇ" : "OPEN POSITIONS"}</span>
           <div className="vacancies-grid">
-            <VacancyCard locale={locale} hot salary="$[2000–3000]" />
-            <VacancyCard locale={locale} salary="$[XXX–XXX]" />
-            <VacancyCard locale={locale} salary="$[XXX–XXX]" />
+            {vacancies.map((vacancy) => (
+              <VacancyCard key={vacancy.slug} locale={locale} vacancy={vacancy} />
+            ))}
           </div>
         </section>
       </section>

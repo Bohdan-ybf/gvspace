@@ -24,3 +24,13 @@ Thumbs.db
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Local WordPress runtime; keep only project-owned infrastructure and plugin code.
+wordpress/*
+!wordpress/compose.yml
+!wordpress/wp-content/
+wordpress/wp-content/*
+!wordpress/wp-content/plugins/
+wordpress/wp-content/plugins/*
+!wordpress/wp-content/plugins/gvspace-core/
+!wordpress/wp-content/plugins/gvspace-core/**

@@ -1,0 +1,56 @@
+
+name: gvspace-wordpress
+services:
+  database:
+    image: mysql:8.0
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+    volumes:
+      - wordpress_database:/var/lib/mysql
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  wordpress:
+    image: wordpress:php8.3
+    restart: unless-stopped
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    ports:
+      - "${WP_PORT}:80"
+
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DEBUG: "1"
+
+    volumes:
+      - wordpress_files:/var/www/html
+      - ./wp-content:/var/www/html/wp-content
+
+volumes:
+  wordpress_database:
+    external: true
+    name: wordpress_wordpress_database
+
+  wordpress_files:
+    external: true
+    name: wordpress_wordpress_files

@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
-import { getVacancyBySlug } from "./vacancy-data";
+import { getVacancyBySlug } from "./wordpress-vacancies";
 import { VacancyApplicationForm } from "./vacancy-application-form";
 
-export function VacancyDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
-  const vacancy = getVacancyBySlug(slug);
+export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
+  const vacancy = await getVacancyBySlug(slug);
   if (!vacancy) notFound();
 
   const uk = locale === "uk";

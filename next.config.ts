@@ -21,7 +21,17 @@ const indexingHeaders = indexingEnabled
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  images: { formats: ["image/avif", "image/webp"] },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8080",
+        pathname: "/wp-content/uploads/**",
+      },
+    ],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: [...securityHeaders, ...indexingHeaders] }];
   },
