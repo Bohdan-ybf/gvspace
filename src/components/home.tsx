@@ -7,9 +7,11 @@ import { ServiceVectors } from "./service-vectors";
 import { CasesSection } from "./cases-section";
 import { ContactSection } from "./contact-section";
 import { TechnologySection } from "./technology-section";
+import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
 
-export function Home({ locale }: { locale: Locale }) {
+export async function Home({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
+  const blogPosts = (await getBlogPosts(locale)).slice(0, 5);
 
   return (
     <>
@@ -46,7 +48,7 @@ export function Home({ locale }: { locale: Locale }) {
         <CasesSection text={text.cases} locale={locale} />
         <People text={text} />
         <Reviews text={text} />
-        <Blog text={text} />
+        <Blog text={text} locale={locale} posts={blogPosts} />
         <Faq text={text} />
         <section className="mission container">
           <b>{text.mission.statement}</b>
@@ -155,21 +157,56 @@ function Reviews({ text }: { text: Messages }) {
   );
 }
 
-function Blog({ text }: { text: Messages }) {
+function Blog({
+  text,
+  locale,
+  posts,
+}: {
+  text: Messages;
+  locale: Locale;
+  posts: BlogPostSummary[];
+}) {
+  if (!posts.length) return null;
+  const [featured, ...rest] = posts;
+
   return (
     <section className="section container blog-section">
       <h2 className="center-title">{text.blog.title}</h2>
-      <div className="blog">
+      <div className={`blog${posts.length === 1 ? " is-single" : ""}`}>
         <article className="featured">
-          <div />
-          <h3>{text.blog.headline}</h3>
-          <p>{text.blog.intro}</p>
+          <div
+            style={
+              featured.image
+                ? {
+                    backgroundImage: `url(${featured.image})`,
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                  }
+                : undefined
+            }
+          />
+          <h3>
+            <Link href={`/${locale}/blog/${featured.slug}`}>{featured.title}</Link>
+          </h3>
+          <p>{featured.excerpt}</p>
         </article>
-        {Array.from({ length: 4 }, (_, index) => (
-          <article key={index}>
-            <div />
-            <h3>{text.blog.articleTitle}</h3>
-            <p>{text.blog.articleIntro}</p>
+        {rest.map((post) => (
+          <article key={post.slug}>
+            <div
+              style={
+                post.image
+                  ? {
+                      backgroundImage: `url(${post.image})`,
+                      backgroundPosition: "center",
+                      backgroundSize: "cover",
+                    }
+                  : undefined
+              }
+            />
+            <h3>
+              <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
+            </h3>
+            <p>{post.excerpt}</p>
           </article>
         ))}
       </div>

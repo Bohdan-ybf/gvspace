@@ -46,7 +46,10 @@ const vacancyFields = `
   }
 `;
 
-async function queryWordPress<T>(query: string, variables?: Record<string, unknown>): Promise<T | null> {
+async function queryWordPress<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T | null> {
   if (!endpoint) return null;
 
   try {
@@ -99,7 +102,8 @@ export async function getVacancies(locale: Locale): Promise<VacancySummary[]> {
   if (data?.vacancies.nodes.length) {
     return data.vacancies.nodes.map((node) => ({
       slug: node.slug,
-      title: locale === "en" && node.vacancyDetails.titleEn ? node.vacancyDetails.titleEn : node.title,
+      title:
+        locale === "en" && node.vacancyDetails.titleEn ? node.vacancyDetails.titleEn : node.title,
       excerpt: locale === "uk" ? node.vacancyDetails.excerptUk : node.vacancyDetails.excerptEn,
       salary: node.vacancyDetails.salary,
       hot: node.vacancyDetails.hot,
@@ -110,16 +114,19 @@ export async function getVacancies(locale: Locale): Promise<VacancySummary[]> {
   const fallback = getFallbackVacancy("performance-marketing-manager");
   if (!fallback) return [];
 
-  return [{
-    slug: fallback.slug,
-    title: fallback.title[locale],
-    excerpt: locale === "uk"
-      ? "Шукаємо фахівця з досвідом у Meta та Google Ads, який вміє будувати системи."
-      : "We are looking for a Meta and Google Ads expert who knows how to build systems.",
-    salary: fallback.salary,
-    hot: fallback.hot,
-    tags: fallback.tags,
-  }];
+  return [
+    {
+      slug: fallback.slug,
+      title: fallback.title[locale],
+      excerpt:
+        locale === "uk"
+          ? "Шукаємо фахівця з досвідом у Meta та Google Ads, який вміє будувати системи."
+          : "We are looking for a Meta and Google Ads expert who knows how to build systems.",
+      salary: fallback.salary,
+      hot: fallback.hot,
+      tags: fallback.tags,
+    },
+  ];
 }
 
 export async function getVacancyBySlug(slug: string): Promise<Vacancy | undefined> {

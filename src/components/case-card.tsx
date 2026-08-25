@@ -3,12 +3,24 @@ type CaseCardProps = {
   title: string;
   result: string;
   badge: string;
+  image?: string;
 };
 
-export function CaseCard({ index, title, result, badge }: CaseCardProps) {
+export function CaseCard({ index, title, result, badge, image }: CaseCardProps) {
   return (
     <article className="catalog-case-card">
-      <div className="catalog-case-image">
+      <div
+        className="catalog-case-image"
+        style={
+          image
+            ? {
+                backgroundImage: `url(${image})`,
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+              }
+            : undefined
+        }
+      >
         <span>{badge}</span>
       </div>
       <div className="catalog-case-copy">

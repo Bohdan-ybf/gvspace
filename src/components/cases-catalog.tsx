@@ -2,25 +2,17 @@
 
 import { useMemo, useState } from "react";
 import type { Locale } from "@/i18n";
-import type { Messages } from "@/i18n/uk";
 import { CaseCard } from "./case-card";
 import { ChevronDown } from "./icons/chevron-down";
+import Link from "next/link";
+import type { CaseStudy } from "./wordpress-cases";
 
 type CasesCatalogProps = {
   locale: Locale;
-  text: Messages["cases"];
+  projects: CaseStudy[];
 };
 
-const projects = [
-  { type: "ecommerce", industry: "retail" },
-  { type: "strategy", industry: "services" },
-  { type: "development", industry: "retail" },
-  { type: "marketing", industry: "services" },
-  { type: "ecommerce", industry: "technology" },
-  { type: "strategy", industry: "technology" },
-];
-
-export function CasesCatalog({ locale, text }: CasesCatalogProps) {
+export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
   const uk = locale === "uk";
   const [type, setType] = useState("all");
   const [industry, setIndustry] = useState("all");
@@ -30,16 +22,18 @@ export function CasesCatalog({ locale, text }: CasesCatalogProps) {
     () =>
       projects.filter(
         (project) =>
-          (type === "all" || project.type === type) &&
+          (type === "all" || project.projectType === type) &&
           (industry === "all" || project.industry === industry),
       ),
-    [industry, type],
+    [industry, projects, type],
   );
 
   const changeFilter = (setter: (value: string) => void, value: string) => {
     setter(value);
     setVisibleCount(4);
   };
+
+  if (!projects.length) return null;
 
   return (
     <section className="cases-catalog section container">
@@ -72,14 +66,16 @@ export function CasesCatalog({ locale, text }: CasesCatalogProps) {
       </div>
 
       <div className="cases-catalog-grid">
-        {filteredProjects.slice(0, visibleCount).map((_, index) => (
-          <CaseCard
-            index={index + 1}
-            title={text.caseTitle}
-            result={text.result}
-            badge={text.badge}
-            key={index}
-          />
+        {filteredProjects.slice(0, visibleCount).map((project, index) => (
+          <Link href={`/${locale}/cases/${project.slug}`} key={project.slug}>
+            <CaseCard
+              index={index + 1}
+              title={project.title}
+              result={project.result}
+              badge={project.badge}
+              image={project.image}
+            />
+          </Link>
         ))}
       </div>
 

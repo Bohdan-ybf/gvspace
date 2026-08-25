@@ -7,6 +7,10 @@ import { TeamPage } from "@/components/team-page";
 import { CareersPage } from "@/components/careers-page";
 import { VacancyDetailPage } from "@/components/vacancy-detail-page";
 import { TechnologiesPage } from "@/components/technologies-page";
+import { BlogPageServer } from "@/components/blog-page-server";
+import { BlogArticlePage } from "@/components/blog-article-page";
+import { BlogAuthorPage } from "@/components/blog-author-page";
+import { CaseDetailPage } from "@/components/case-detail-page";
 import { isLocale } from "@/i18n";
 
 export const metadata: Metadata = {
@@ -24,6 +28,9 @@ export default async function RoutedPage({
   if (isLocale(locale) && slug.length === 1 && slug[0] === "cases") {
     return <CasesPage locale={locale} />;
   }
+  if (isLocale(locale) && slug.length === 2 && slug[0] === "cases") {
+    return <CaseDetailPage locale={locale} slug={slug[1]} />;
+  }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "about") {
     return <AboutPage locale={locale} />;
   }
@@ -38,6 +45,15 @@ export default async function RoutedPage({
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "technologies") {
     return <TechnologiesPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "blog") {
+    return <BlogPageServer locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 2 && slug[0] === "blog") {
+    return <BlogArticlePage locale={locale} slug={slug[1]} />;
+  }
+  if (isLocale(locale) && slug.length === 3 && slug[0] === "blog" && slug[1] === "author") {
+    return <BlogAuthorPage locale={locale} slug={slug[2]} />;
   }
   return notFound();
 }

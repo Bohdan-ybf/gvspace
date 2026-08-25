@@ -12,9 +12,12 @@ export function SiteShell({ children, locale }: { children: React.ReactNode; loc
     isHomePage ||
     pathname === `/${locale}/services` ||
     pathname === `/${locale}/cases` ||
+    pathname.startsWith(`/${locale}/cases/`) ||
     pathname === `/${locale}/about` ||
     pathname === `/${locale}/team` ||
     pathname === `/${locale}/technologies` ||
+    pathname === `/${locale}/blog` ||
+    (pathname.startsWith(`/${locale}/blog/`) && !pathname.startsWith(`/${locale}/blog/author/`)) ||
     pathname === `/${locale}/careers` ||
     pathname.startsWith(`/${locale}/careers/`);
 

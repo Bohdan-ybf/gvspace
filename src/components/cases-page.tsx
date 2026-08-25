@@ -5,9 +5,11 @@ import { ArrowRight } from "./icons/arrow-right";
 import { CasesCatalog } from "./cases-catalog";
 import { ContactSection } from "./contact-section";
 import { TechnologySection } from "./technology-section";
+import { getCaseStudies } from "./wordpress-cases";
 
-export function CasesPage({ locale }: { locale: Locale }) {
+export async function CasesPage({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
+  const projects = await getCaseStudies();
   const uk = locale === "uk";
   const contactText = {
     ...text.contact,
@@ -48,7 +50,7 @@ export function CasesPage({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      <CasesCatalog locale={locale} text={text.cases} />
+      <CasesCatalog locale={locale} projects={projects} />
       <TechnologySection locale={locale} />
       <ContactSection text={contactText} />
     </main>
