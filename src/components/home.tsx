@@ -9,6 +9,9 @@ import { ContactSection } from "./contact-section";
 import { TechnologySection } from "./technology-section";
 import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
 
+const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
+const approachIcons = ["clarity", "system", "scale"] as const;
+
 export async function Home({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
   const blogPosts = (await getBlogPosts(locale)).slice(0, 5);
@@ -17,7 +20,7 @@ export async function Home({ locale }: { locale: Locale }) {
     <>
       <section className="hero">
         <Image
-          src="/images/hero/hero-main.webp"
+          src="/images/hero/hero-main.jpg"
           alt=""
           fill
           priority
@@ -44,7 +47,7 @@ export async function Home({ locale }: { locale: Locale }) {
         <Approach text={text} locale={locale} />
         <ServiceVectors text={text.vectors} locale={locale} />
         <MobileClarity text={text} locale={locale} />
-        <TechnologySection locale={locale} />
+        <TechnologySection locale={locale} title={text.technology.title} />
         <CasesSection text={text.cases} locale={locale} />
         <People text={text} />
         <Reviews text={text} />
@@ -70,7 +73,15 @@ function Problems({ text }: { text: Messages }) {
       <div className="cards">
         {text.problems.items.map((item, index) => (
           <article className="card" key={item[0]}>
-            <span className="mono">[ 0{index + 1} ]</span>
+            <div className="card-visual">
+              <Image
+                src={`/images/home/icons/${problemIcons[index]}.png`}
+                alt=""
+                width={96}
+                height={96}
+              />
+              <span className="mono">[ 0{index + 1} ]</span>
+            </div>
             <h3>{item[0]}</h3>
             <p className="muted">{item[1]}</p>
           </article>
@@ -86,9 +97,17 @@ function Approach({ text, locale }: { text: Messages; locale: Locale }) {
       <h2>{text.approach.title}</h2>
       <p className="muted lead">{text.approach.intro}</p>
       <div className="values">
-        {text.approach.items.map((item) => (
+        {text.approach.items.map((item, index) => (
           <article key={item[0]}>
-            <span className="mono">[ {item[0]} ]</span>
+            <div className="card-visual">
+              <Image
+                src={`/images/home/icons/${approachIcons[index]}.png`}
+                alt=""
+                width={96}
+                height={96}
+              />
+              <span className="mono">[ {item[0]} ]</span>
+            </div>
             <h3>{item[1]}</h3>
             <p className="muted">{text.approach.description}</p>
           </article>
@@ -167,32 +186,23 @@ function Blog({
   posts: BlogPostSummary[];
 }) {
   if (!posts.length) return null;
-  const [featured, ...rest] = posts;
 
   return (
-    <section className="section container blog-section">
-      <h2 className="center-title">{text.blog.title}</h2>
-      <div className={`blog${posts.length === 1 ? " is-single" : ""}`}>
-        <article className="featured">
-          <div
-            style={
-              featured.image
-                ? {
-                    backgroundImage: `url(${featured.image})`,
-                    backgroundPosition: "center",
-                    backgroundSize: "cover",
-                  }
-                : undefined
-            }
-          />
-          <h3>
-            <Link href={`/${locale}/blog/${featured.slug}`}>{featured.title}</Link>
-          </h3>
-          <p>{featured.excerpt}</p>
-        </article>
-        {rest.map((post) => (
-          <article key={post.slug}>
-            <div
+    <section className="section container home-blog-section">
+      <header className="home-blog-header">
+        <h2>{text.blog.title}</h2>
+        <Link className="btn btn-primary home-blog-more" href={`/${locale}/blog`}>
+          {locale === "uk" ? "Читати більше" : "Read more"}
+          <ArrowRight />
+        </Link>
+      </header>
+      <div className={`home-blog-grid${posts.length === 1 ? " is-single" : ""}`}>
+        {posts.map((post, index) => (
+          <article className={`home-blog-card${index === 0 ? " is-featured" : ""}`} key={post.slug}>
+            <Link
+              aria-label={post.title}
+              className="home-blog-image"
+              href={`/${locale}/blog/${post.slug}`}
               style={
                 post.image
                   ? {
@@ -203,10 +213,29 @@ function Blog({
                   : undefined
               }
             />
-            <h3>
-              <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
-            </h3>
-            <p>{post.excerpt}</p>
+            <div className="home-blog-body">
+              <div className="home-blog-meta mono">
+                <span>{post.publishedAt}</span>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {post.readingTime} {locale === "uk" ? "хв читати" : "min read"}
+                </span>
+                {index === 0 && (
+                  <span className="home-blog-author">
+                    {locale === "uk" ? "Автор" : "Author"}: {post.authorName}
+                  </span>
+                )}
+              </div>
+              <h3>
+                <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
+              </h3>
+              <p>{post.excerpt}</p>
+              {index !== 0 && (
+                <small className="home-blog-card-author mono">
+                  {locale === "uk" ? "Автор" : "Author"}: {post.authorName}
+                </small>
+              )}
+            </div>
           </article>
         ))}
       </div>

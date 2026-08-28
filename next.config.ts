@@ -8,6 +8,7 @@ const securityHeaders = [
 ];
 
 const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
+const wordpressUrl = new URL(process.env.WORDPRESS_URL ?? "http://localhost:8080");
 
 const indexingHeaders = indexingEnabled
   ? []
@@ -25,9 +26,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8080",
+        protocol: wordpressUrl.protocol.replace(":", "") as "http" | "https",
+        hostname: wordpressUrl.hostname,
+        port: wordpressUrl.port,
         pathname: "/wp-content/uploads/**",
       },
     ],

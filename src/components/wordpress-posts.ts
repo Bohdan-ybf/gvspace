@@ -19,6 +19,7 @@ export type BlogPostSummary = {
   category: string;
   publishedAt: string;
   readingTime: number;
+  authorName: string;
   image?: string;
 };
 
@@ -85,7 +86,7 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Posts { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`,
+        query: `query Posts { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`,
       }),
       next: { revalidate: 60 },
     });
@@ -99,13 +100,14 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
         category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
         publishedAt: new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : "en-GB", {
           day: "2-digit",
-          month: "short",
+          month: "long",
           year: "numeric",
         }).format(new Date(post.date)),
         readingTime: Math.max(
           1,
           Math.ceil(stripHtml(post.content || post.excerpt).split(" ").length / 200),
         ),
+        authorName: post.author?.node?.name ?? "GVSPACE",
         image: post.featuredImage?.node?.sourceUrl,
       })) ?? []
     );
@@ -124,7 +126,7 @@ export async function getBlogPostsByAuthor(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query AuthorPosts($slug: ID!) { user(id: $slug, idType: SLUG) { posts(first: 100) { nodes { slug title excerpt content date featuredImage { node { sourceUrl } } categories { nodes { name } } } } } }`,
+        query: `query AuthorPosts($slug: ID!) { user(id: $slug, idType: SLUG) { posts(first: 100) { nodes { slug title excerpt content date author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name } } } } } }`,
         variables: { slug },
       }),
       next: { revalidate: 60 },
@@ -141,13 +143,14 @@ export async function getBlogPostsByAuthor(
         category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
         publishedAt: new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : "en-GB", {
           day: "2-digit",
-          month: "short",
+          month: "long",
           year: "numeric",
         }).format(new Date(post.date)),
         readingTime: Math.max(
           1,
           Math.ceil(stripHtml(post.content || post.excerpt).split(" ").length / 200),
         ),
+        authorName: post.author?.node?.name ?? "GVSPACE",
         image: post.featuredImage?.node?.sourceUrl,
       })) ?? []
     );
