@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ServicesPage } from "@/components/services-page";
+import { ServiceDetailPage } from "@/components/service-detail-page";
 import { CasesPage } from "@/components/cases-page";
 import { AboutPage } from "@/components/about-page";
 import { TeamPage } from "@/components/team-page";
@@ -11,6 +12,7 @@ import { BlogPageServer } from "@/components/blog-page-server";
 import { BlogArticlePage } from "@/components/blog-article-page";
 import { BlogAuthorPage } from "@/components/blog-author-page";
 import { CaseDetailPage } from "@/components/case-detail-page";
+import { ReviewsPage } from "@/components/reviews-page";
 import { isLocale } from "@/i18n";
 
 export const metadata: Metadata = {
@@ -25,8 +27,14 @@ export default async function RoutedPage({
   if (isLocale(locale) && slug.length === 1 && slug[0] === "services") {
     return <ServicesPage locale={locale} />;
   }
+  if (isLocale(locale) && slug.length >= 2 && slug.length <= 3 && slug[0] === "services") {
+    return <ServiceDetailPage locale={locale} slugs={slug.slice(1)} />;
+  }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "cases") {
     return <CasesPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "reviews") {
+    return <ReviewsPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 2 && slug[0] === "cases") {
     return <CaseDetailPage locale={locale} slug={slug[1]} />;

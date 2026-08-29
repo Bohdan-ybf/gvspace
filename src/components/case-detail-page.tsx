@@ -1,13 +1,12 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary, type Locale } from "@/i18n";
 import { ContactSection } from "./contact-section";
-import { getCaseStudies, getCaseStudy } from "./wordpress-cases";
+import { CasesShowcaseSection } from "./cases-showcase-section";
+import { getCaseStudy } from "./wordpress-cases";
 
 export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
   const data = await getCaseStudy(slug, locale);
   if (!data) notFound();
-  const similar = (await getCaseStudies()).filter((item) => item.slug !== data.slug).slice(0, 3);
   const uk = locale === "uk";
   const contact = {
     ...getDictionary(locale).contact,
@@ -139,37 +138,13 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
           </blockquote>
         </div>
       </section>
-      {similar.length > 0 && (
-        <section className="container case-similar">
-          <span className="mono">ПОДІБНІ ПРОЄКТИ</span>
-          <h2>{uk ? "Схожі кейси" : "Similar cases"}</h2>
-          <div>
-            {similar.map((item, index) => (
-              <Link href={`/${locale}/cases/${item.slug}`} key={item.slug}>
-                <article>
-                  <div
-                    style={
-                      item.image
-                        ? {
-                            backgroundImage: `url(${item.image})`,
-                            backgroundPosition: "center",
-                            backgroundSize: "cover",
-                          }
-                        : undefined
-                    }
-                  />
-                  <small className="mono">
-                    0{index + 1}　[ {item.projectType.toUpperCase()} / {item.industry.toUpperCase()}{" "}
-                    ]
-                  </small>
-                  <h3>{item.title}</h3>
-                </article>
-              </Link>
-            ))}
-          </div>
-          <Link href={`/${locale}/cases`}>{uk ? "Усі кейси" : "All cases"} →</Link>
-        </section>
-      )}
+      <CasesShowcaseSection
+        locale={locale}
+        excludeSlug={data.slug}
+        allowExcludedFallback
+        eyebrow={uk ? "ПОДІБНІ ПРОЄКТИ" : "SIMILAR PROJECTS"}
+        title={uk ? "Схожі кейси" : "Similar cases"}
+      />
       <ContactSection text={contact} />
     </main>
   );

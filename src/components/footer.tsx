@@ -40,6 +40,10 @@ export function Footer({ locale }: { locale: Locale }) {
               const href =
                 columnIndex === 1 && index === 1
                   ? `/${locale}/team`
+                  : columnIndex === 1 && index === 2
+                    ? `/${locale}/cases`
+                    : columnIndex === 1 && index === 3
+                      ? `/${locale}/reviews`
                   : columnIndex === 2 && index === 1
                     ? `/${locale}/technologies`
                     : columnIndex === 2 && index === 2

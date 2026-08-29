@@ -35,6 +35,33 @@ const GVSPACE_AUTHOR_FIELDS = [
     'projects' => 'Успішних проєктів (наприклад, 50+)',
 ];
 
+const GVSPACE_REVIEW_FIELDS = [
+    'name_en' => ['label' => 'Ім’я англійською', 'type' => 'text'],
+    'position_uk' => ['label' => 'Посада українською', 'type' => 'text'],
+    'position_en' => ['label' => 'Посада англійською', 'type' => 'text'],
+    'company' => ['label' => 'Компанія', 'type' => 'text'],
+    'text_uk' => ['label' => 'Текст відгуку українською', 'type' => 'textarea'],
+    'text_en' => ['label' => 'Текст відгуку англійською', 'type' => 'textarea'],
+    'category' => ['label' => 'Категорія (strategy, marketing, development, content)', 'type' => 'text'],
+    'rating' => ['label' => 'Оцінка від 1 до 5', 'type' => 'number'],
+    'metrics' => ['label' => 'Метрики (кожна з нового рядка)', 'type' => 'textarea'],
+];
+
+const GVSPACE_SERVICE_FIELDS = [
+    'title_en' => ['label' => 'Назва англійською', 'type' => 'text'],
+    'headline_uk' => ['label' => 'Головний заголовок українською', 'type' => 'text'],
+    'headline_en' => ['label' => 'Головний заголовок англійською', 'type' => 'text'],
+    'description_uk' => ['label' => 'Опис українською', 'type' => 'textarea'],
+    'description_en' => ['label' => 'Опис англійською', 'type' => 'textarea'],
+    'includes_uk' => ['label' => 'Що входить (українською, кожне з нового рядка)', 'type' => 'textarea'],
+    'includes_en' => ['label' => 'Що входить (англійською, кожне з нового рядка)', 'type' => 'textarea'],
+    'steps_uk' => ['label' => 'Етапи українською: назва | термін | опис', 'type' => 'textarea'],
+    'steps_en' => ['label' => 'Етапи англійською: назва | термін | опис', 'type' => 'textarea'],
+    'metrics' => ['label' => 'Метрики результату (кожна з нового рядка)', 'type' => 'textarea'],
+    'faq_uk' => ['label' => 'FAQ українською: питання | відповідь', 'type' => 'textarea'],
+    'faq_en' => ['label' => 'FAQ англійською: питання | відповідь', 'type' => 'textarea'],
+];
+
 const GVSPACE_CASE_FIELDS = [
     'result' => ['label' => 'Головний результат одним реченням', 'type' => 'textarea'],
     'services' => ['label' => 'Послуги (кожна з нового рядка)', 'type' => 'textarea'],
@@ -151,6 +178,31 @@ add_action('init', function (): void {
         'supports' => ['title', 'thumbnail', 'page-attributes'],
     ]);
 
+    register_post_type('gv_service', [
+        'labels' => [
+            'name' => 'Послуги', 'singular_name' => 'Послуга', 'add_new_item' => 'Додати послугу',
+            'edit_item' => 'Редагувати послугу', 'new_item' => 'Нова послуга', 'all_items' => 'Усі послуги',
+            'parent_item_colon' => 'Батьківський напрямок:', 'not_found' => 'Послуг не знайдено',
+        ],
+        'public' => true, 'hierarchical' => true, 'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'serviceOffering', 'graphql_plural_name' => 'serviceOfferings',
+        'menu_icon' => 'dashicons-admin-generic', 'rewrite' => ['slug' => 'services'],
+        'supports' => ['title', 'thumbnail', 'page-attributes'],
+    ]);
+
+    register_post_type('gv_review', [
+        'labels' => [
+            'name' => 'Відгуки', 'singular_name' => 'Відгук', 'add_new_item' => 'Додати відгук',
+            'edit_item' => 'Редагувати відгук', 'new_item' => 'Новий відгук', 'all_items' => 'Усі відгуки',
+            'not_found' => 'Відгуків не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'clientReview', 'graphql_plural_name' => 'clientReviews',
+        'menu_icon' => 'dashicons-star-filled',
+        'supports' => ['title', 'thumbnail', 'page-attributes'],
+    ]);
+
     register_taxonomy('gv_technology_category', ['gv_technology'], [
         'labels' => [
             'name' => 'Категорії технологій',
@@ -205,6 +257,22 @@ add_action('init', function (): void {
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
+    foreach (array_keys(GVSPACE_SERVICE_FIELDS) as $field) {
+        register_post_meta('gv_service', '_gvspace_service_' . $field, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
+    foreach (array_keys(GVSPACE_REVIEW_FIELDS) as $field) {
+        register_post_meta('gv_review', '_gvspace_review_' . $field, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_textarea_field',
             'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
         ]);
@@ -287,6 +355,57 @@ add_action('save_post_gv_case', function (int $post_id): void {
     foreach (array_keys(GVSPACE_CASE_FIELDS) as $field) {
         $value = isset($_POST['gvspace_case_' . $field]) ? sanitize_textarea_field(wp_unslash($_POST['gvspace_case_' . $field])) : '';
         update_post_meta($post_id, '_gvspace_case_' . $field, $value);
+    }
+});
+
+add_action('add_meta_boxes', function (): void {
+    add_meta_box('gvspace-review-details', 'Дані відгуку', 'gvspace_render_review_fields', 'gv_review', 'normal', 'high');
+});
+
+function gvspace_render_review_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_review', 'gvspace_review_nonce');
+    echo '<p class="description">Ім’я українською задайте у заголовку, фото автора — у полі «Головне зображення», порядок — у полі «Порядок».</p>';
+    foreach (GVSPACE_REVIEW_FIELDS as $key => $config) {
+        $value = (string) get_post_meta($post->ID, '_gvspace_review_' . $key, true);
+        echo '<p><label for="gvspace_review_' . esc_attr($key) . '"><strong>' . esc_html($config['label']) . '</strong></label><br>';
+        if ($config['type'] === 'textarea') {
+            echo '<textarea id="gvspace_review_' . esc_attr($key) . '" name="gvspace_review_' . esc_attr($key) . '" rows="4" style="width:100%">' . esc_textarea($value) . '</textarea>';
+        } else {
+            $type = $config['type'] === 'number' ? 'number' : 'text';
+            echo '<input type="' . esc_attr($type) . '" id="gvspace_review_' . esc_attr($key) . '" name="gvspace_review_' . esc_attr($key) . '" value="' . esc_attr($value) . '" style="width:100%">';
+        }
+        echo '</p>';
+    }
+}
+
+add_action('save_post_gv_review', function (int $post_id): void {
+    if (!isset($_POST['gvspace_review_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_review_nonce'])), 'gvspace_save_review') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return;
+    foreach (array_keys(GVSPACE_REVIEW_FIELDS) as $field) {
+        $value = isset($_POST['gvspace_review_' . $field]) ? sanitize_textarea_field(wp_unslash($_POST['gvspace_review_' . $field])) : '';
+        update_post_meta($post_id, '_gvspace_review_' . $field, $value);
+    }
+});
+
+add_action('add_meta_boxes', function (): void {
+    add_meta_box('gvspace-service-details', 'Дані послуги', 'gvspace_render_service_fields', 'gv_service', 'normal', 'high');
+});
+function gvspace_render_service_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_service', 'gvspace_service_nonce');
+    echo '<p class="description">Запис без батьківського елемента — напрямок (L2), дочірній запис — конкретна послуга (L3). Іконку напрямку завантажте як головне зображення.</p>';
+    foreach (GVSPACE_SERVICE_FIELDS as $key => $config) {
+        $value = (string) get_post_meta($post->ID, '_gvspace_service_' . $key, true);
+        echo '<p><label><strong>' . esc_html($config['label']) . '</strong></label><br>';
+        if ($config['type'] === 'textarea') echo '<textarea name="gvspace_service_' . esc_attr($key) . '" rows="4" style="width:100%">' . esc_textarea($value) . '</textarea>';
+        else echo '<input name="gvspace_service_' . esc_attr($key) . '" value="' . esc_attr($value) . '" style="width:100%">';
+        echo '</p>';
+    }
+}
+add_action('save_post_gv_service', function (int $post_id): void {
+    if (!isset($_POST['gvspace_service_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_service_nonce'])), 'gvspace_save_service') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return;
+    foreach (array_keys(GVSPACE_SERVICE_FIELDS) as $field) {
+        update_post_meta($post_id, '_gvspace_service_' . $field, isset($_POST['gvspace_service_' . $field]) ? sanitize_textarea_field(wp_unslash($_POST['gvspace_service_' . $field])) : '');
     }
 });
 
@@ -479,6 +598,47 @@ add_action('graphql_register_types', function (): void {
         },
     ]);
 
+    register_graphql_object_type('GvspaceReviewDetails', [
+        'fields' => [
+            'nameEn' => ['type' => 'String'], 'positionUk' => ['type' => 'String'],
+            'positionEn' => ['type' => 'String'], 'company' => ['type' => 'String'],
+            'textUk' => ['type' => 'String'], 'textEn' => ['type' => 'String'],
+            'category' => ['type' => 'String'], 'rating' => ['type' => 'Int'],
+            'metrics' => ['type' => ['list_of' => 'String']],
+        ],
+    ]);
+    register_graphql_object_type('GvspaceServiceStep', ['fields' => ['title' => ['type' => 'String'], 'duration' => ['type' => 'String'], 'description' => ['type' => 'String']]]);
+    register_graphql_object_type('GvspaceServiceFaq', ['fields' => ['question' => ['type' => 'String'], 'answer' => ['type' => 'String']]]);
+    register_graphql_object_type('GvspaceServiceDetails', ['fields' => [
+        'titleEn' => ['type' => 'String'], 'headlineUk' => ['type' => 'String'], 'headlineEn' => ['type' => 'String'],
+        'descriptionUk' => ['type' => 'String'], 'descriptionEn' => ['type' => 'String'],
+        'includesUk' => ['type' => ['list_of' => 'String']], 'includesEn' => ['type' => ['list_of' => 'String']],
+        'stepsUk' => ['type' => ['list_of' => 'GvspaceServiceStep']], 'stepsEn' => ['type' => ['list_of' => 'GvspaceServiceStep']],
+        'metrics' => ['type' => ['list_of' => 'String']], 'faqUk' => ['type' => ['list_of' => 'GvspaceServiceFaq']], 'faqEn' => ['type' => ['list_of' => 'GvspaceServiceFaq']],
+    ]]);
+    register_graphql_field('ServiceOffering', 'serviceDetails', ['type' => 'GvspaceServiceDetails', 'resolve' => static function ($source): array {
+        $id = (int) $source->databaseId;
+        $value = static fn (string $key): string => (string) get_post_meta($id, '_gvspace_service_' . $key, true);
+        $lines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/', $value($key)) ?: [])));
+        $steps = static fn (string $key): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 3)); return ['title' => $p[0] ?? '', 'duration' => $p[1] ?? '', 'description' => $p[2] ?? '']; }, $lines($key));
+        $faq = static fn (string $key): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 2)); return ['question' => $p[0] ?? '', 'answer' => $p[1] ?? '']; }, $lines($key));
+        return ['titleEn' => $value('title_en'), 'headlineUk' => $value('headline_uk'), 'headlineEn' => $value('headline_en'), 'descriptionUk' => $value('description_uk'), 'descriptionEn' => $value('description_en'), 'includesUk' => $lines('includes_uk'), 'includesEn' => $lines('includes_en'), 'stepsUk' => $steps('steps_uk'), 'stepsEn' => $steps('steps_en'), 'metrics' => $lines('metrics'), 'faqUk' => $faq('faq_uk'), 'faqEn' => $faq('faq_en')];
+    }]);
+    register_graphql_field('ClientReview', 'reviewDetails', [
+        'type' => 'GvspaceReviewDetails',
+        'resolve' => static function ($source): array {
+            $post_id = (int) $source->databaseId;
+            $value = static fn (string $key): string => (string) get_post_meta($post_id, '_gvspace_review_' . $key, true);
+            return [
+                'nameEn' => $value('name_en'), 'positionUk' => $value('position_uk'),
+                'positionEn' => $value('position_en'), 'company' => $value('company'),
+                'textUk' => $value('text_uk'), 'textEn' => $value('text_en'),
+                'category' => $value('category'), 'rating' => max(1, min(5, (int) $value('rating'))),
+                'metrics' => array_values(array_filter(array_map('trim', preg_split('/\R/', $value('metrics')) ?: []))),
+            ];
+        },
+    ]);
+
 });
 
 register_activation_hook(__FILE__, function (): void {
@@ -487,6 +647,56 @@ register_activation_hook(__FILE__, function (): void {
 });
 
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
+
+function gvspace_seed_services(): void
+{
+    if (get_option('gvspace_services_seeded_v1')) return;
+    $directions = [
+        'strategy' => ['Стратегія', 'Strategy', [
+            ['strategic-audit', 'Стратегічний аудит', 'Strategic audit'],
+            ['digital-audit', 'Комплексний Digital-аудит', 'Comprehensive Digital audit'],
+            ['market-analysis', 'Аналіз ринку та конкурентне позиціонування', 'Market analysis and competitive positioning'],
+            ['clarity-session', 'Clarity Session', 'Clarity Session'],
+            ['growth-roadmap', 'Архітектура зростання (Roadmap)', 'Growth architecture (Roadmap)'],
+            ['marketing-process-audit', 'Аудит маркетингових процесів', 'Marketing process audit'],
+        ]],
+        'marketing' => ['Маркетинг', 'Marketing', [
+            ['performance-marketing', 'Performance Marketing (Meta & Google Ads)', 'Performance Marketing (Meta & Google Ads)'],
+            ['analytics-dashboards', 'Побудова системної аналітики & Dashboards', 'Analytics systems & Dashboards'],
+            ['smm-strategy', 'SMM Стратегія та присутність', 'SMM strategy and presence'],
+            ['seo', 'SEO-просування', 'SEO promotion'],
+            ['retention-crm', 'Retention & CRM Маркетинг', 'Retention & CRM Marketing'],
+        ]],
+        'development' => ['IT-розробка', 'IT Development', [
+            ['corporate-websites', 'Розробка корпоративних сайтів та лендингів', 'Corporate websites and landing pages'],
+            ['business-systems', 'Розробка складних систем (CRM, ERP, Dashboards)', 'Complex systems (CRM, ERP, Dashboards)'],
+            ['technical-support', 'Технічна підтримка та інфраструктура', 'Technical support and infrastructure'],
+            ['ecommerce', 'E-commerce рішення (Інтернет-магазини)', 'E-commerce solutions'],
+            ['product-discovery', 'Product Discovery & Архітектура', 'Product Discovery & Architecture'],
+        ]],
+        'content' => ['Контент & Продакшн', 'Content & Production', [
+            ['brand-design', 'Бренд-дизайн та Візуальна айдентика', 'Brand design and visual identity'],
+            ['photo-production', 'Фото-продакшн (Food, Product, Lifestyle)', 'Photo production (Food, Product, Lifestyle)'],
+            ['creative-concepts', 'Креативні концепції та спецпроєкти', 'Creative concepts and special projects'],
+            ['video-production', 'Video Production (Рекламні та іміджеві ролики)', 'Video Production'],
+            ['copywriting', 'Копірайтинг & Storytelling', 'Copywriting & Storytelling'],
+        ]],
+    ];
+    foreach ($directions as $slug => [$title, $title_en, $children]) {
+        $parent = get_page_by_path($slug, OBJECT, 'gv_service');
+        $parent_id = $parent ? (int) $parent->ID : (int) wp_insert_post(['post_type' => 'gv_service', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug]);
+        if (!$parent_id) continue;
+        update_post_meta($parent_id, '_gvspace_service_title_en', $title_en);
+        foreach ($children as $order => [$child_slug, $child_title, $child_title_en]) {
+            $existing = get_page_by_path($slug . '/' . $child_slug, OBJECT, 'gv_service');
+            $child_id = $existing ? (int) $existing->ID : (int) wp_insert_post(['post_type' => 'gv_service', 'post_status' => 'publish', 'post_title' => $child_title, 'post_name' => $child_slug, 'post_parent' => $parent_id, 'menu_order' => $order]);
+            if ($child_id) update_post_meta($child_id, '_gvspace_service_title_en', $child_title_en);
+        }
+    }
+    update_option('gvspace_services_seeded_v1', '1', false);
+    flush_rewrite_rules(false);
+}
+add_action('admin_init', 'gvspace_seed_services');
 
 // GVSPACE does not use the native WordPress comments interface.
 add_action('admin_menu', function (): void {
@@ -507,7 +717,7 @@ add_action('init', function (): void {
 add_filter('comments_open', '__return_false', 100);
 add_filter('pings_open', '__return_false', 100);
 
-const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_vacancy', 'gv_technology'];
+const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology'];
 
 function gvspace_duplicate_post_link(array $actions, WP_Post $post): array
 {

@@ -6,7 +6,8 @@ import { CasesSection } from "./cases-section";
 import { ContactSection } from "./contact-section";
 import { ServicesNavigation } from "./services-navigation";
 import { SystemTransitionSection } from "./system-transition-section";
-import { TechnologySection } from "./technology-section";
+import { TechnologyShowcaseSection } from "./technology-showcase-section";
+import { getServiceOfferings } from "./wordpress-services";
 
 const ukDirections = [
   {
@@ -120,9 +121,20 @@ const enDirections = [
   },
 ];
 
-export function ServicesPage({ locale }: { locale: Locale }) {
+export async function ServicesPage({ locale }: { locale: Locale }) {
   const uk = locale === "uk";
-  const directions = uk ? ukDirections : enDirections;
+  const serviceItems = await getServiceOfferings(locale);
+  const directionSlugs = ["strategy", "marketing", "development", "content"];
+  const dynamicDirections = serviceItems.filter((item) => !item.parentSlug && directionSlugs.includes(item.slug)).sort((a, b) => directionSlugs.indexOf(a.slug) - directionSlugs.indexOf(b.slug)).map((item) => ({
+    slug: item.slug,
+    title: item.title,
+    description: item.description,
+    image: item.image,
+    services: serviceItems.filter((child) => child.parentSlug === item.slug),
+  }));
+  const staticDirections = uk ? ukDirections : enDirections;
+  const hasDynamicChildren = dynamicDirections.some((direction) => direction.services.length);
+  const directions = hasDynamicChildren ? dynamicDirections : staticDirections.map((direction) => ({ ...direction, image: undefined, services: direction.services.map((title, index) => ({ id: index, slug: "", title })) }));
   const text = getDictionary(locale);
   return (
     <main className="services-page">
@@ -153,7 +165,7 @@ export function ServicesPage({ locale }: { locale: Locale }) {
             <div className="service-direction-copy">
               <div className="service-symbol" aria-hidden="true">
                 <Image
-                  src={`/images/services/icons/${direction.slug}.webp`}
+                  src={direction.image || `/images/services/icons/${direction.slug}.webp`}
                   alt=""
                   fill
                   sizes="92px"
@@ -171,9 +183,8 @@ export function ServicesPage({ locale }: { locale: Locale }) {
             </div>
             <ul>
               {direction.services.map((service) => (
-                <li key={service}>
-                  <span>{service}</span>
-                  <ArrowRight />
+                <li key={service.id || service.title}>
+                  {service.slug ? <Link href={`/${locale}/services/${direction.slug}/${service.slug}`}><span>{service.title}</span><ArrowRight /></Link> : <><span>{service.title}</span><ArrowRight /></>}
                 </li>
               ))}
             </ul>
@@ -182,7 +193,7 @@ export function ServicesPage({ locale }: { locale: Locale }) {
       </section>
       <SystemTransitionSection locale={locale} />
       <CasesSection locale={locale} text={text.cases} />
-      <TechnologySection locale={locale} />
+      <TechnologyShowcaseSection locale={locale} />
       <ContactSection text={text.contact} />
     </main>
   );

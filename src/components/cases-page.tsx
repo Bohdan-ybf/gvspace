@@ -4,7 +4,7 @@ import { getDictionary, type Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { CasesCatalog } from "./cases-catalog";
 import { ContactSection } from "./contact-section";
-import { TechnologySection } from "./technology-section";
+import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getCaseStudies } from "./wordpress-cases";
 
 export async function CasesPage({ locale }: { locale: Locale }) {
@@ -51,7 +51,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
       </section>
 
       <CasesCatalog locale={locale} projects={projects} />
-      <TechnologySection locale={locale} />
+      <TechnologyShowcaseSection locale={locale} />
       <ContactSection text={contactText} />
     </main>
   );

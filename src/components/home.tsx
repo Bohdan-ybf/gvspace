@@ -8,6 +8,7 @@ import { CasesSection } from "./cases-section";
 import { ContactSection } from "./contact-section";
 import { TechnologySection } from "./technology-section";
 import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
+import { ReviewsSection } from "./reviews-section";
 
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
 const approachIcons = ["clarity", "system", "scale"] as const;
@@ -50,7 +51,7 @@ export async function Home({ locale }: { locale: Locale }) {
         <TechnologySection locale={locale} title={text.technology.title} />
         <CasesSection text={text.cases} locale={locale} />
         <People text={text} />
-        <Reviews text={text} />
+        <ReviewsSection locale={locale} />
         <Blog text={text} locale={locale} posts={blogPosts} />
         <Faq text={text} />
         <section className="mission container">
@@ -154,23 +155,6 @@ function People({ text }: { text: Messages }) {
           <strong>{text.people.days}</strong>
           <b>{text.people.results}</b>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Reviews({ text }: { text: Messages }) {
-  return (
-    <section className="section container reviews-section">
-      <h2 className="center-title">{text.reviews.title}</h2>
-      <div className="reviews">
-        {Array.from({ length: 4 }, (_, index) => (
-          <article key={index}>
-            <div />
-            <b>{text.reviews.author}</b>
-            <p>{text.reviews.text}</p>
-          </article>
-        ))}
       </div>
     </section>
   );

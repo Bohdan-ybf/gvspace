@@ -3,6 +3,7 @@ import type { Locale } from "@/i18n";
 export type CaseStudy = {
   slug: string;
   title: string;
+  publishedAt?: string;
   result: string;
   services: string[];
   metrics: Array<{ value: string; label: string }>;
@@ -59,17 +60,19 @@ export const fallback: CaseStudy = {
 type CaseNode = {
   slug: string;
   title: string;
+  date?: string;
   featuredImage?: { node?: { sourceUrl?: string } };
   caseDetails?: Omit<CaseStudy, "slug" | "title" | "image">;
 };
 
-const fields = `slug title featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
+const fields = `slug title date featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
 
 function mapCase(node: CaseNode): CaseStudy | undefined {
   if (!node.caseDetails) return undefined;
   return {
     slug: node.slug,
     title: node.title,
+    publishedAt: node.date,
     image: node.featuredImage?.node?.sourceUrl,
     ...node.caseDetails,
   };
