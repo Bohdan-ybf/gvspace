@@ -3929,6 +3929,7 @@ h2 {
   line-height: normal;
   color: var(--violet);
 }
+.mobile-header-cta { display: none; }
 .services-menu { position: relative; display: flex; align-items: center; }
 .services-dropdown { width: 310px; position: absolute; top: calc(100% + 22px); left: 0; display: flex; flex-direction: column; padding: 8px; visibility: hidden; opacity: 0; color: var(--ink); background: #fff; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(0,0,61,.12); transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease, visibility 180ms; }
 .services-menu:hover .services-dropdown, .services-menu:focus-within .services-dropdown { visibility: visible; opacity: 1; transform: none; }
@@ -5305,6 +5306,16 @@ footer {
   .header {
     padding-inline: 32px;
   }
+  .header .logo { width: 190px; height: 35px; }
+  .header .actions { margin-left: auto; gap: 12px; }
+  .header .language-switcher { display: none; }
+  .mobile-header-cta {
+    min-height: 38px;
+    padding: 9px 16px;
+    display: inline-flex;
+    color: #fff;
+    font-size: 12px;
+  }
   .menu {
     display: flex;
   }
@@ -5376,6 +5387,20 @@ footer {
   .cases {
     grid-template-columns: 220px minmax(0, 1fr);
     gap: 32px;
+  }
+  .header .mobile-navigation > .mobile-nav-group > a:first-child {
+    color: var(--navy);
+    border-bottom: 1px solid var(--line);
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .header .mobile-navigation .mobile-service-link {
+    min-height: 42px;
+    padding-left: 20px;
+    color: #77709b;
+    border-bottom: 1px solid #f1eff7;
+    font-size: 14px;
+    font-weight: 400;
   }
   .home-case-card {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr);
@@ -5510,6 +5535,10 @@ footer {
     height: 80px;
     padding: 20px;
   }
+  .header .logo { width: 145px; height: 30px; }
+  .header .actions { gap: 8px; }
+  .mobile-header-cta { min-height: 36px; padding: 8px 12px; font-size: 11px; }
+  .menu { width: 30px; padding-inline: 5px; }
   .header .mobile-navigation {
     inset-block-start: 80px;
     padding: 20px;

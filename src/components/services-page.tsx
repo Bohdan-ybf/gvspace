@@ -8,6 +8,7 @@ import { ServicesNavigation } from "./services-navigation";
 import { SystemTransitionSection } from "./system-transition-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getServiceOfferings } from "./wordpress-services";
+import { ReviewsSection } from "./reviews-section";
 
 const ukDirections = [
   {
@@ -125,14 +126,14 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
   const uk = locale === "uk";
   const serviceItems = await getServiceOfferings(locale);
   const directionSlugs = ["strategy", "marketing", "development", "content"];
+  const staticDirections = uk ? ukDirections : enDirections;
   const dynamicDirections = serviceItems.filter((item) => !item.parentSlug && directionSlugs.includes(item.slug)).sort((a, b) => directionSlugs.indexOf(a.slug) - directionSlugs.indexOf(b.slug)).map((item) => ({
     slug: item.slug,
     title: item.title,
-    description: item.description,
+    description: item.description || staticDirections.find((direction) => direction.slug === item.slug)?.description || "",
     image: item.image,
     services: serviceItems.filter((child) => child.parentSlug === item.slug),
   }));
-  const staticDirections = uk ? ukDirections : enDirections;
   const hasDynamicChildren = dynamicDirections.some((direction) => direction.services.length);
   const directions = hasDynamicChildren ? dynamicDirections : staticDirections.map((direction) => ({ ...direction, image: undefined, services: direction.services.map((title, index) => ({ id: index, slug: "", title })) }));
   const text = getDictionary(locale);
@@ -192,8 +193,9 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
         ))}
       </section>
       <SystemTransitionSection locale={locale} />
-      <CasesSection locale={locale} text={text.cases} />
       <TechnologyShowcaseSection locale={locale} />
+      <CasesSection locale={locale} text={text.cases} />
+      <ReviewsSection locale={locale} />
       <ContactSection text={text.contact} />
     </main>
   );

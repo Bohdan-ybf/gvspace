@@ -107,6 +107,9 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
         <Link className="btn btn-primary desktop-only" href={`/${locale}/contacts`}>
           {text.common.buildSystem}
         </Link>
+        <Link className="btn btn-primary mobile-header-cta" href={`/${locale}/contacts`}>
+          {locale === "uk" ? "Хочу ріст" : "Let’s grow"}
+        </Link>
         <div className="language-switcher" ref={languageSwitcherRef}>
           <button
             className="language-button"

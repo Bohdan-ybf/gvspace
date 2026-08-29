@@ -9,13 +9,18 @@ import { ContactSection } from "./contact-section";
 import { TechnologySection } from "./technology-section";
 import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
 import { ReviewsSection } from "./reviews-section";
+import { getServiceOfferings } from "./wordpress-services";
 
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
 const approachIcons = ["clarity", "system", "scale"] as const;
 
 export async function Home({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
-  const blogPosts = (await getBlogPosts(locale)).slice(0, 5);
+  const [blogPostsResult, services] = await Promise.all([
+    getBlogPosts(locale),
+    getServiceOfferings(locale),
+  ]);
+  const blogPosts = blogPostsResult.slice(0, 5);
 
   return (
     <>
@@ -46,7 +51,7 @@ export async function Home({ locale }: { locale: Locale }) {
       <main>
         <Problems text={text} />
         <Approach text={text} locale={locale} />
-        <ServiceVectors text={text.vectors} locale={locale} />
+        <ServiceVectors text={text.vectors} locale={locale} services={services} />
         <MobileClarity text={text} locale={locale} />
         <TechnologySection locale={locale} title={text.technology.title} />
         <CasesSection text={text.cases} locale={locale} />
