@@ -26,6 +26,7 @@ Thumbs.db
 
 # TypeScript cache
 *.tsbuildinfo
+deploy/auth.caddy
 
 # Local WordPress runtime; keep only project-owned infrastructure and plugin code.
 wordpress/*

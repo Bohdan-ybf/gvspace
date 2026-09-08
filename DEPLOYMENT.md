@@ -46,6 +46,8 @@ chmod 600 .env.production
 
 Edit `.env.production`. Use two different long random database passwords. Confirm the real domain and email. Keep `SITE_INDEXING_ENABLED=false` during migration.
 
+For a non-public preview, create `deploy/auth.caddy` from `deploy/auth.caddy.example` and replace the placeholder with a hash produced by `caddy hash-password`. The real file is ignored by Git. Remove the `import /etc/caddy/auth.caddy` line and its Compose mount when public HTTP authentication is no longer required.
+
 Start the stack:
 
 ```bash

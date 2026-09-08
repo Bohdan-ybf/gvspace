@@ -1,0 +1,4 @@
+basic_auth {
+	# Example hash only. Generate a unique production hash with `caddy hash-password`.
+	preview $2a$14$b0UWVj2UhW49cq9DdVsbNOAyi2q3gHl/7BCxGflN.XhIQKGCGPk6O
+}
