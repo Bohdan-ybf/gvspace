@@ -44,11 +44,11 @@ export function Footer({ locale }: { locale: Locale }) {
                     ? `/${locale}/cases`
                     : columnIndex === 1 && index === 3
                       ? `/${locale}/reviews`
-                  : columnIndex === 2 && index === 1
-                    ? `/${locale}/technologies`
-                    : columnIndex === 2 && index === 2
-                      ? `/${locale}/careers`
-                      : `/${locale}/${routes[columnIndex]}${index ? `/${index}` : ""}`;
+                      : columnIndex === 2 && index === 1
+                        ? `/${locale}/technologies`
+                        : columnIndex === 2 && index === 2
+                          ? `/${locale}/careers`
+                          : `/${locale}/${routes[columnIndex]}${index ? `/${index}` : ""}`;
 
               return (
                 <Link key={item} href={href}>

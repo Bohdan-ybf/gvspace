@@ -49,17 +49,19 @@ export async function getClientReviews(locale: Locale): Promise<ClientReview[]> 
     return (result.data?.clientReviews?.nodes ?? []).flatMap((node) => {
       const details = node.reviewDetails;
       if (!details) return [];
-      return [{
-        slug: node.slug,
-        name: locale === "en" && details.nameEn ? details.nameEn : node.title,
-        position: locale === "en" ? details.positionEn ?? "" : details.positionUk ?? "",
-        company: details.company ?? "",
-        text: locale === "en" ? details.textEn ?? "" : details.textUk ?? "",
-        category: details.category ?? "",
-        rating: details.rating ?? 5,
-        metrics: details.metrics ?? [],
-        image: node.featuredImage?.node?.sourceUrl,
-      }];
+      return [
+        {
+          slug: node.slug,
+          name: locale === "en" && details.nameEn ? details.nameEn : node.title,
+          position: locale === "en" ? (details.positionEn ?? "") : (details.positionUk ?? ""),
+          company: details.company ?? "",
+          text: locale === "en" ? (details.textEn ?? "") : (details.textUk ?? ""),
+          category: details.category ?? "",
+          rating: details.rating ?? 5,
+          metrics: details.metrics ?? [],
+          image: node.featuredImage?.node?.sourceUrl,
+        },
+      ];
     });
   } catch {
     return [];

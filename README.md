@@ -50,14 +50,4 @@ public/images/       Optimized public image assets
 
 ## Deployment
 
-The website is deployed on Vercel and connected to the GitHub repository. Pushes to the production branch trigger a new deployment automatically.
-
-Production URL: [https://gvspace-eta.vercel.app/uk](https://gvspace-eta.vercel.app/uk)
-
-Configure the following environment variable in Vercel without a trailing slash or locale path:
-
-```env
-NEXT_PUBLIC_SITE_URL=https://gvspace-eta.vercel.app
-```
-
-Run `npm run build` before deployment to verify the production build locally.
+Production runs on a VPS with Docker Compose, Caddy, WordPress and MySQL. Successful pushes to `main` are deployed automatically after CI. See [DEPLOYMENT.md](./DEPLOYMENT.md) for initial server setup, DNS, secrets, migration, backups and rollback.

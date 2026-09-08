@@ -127,15 +127,27 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
   const serviceItems = await getServiceOfferings(locale);
   const directionSlugs = ["strategy", "marketing", "development", "content"];
   const staticDirections = uk ? ukDirections : enDirections;
-  const dynamicDirections = serviceItems.filter((item) => !item.parentSlug && directionSlugs.includes(item.slug)).sort((a, b) => directionSlugs.indexOf(a.slug) - directionSlugs.indexOf(b.slug)).map((item) => ({
-    slug: item.slug,
-    title: item.title,
-    description: item.description || staticDirections.find((direction) => direction.slug === item.slug)?.description || "",
-    image: item.image,
-    services: serviceItems.filter((child) => child.parentSlug === item.slug),
-  }));
+  const dynamicDirections = serviceItems
+    .filter((item) => !item.parentSlug && directionSlugs.includes(item.slug))
+    .sort((a, b) => directionSlugs.indexOf(a.slug) - directionSlugs.indexOf(b.slug))
+    .map((item) => ({
+      slug: item.slug,
+      title: item.title,
+      description:
+        item.description ||
+        staticDirections.find((direction) => direction.slug === item.slug)?.description ||
+        "",
+      image: item.image,
+      services: serviceItems.filter((child) => child.parentSlug === item.slug),
+    }));
   const hasDynamicChildren = dynamicDirections.some((direction) => direction.services.length);
-  const directions = hasDynamicChildren ? dynamicDirections : staticDirections.map((direction) => ({ ...direction, image: undefined, services: direction.services.map((title, index) => ({ id: index, slug: "", title })) }));
+  const directions = hasDynamicChildren
+    ? dynamicDirections
+    : staticDirections.map((direction) => ({
+        ...direction,
+        image: undefined,
+        services: direction.services.map((title, index) => ({ id: index, slug: "", title })),
+      }));
   const text = getDictionary(locale);
   return (
     <main className="services-page">
@@ -185,7 +197,17 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
             <ul>
               {direction.services.map((service) => (
                 <li key={service.id || service.title}>
-                  {service.slug ? <Link href={`/${locale}/services/${direction.slug}/${service.slug}`}><span>{service.title}</span><ArrowRight /></Link> : <><span>{service.title}</span><ArrowRight /></>}
+                  {service.slug ? (
+                    <Link href={`/${locale}/services/${direction.slug}/${service.slug}`}>
+                      <span>{service.title}</span>
+                      <ArrowRight />
+                    </Link>
+                  ) : (
+                    <>
+                      <span>{service.title}</span>
+                      <ArrowRight />
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

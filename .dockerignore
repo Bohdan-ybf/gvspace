@@ -1,0 +1,11 @@
+.git
+.github
+.next
+node_modules
+wordpress/.env
+.env
+.env.local
+.env.*.local
+*.log
+*.tsbuildinfo
+README.md

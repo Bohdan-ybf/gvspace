@@ -8,7 +8,11 @@ import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
 import type { ServiceOffering } from "./wordpress-services";
 
-type ServiceVectorsProps = { locale: Locale; text: Messages["vectors"]; services: ServiceOffering[] };
+type ServiceVectorsProps = {
+  locale: Locale;
+  text: Messages["vectors"];
+  services: ServiceOffering[];
+};
 
 export function ServiceVectors({ locale, text, services }: ServiceVectorsProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
@@ -68,17 +72,20 @@ export function ServiceVectors({ locale, text, services }: ServiceVectorsProps) 
                   <ul>
                     {direction.children.map((service) => (
                       <li key={service.id}>
-                        <Link href={service.slug ? `/${locale}/services/${direction.slug}/${service.slug}` : `/${locale}/services/${direction.slug}`}>
+                        <Link
+                          href={
+                            service.slug
+                              ? `/${locale}/services/${direction.slug}/${service.slug}`
+                              : `/${locale}/services/${direction.slug}`
+                          }
+                        >
                           <span>{service.title}</span>
                           <ArrowRight />
                         </Link>
                       </li>
                     ))}
                   </ul>
-                  <Link
-                    className="btn vector-more"
-                    href={`/${locale}/services/${direction.slug}`}
-                  >
+                  <Link className="btn vector-more" href={`/${locale}/services/${direction.slug}`}>
                     <span>{text.more}</span>
                     <ArrowRight />
                   </Link>

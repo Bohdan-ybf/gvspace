@@ -22,10 +22,9 @@ export async function CasesShowcaseSection({
 }: CasesShowcaseSectionProps) {
   const allProjects = await getCaseStudies();
   const filteredProjects = allProjects.filter((project) => project.slug !== excludeSlug);
-  const projects = (filteredProjects.length || !allowExcludedFallback ? filteredProjects : allProjects).slice(
-    0,
-    limit,
-  );
+  const projects = (
+    filteredProjects.length || !allowExcludedFallback ? filteredProjects : allProjects
+  ).slice(0, limit);
   const uk = locale === "uk";
 
   if (!projects.length) return null;
@@ -34,7 +33,9 @@ export async function CasesShowcaseSection({
     <section className="section container cases-showcase">
       <header>
         <div>
-          <span className="mono">{eyebrow ?? (uk ? "КЕЙСИ ЦИХ КЛІЄНТІВ" : "THESE CLIENTS’ CASES")}</span>
+          <span className="mono">
+            {eyebrow ?? (uk ? "КЕЙСИ ЦИХ КЛІЄНТІВ" : "THESE CLIENTS’ CASES")}
+          </span>
           <h2>{title ?? (uk ? "Від хаосу до результату" : "From chaos to results")}</h2>
         </div>
         <Link className="btn btn-primary" href={`/${locale}/cases`}>

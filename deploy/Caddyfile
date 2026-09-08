@@ -1,0 +1,13 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$SITE_DOMAIN}, www.{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy frontend:3000
+}
+
+{$CMS_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy wordpress:80
+}

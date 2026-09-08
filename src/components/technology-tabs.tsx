@@ -29,13 +29,14 @@ export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabs
         ? 0
         : event.key === "End"
           ? categories.length - 1
-          : (index + (event.key === "ArrowRight" ? 1 : -1) + categories.length) %
-            categories.length;
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + categories.length) % categories.length;
     const nextCategory = categories[nextIndex];
     if (!nextCategory) return;
 
     setActiveCategory(nextCategory.slug);
-    requestAnimationFrame(() => document.getElementById(`technology-tab-${nextCategory.slug}`)?.focus());
+    requestAnimationFrame(() =>
+      document.getElementById(`technology-tab-${nextCategory.slug}`)?.focus(),
+    );
   };
 
   return (

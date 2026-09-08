@@ -23,7 +23,10 @@ export async function TechnologyShowcaseSection({
           <span className="mono">
             {eyebrow ?? (uk ? "ТЕХНОЛОГІЧНИЙ ФУНДАМЕНТ" : "TECHNOLOGY FOUNDATION")}
           </span>
-          <h2>{title ?? (uk ? "Правильний інструмент для кожної задачі" : "The right tool for every task")}</h2>
+          <h2>
+            {title ??
+              (uk ? "Правильний інструмент для кожної задачі" : "The right tool for every task")}
+          </h2>
         </div>
       </header>
       <div className="technology-showcase-content">

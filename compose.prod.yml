@@ -1,0 +1,84 @@
+name: gvspace
+
+services:
+  proxy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_started
+      wordpress:
+        condition: service_started
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      CMS_DOMAIN: ${CMS_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  frontend:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+        WORDPRESS_URL: https://${CMS_DOMAIN}
+        WORDPRESS_GRAPHQL_URL: http://wordpress/graphql
+        SITE_INDEXING_ENABLED: ${SITE_INDEXING_ENABLED:-false}
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+      WORDPRESS_URL: https://${CMS_DOMAIN}
+      WORDPRESS_GRAPHQL_URL: http://wordpress/graphql
+      SITE_INDEXING_ENABLED: ${SITE_INDEXING_ENABLED:-false}
+    depends_on:
+      wordpress:
+        condition: service_started
+
+  database:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  wordpress:
+    image: wordpress:php8.3-apache
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'https://${CMS_DOMAIN}');
+        define('WP_SITEURL', 'https://${CMS_DOMAIN}');
+        define('FORCE_SSL_ADMIN', true);
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { $$_SERVER['HTTPS'] = 'on'; }
+        define('DISALLOW_FILE_EDIT', true);
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wordpress/wp-content/plugins/gvspace-core:/var/www/html/wp-content/plugins/gvspace-core:ro
+
+volumes:
+  mysql_data:
+  wordpress_data:
+  caddy_data:
+  caddy_config:

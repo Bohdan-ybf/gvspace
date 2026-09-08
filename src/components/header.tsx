@@ -23,19 +23,20 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
-  const serviceDirections = locale === "uk"
-    ? [
-        { slug: "strategy", title: "Стратегія" },
-        { slug: "marketing", title: "Маркетинг" },
-        { slug: "development", title: "IT-розробка" },
-        { slug: "content", title: "Контент & Продакшн" },
-      ]
-    : [
-        { slug: "strategy", title: "Strategy" },
-        { slug: "marketing", title: "Marketing" },
-        { slug: "development", title: "IT Development" },
-        { slug: "content", title: "Content & Production" },
-      ];
+  const serviceDirections =
+    locale === "uk"
+      ? [
+          { slug: "strategy", title: "Стратегія" },
+          { slug: "marketing", title: "Маркетинг" },
+          { slug: "development", title: "IT-розробка" },
+          { slug: "content", title: "Контент & Продакшн" },
+        ]
+      : [
+          { slug: "strategy", title: "Strategy" },
+          { slug: "marketing", title: "Marketing" },
+          { slug: "development", title: "IT Development" },
+          { slug: "content", title: "Content & Production" },
+        ];
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,22 +84,29 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
         className="desktop-only"
         aria-label={locale === "en" ? "Main navigation" : "Головна навігація"}
       >
-        {text.navigation.map((label, index) => index === 0 ? (
-          <div className="services-menu" key="services">
-            <Link href={`/${locale}/services`}>{label.toUpperCase()}<ChevronDown className="chevron" /></Link>
-            <div className="services-dropdown">
-              {serviceDirections.map((direction) =>
-                <Link href={`/${locale}/services/${direction.slug}`} key={direction.slug}>
-                  <span>{direction.title}</span>
-                  <span aria-hidden="true">→</span>
-                </Link>)}
+        {text.navigation.map((label, index) =>
+          index === 0 ? (
+            <div className="services-menu" key="services">
+              <Link href={`/${locale}/services`}>
+                {label.toUpperCase()}
+                <ChevronDown className="chevron" />
+              </Link>
+              <div className="services-dropdown">
+                {serviceDirections.map((direction) => (
+                  <Link href={`/${locale}/services/${direction.slug}`} key={direction.slug}>
+                    <span>{direction.title}</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : (
-          <Link key={routes[index]} href={`/${locale}/${routes[index]}`}>
-            {label.toUpperCase()}{index === 2 && <ChevronDown className="chevron" />}
-          </Link>
-        ))}
+          ) : (
+            <Link key={routes[index]} href={`/${locale}/${routes[index]}`}>
+              {label.toUpperCase()}
+              {index === 2 && <ChevronDown className="chevron" />}
+            </Link>
+          ),
+        )}
       </nav>
       <div className="actions">
         <a className="header-phone desktop-only" href="tel:+380123456789">
@@ -164,14 +172,28 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
         aria-hidden={!isMenuOpen}
       >
         {text.navigation.map((label, index) => (
-          <div className="mobile-nav-group" key={routes[index]}><Link
-            href={`/${locale}/${routes[index]}`}
-            tabIndex={isMenuOpen ? 0 : -1}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <span>{label}</span>
-            <span aria-hidden="true">0{index + 1}</span>
-          </Link>{index === 0 && serviceDirections.map((direction) => <Link className="mobile-service-link" href={`/${locale}/services/${direction.slug}`} tabIndex={isMenuOpen ? 0 : -1} onClick={() => setIsMenuOpen(false)} key={direction.slug}>{direction.title}</Link>)}</div>
+          <div className="mobile-nav-group" key={routes[index]}>
+            <Link
+              href={`/${locale}/${routes[index]}`}
+              tabIndex={isMenuOpen ? 0 : -1}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span>{label}</span>
+              <span aria-hidden="true">0{index + 1}</span>
+            </Link>
+            {index === 0 &&
+              serviceDirections.map((direction) => (
+                <Link
+                  className="mobile-service-link"
+                  href={`/${locale}/services/${direction.slug}`}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={() => setIsMenuOpen(false)}
+                  key={direction.slug}
+                >
+                  {direction.title}
+                </Link>
+              ))}
+          </div>
         ))}
         <a
           href="tel:+380123456789"

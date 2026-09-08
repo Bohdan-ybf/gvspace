@@ -40,41 +40,40 @@ export async function CasesSection({ locale, text }: CasesSectionProps) {
             .slice(0, 3)
             .join(" / ");
 
-          return <article className="home-case-card" key={project.slug}>
-            <div className="home-case-copy">
-              <h3>
-                <Link href={`/${locale}/cases/${project.slug}`}>{project.title}</Link>
-              </h3>
-              <p className="home-case-result">[{project.result}]</p>
-              <dl className="home-case-metrics">
-                {project.metrics.slice(0, 2).map((metric) => (
-                  <div key={`${metric.value}-${metric.label}`}>
-                    <dt>{locale === "uk" ? "Головна цифра" : "Key figure"}</dt>
-                    <dd>
-                      {metric.value} <small>{metric.label}</small>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+          return (
+            <article className="home-case-card" key={project.slug}>
+              <div className="home-case-copy">
+                <h3>
+                  <Link href={`/${locale}/cases/${project.slug}`}>{project.title}</Link>
+                </h3>
+                <p className="home-case-result">[{project.result}]</p>
+                <dl className="home-case-metrics">
+                  {project.metrics.slice(0, 2).map((metric) => (
+                    <div key={`${metric.value}-${metric.label}`}>
+                      <dt>{locale === "uk" ? "Головна цифра" : "Key figure"}</dt>
+                      <dd>
+                        {metric.value} <small>{metric.label}</small>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                <Link className="btn home-case-link" href={`/${locale}/cases/${project.slug}`}>
+                  <span>{locale === "uk" ? "Переглянути кейс" : "View case"}</span>
+                  <ArrowRight />
+                </Link>
+              </div>
               <Link
-                className="btn home-case-link"
+                className="case-image"
                 href={`/${locale}/cases/${project.slug}`}
+                style={project.image ? { backgroundImage: `url(${project.image})` } : undefined}
               >
-                <span>{locale === "uk" ? "Переглянути кейс" : "View case"}</span>
-                <ArrowRight />
+                <span className="home-case-labels mono">
+                  {dateLabel && <span>{dateLabel}</span>}
+                  {categoryLabel && <span>[ {categoryLabel} ]</span>}
+                </span>
               </Link>
-            </div>
-            <Link
-              className="case-image"
-              href={`/${locale}/cases/${project.slug}`}
-              style={project.image ? { backgroundImage: `url(${project.image})` } : undefined}
-            >
-              <span className="home-case-labels mono">
-                {dateLabel && <span>{dateLabel}</span>}
-                {categoryLabel && <span>[ {categoryLabel} ]</span>}
-              </span>
-            </Link>
-          </article>
+            </article>
+          );
         })}
       </div>
     </section>
