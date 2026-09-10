@@ -3,6 +3,19 @@ import { getLocaleOrigin, getMarket } from "@/markets";
 import { isLocale } from "@/i18n";
 
 export function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Public assets must keep their original paths. Rewriting an image such as
+  // /images/logo.svg to /uk/images/logo.svg makes Next.js return HTML instead.
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/images/") ||
+    /\.[^/]+$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
   const market = getMarket(request.headers.get("host") ?? "");
 
   // Local development and preview hosts keep the existing locale routing.
@@ -25,5 +38,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml).*)"],
+  matcher: ["/:path*"],
 };
