@@ -21,6 +21,7 @@ const indexingHeaders = indexingEnabled
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: ["gvspace.test", "ua.gvspace.test"],
   poweredByHeader: false,
   reactStrictMode: true,
   images: {
