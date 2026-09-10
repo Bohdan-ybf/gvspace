@@ -10,7 +10,7 @@ type CasesSectionProps = {
 };
 
 export async function CasesSection({ locale, text }: CasesSectionProps) {
-  const projects = (await getCaseStudies()).slice(0, 3);
+  const projects = (await getCaseStudies(locale)).slice(0, 3);
 
   if (!projects.length) return null;
 

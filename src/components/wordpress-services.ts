@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n";
+import { filterPublishedForLocale, type ContentLocalization } from "@/content-localization";
 
 export type ServiceStep = { title: string; duration: string; description: string };
 export type ServiceOffering = {
@@ -83,6 +84,7 @@ type Node = {
     faqUk?: ServiceOffering["faq"];
     faqEn?: ServiceOffering["faq"];
   };
+  gvspaceLocalization?: ContentLocalization | null;
 };
 
 export async function getServiceOfferings(locale: Locale): Promise<ServiceOffering[]> {
@@ -101,7 +103,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title menuOrder parent { node { slug } } featuredImage { node { sourceUrl } } serviceDetails { titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
+        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug } } featuredImage { node { sourceUrl } } serviceDetails { titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
       }),
       next: { revalidate: 10 },
     });
@@ -109,7 +111,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
     const json = (await response.json()) as { data?: { serviceOfferings?: { nodes?: Node[] } } };
     const nodes = json.data?.serviceOfferings?.nodes ?? [];
     if (!nodes.length) return fallback;
-    return nodes
+    return filterPublishedForLocale(nodes, locale)
       .sort((a, b) => (a.menuOrder ?? 0) - (b.menuOrder ?? 0))
       .map((node) => {
         const d = node.serviceDetails ?? {};

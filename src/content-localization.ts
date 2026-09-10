@@ -6,6 +6,10 @@ export type ContentLocalization = {
   status?: string | null;
 };
 
+export type LocalizedContent = {
+  gvspaceLocalization?: ContentLocalization | null;
+};
+
 export function isContentPublishedForLocale(
   localization: ContentLocalization | null | undefined,
   locale: Locale,
@@ -14,4 +18,11 @@ export function isContentPublishedForLocale(
   const contentLocale = localization?.locale || "legacy";
   const status = localization?.status || "published";
   return status === "published" && (contentLocale === "legacy" || contentLocale === locale);
+}
+
+export function filterPublishedForLocale<T extends LocalizedContent>(
+  items: T[],
+  locale: Locale,
+): T[] {
+  return items.filter((item) => isContentPublishedForLocale(item.gvspaceLocalization, locale));
 }

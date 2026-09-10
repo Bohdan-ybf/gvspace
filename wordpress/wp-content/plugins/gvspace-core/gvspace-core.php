@@ -2,7 +2,7 @@
 /**
  * Plugin Name: GVSPACE Core
  * Description: Content types and GraphQL fields used by the GVSPACE frontend.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Author: GVSPACE
  * Text Domain: gvspace-core
  */
@@ -359,9 +359,11 @@ add_action('add_meta_boxes', function (): void {
 function gvspace_render_localization_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_localization', 'gvspace_localization_nonce');
-    $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true) ?: 'legacy';
+    $stored_locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true);
+    $locale = $stored_locale ?: ($post->post_status === 'auto-draft' ? 'uk' : 'legacy');
     $group = (string) get_post_meta($post->ID, '_gvspace_translation_group', true);
-    $status = (string) get_post_meta($post->ID, '_gvspace_translation_status', true) ?: 'published';
+    $stored_status = (string) get_post_meta($post->ID, '_gvspace_translation_status', true);
+    $status = $stored_status ?: ($post->post_status === 'auto-draft' ? 'draft' : 'published');
     ?>
     <p>
         <label for="gvspace_content_locale"><strong>Мова запису</strong></label><br>
@@ -384,6 +386,27 @@ function gvspace_render_localization_fields(WP_Post $post): void
             <option value="published" <?php selected($status, 'published'); ?>>Опублікований</option>
         </select>
     </p>
+    <?php if ($post->post_status !== 'auto-draft') : ?>
+        <hr>
+        <p><strong>Створити переклад</strong></p>
+        <?php foreach (GVSPACE_CONTENT_LOCALES as $target_locale) : ?>
+            <?php if ($target_locale === $locale) continue; ?>
+            <?php
+            $translation_url = wp_nonce_url(
+                add_query_arg([
+                    'action' => 'gvspace_duplicate_post',
+                    'post' => $post->ID,
+                    'target_locale' => $target_locale,
+                ], admin_url('admin-post.php')),
+                'gvspace_duplicate_post_' . $post->ID
+            );
+            ?>
+            <a class="button" href="<?php echo esc_url($translation_url); ?>" style="margin:0 4px 4px 0">
+                <?php echo esc_html(strtoupper($target_locale)); ?>
+            </a>
+        <?php endforeach; ?>
+        <p class="description">Буде створена чернетка в цій самій групі перекладів.</p>
+    <?php endif; ?>
     <?php
 }
 
@@ -400,7 +423,7 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
 
     $locale = isset($_POST['gvspace_content_locale'])
         ? gvspace_sanitize_content_locale(sanitize_text_field(wp_unslash($_POST['gvspace_content_locale'])))
-        : 'legacy';
+        : ($post->post_status === 'auto-draft' ? 'uk' : 'legacy');
     $group = isset($_POST['gvspace_translation_group'])
         ? sanitize_key(wp_unslash($_POST['gvspace_translation_group']))
         : '';
@@ -897,6 +920,9 @@ add_filter('page_row_actions', 'gvspace_duplicate_post_link', 10, 2);
 add_action('admin_post_gvspace_duplicate_post', function (): void {
     $post_id = isset($_GET['post']) ? absint($_GET['post']) : 0;
     $post = $post_id ? get_post($post_id) : null;
+    $target_locale = isset($_GET['target_locale'])
+        ? gvspace_sanitize_content_locale(sanitize_text_field(wp_unslash($_GET['target_locale'])))
+        : '';
 
     if (
         !$post
@@ -937,6 +963,18 @@ add_action('admin_post_gvspace_duplicate_post', function (): void {
         foreach ($values as $value) {
             add_post_meta($duplicate_id, $meta_key, maybe_unserialize($value));
         }
+    }
+
+    if ($target_locale && $target_locale !== 'legacy') {
+        $translation_group = (string) get_post_meta($post_id, '_gvspace_translation_group', true);
+        if (!$translation_group) {
+            $translation_group = sanitize_key($post->post_type . '-' . ($post->post_name ?: $post_id));
+            update_post_meta($post_id, '_gvspace_translation_group', $translation_group);
+        }
+
+        update_post_meta($duplicate_id, '_gvspace_content_locale', $target_locale);
+        update_post_meta($duplicate_id, '_gvspace_translation_group', $translation_group);
+        update_post_meta($duplicate_id, '_gvspace_translation_status', 'draft');
     }
 
     wp_safe_redirect(admin_url('post.php?action=edit&post=' . $duplicate_id));

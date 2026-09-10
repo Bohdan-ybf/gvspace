@@ -1,4 +1,9 @@
 import type { Locale } from "@/i18n";
+import {
+  filterPublishedForLocale,
+  isContentPublishedForLocale,
+  type ContentLocalization,
+} from "@/content-localization";
 import { getVacancyBySlug as getFallbackVacancy, type Vacancy } from "./vacancy-data";
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -25,6 +30,7 @@ type VacancyNode = {
   slug: string;
   title: string;
   vacancyDetails: VacancyDetails;
+  gvspaceLocalization?: ContentLocalization | null;
 };
 
 export type VacancySummary = {
@@ -39,6 +45,7 @@ export type VacancySummary = {
 const vacancyFields = `
   slug
   title
+  gvspaceLocalization { locale translationGroup status }
   vacancyDetails {
     titleEn excerptUk excerptEn salary hot tags
     roleUk roleEn tasksUk tasksEn requirementsUk requirementsEn
@@ -100,7 +107,7 @@ export async function getVacancies(locale: Locale): Promise<VacancySummary[]> {
   `);
 
   if (data?.vacancies.nodes.length) {
-    return data.vacancies.nodes.map((node) => ({
+    return filterPublishedForLocale(data.vacancies.nodes, locale).map((node) => ({
       slug: node.slug,
       title:
         locale === "en" && node.vacancyDetails.titleEn ? node.vacancyDetails.titleEn : node.title,
@@ -129,10 +136,12 @@ export async function getVacancies(locale: Locale): Promise<VacancySummary[]> {
   ];
 }
 
-export async function getVacancyBySlug(slug: string): Promise<Vacancy | undefined> {
+export async function getVacancyBySlug(slug: string, locale: Locale): Promise<Vacancy | undefined> {
   const data = await queryWordPress<{ vacancy: VacancyNode | null }>(
     `query Vacancy($slug: ID!) { vacancy(id: $slug, idType: SLUG) { ${vacancyFields} } }`,
     { slug },
   );
-  return data?.vacancy ? toVacancy(data.vacancy) : getFallbackVacancy(slug);
+  return data?.vacancy && isContentPublishedForLocale(data.vacancy.gvspaceLocalization, locale)
+    ? toVacancy(data.vacancy)
+    : getFallbackVacancy(slug);
 }

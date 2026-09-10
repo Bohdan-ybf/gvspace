@@ -1,4 +1,9 @@
 import type { Locale } from "@/i18n";
+import {
+  filterPublishedForLocale,
+  isContentPublishedForLocale,
+  type ContentLocalization,
+} from "@/content-localization";
 
 export type CaseStudy = {
   slug: string;
@@ -63,9 +68,10 @@ type CaseNode = {
   date?: string;
   featuredImage?: { node?: { sourceUrl?: string } };
   caseDetails?: Omit<CaseStudy, "slug" | "title" | "image">;
+  gvspaceLocalization?: ContentLocalization | null;
 };
 
-const fields = `slug title date featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
+const fields = `slug title date gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
 
 function mapCase(node: CaseNode): CaseStudy | undefined {
   if (!node.caseDetails) return undefined;
@@ -78,7 +84,7 @@ function mapCase(node: CaseNode): CaseStudy | undefined {
   };
 }
 
-export async function getCaseStudies(): Promise<CaseStudy[]> {
+export async function getCaseStudies(locale: Locale): Promise<CaseStudy[]> {
   if (!endpoint) return [];
   try {
     const response = await fetch(endpoint, {
@@ -92,8 +98,8 @@ export async function getCaseStudies(): Promise<CaseStudy[]> {
     if (!response.ok) return [];
     const result = (await response.json()) as { data?: { projectCases?: { nodes?: CaseNode[] } } };
     return (
-      result.data?.projectCases?.nodes
-        ?.map(mapCase)
+      filterPublishedForLocale(result.data?.projectCases?.nodes ?? [], locale)
+        .map(mapCase)
         .filter((item): item is CaseStudy => Boolean(item)) ?? []
     );
   } catch {
@@ -102,7 +108,6 @@ export async function getCaseStudies(): Promise<CaseStudy[]> {
 }
 
 export async function getCaseStudy(slug: string, locale: Locale): Promise<CaseStudy | undefined> {
-  void locale;
   if (endpoint) {
     try {
       const response = await fetch(endpoint, {
@@ -116,7 +121,8 @@ export async function getCaseStudy(slug: string, locale: Locale): Promise<CaseSt
       });
       const result = (await response.json()) as { data?: { projectCase?: CaseNode } };
       const node = result.data?.projectCase;
-      if (node) return mapCase(node);
+      if (node && isContentPublishedForLocale(node.gvspaceLocalization, locale))
+        return mapCase(node);
     } catch {}
   }
   return undefined;

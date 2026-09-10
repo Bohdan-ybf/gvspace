@@ -10,6 +10,16 @@ Every post, service, case, vacancy, review and technology has a **GVSPACE: local
 4. Only a translation marked **Published** is ready for the public frontend. **Draft** and **Missing** are editorial states and must not be indexed.
 5. Do not convert legacy records until their separate UK and EN copies have been reviewed.
 
+### Creating a translation
+
+1. Create the source record, select its language and keep the translation status as **Draft** while editing.
+2. Save it, then use **Create translation** in the localization panel.
+3. The plugin creates a WordPress draft, copies the content and media, assigns the target language and keeps the same translation-group key.
+4. Replace the copied text with the translation. Publish the WordPress record and then set the translation status to **Published**.
+5. The frontend only returns records whose language matches the active domain and whose translation status is **Published**.
+
+New records default to Ukrainian and Draft. Records created before this workflow remain Legacy/Published until they are migrated.
+
 The fields are available through WPGraphQL as `gvspaceLocalization { locale translationGroup status }`.
 
 ## Технології

@@ -20,7 +20,7 @@ export async function CasesShowcaseSection({
   excludeSlug,
   allowExcludedFallback = false,
 }: CasesShowcaseSectionProps) {
-  const allProjects = await getCaseStudies();
+  const allProjects = await getCaseStudies(locale);
   const filteredProjects = allProjects.filter((project) => project.slug !== excludeSlug);
   const projects = (
     filteredProjects.length || !allowExcludedFallback ? filteredProjects : allProjects

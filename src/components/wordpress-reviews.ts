@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n";
+import { filterPublishedForLocale, type ContentLocalization } from "@/content-localization";
 
 export type ClientReview = {
   slug: string;
@@ -27,6 +28,7 @@ type ReviewNode = {
     rating?: number;
     metrics?: string[];
   };
+  gvspaceLocalization?: ContentLocalization | null;
 };
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -38,7 +40,7 @@ export async function getClientReviews(locale: Locale): Promise<ClientReview[]> 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Reviews { clientReviews(first: 100) { nodes { slug title featuredImage { node { sourceUrl } } reviewDetails { nameEn positionUk positionEn company textUk textEn category rating metrics } } } }`,
+        query: `query Reviews { clientReviews(first: 100) { nodes { slug title gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } reviewDetails { nameEn positionUk positionEn company textUk textEn category rating metrics } } } }`,
       }),
       next: { revalidate: 60 },
     });
@@ -46,23 +48,25 @@ export async function getClientReviews(locale: Locale): Promise<ClientReview[]> 
     const result = (await response.json()) as {
       data?: { clientReviews?: { nodes?: ReviewNode[] } };
     };
-    return (result.data?.clientReviews?.nodes ?? []).flatMap((node) => {
-      const details = node.reviewDetails;
-      if (!details) return [];
-      return [
-        {
-          slug: node.slug,
-          name: locale === "en" && details.nameEn ? details.nameEn : node.title,
-          position: locale === "en" ? (details.positionEn ?? "") : (details.positionUk ?? ""),
-          company: details.company ?? "",
-          text: locale === "en" ? (details.textEn ?? "") : (details.textUk ?? ""),
-          category: details.category ?? "",
-          rating: details.rating ?? 5,
-          metrics: details.metrics ?? [],
-          image: node.featuredImage?.node?.sourceUrl,
-        },
-      ];
-    });
+    return filterPublishedForLocale(result.data?.clientReviews?.nodes ?? [], locale).flatMap(
+      (node) => {
+        const details = node.reviewDetails;
+        if (!details) return [];
+        return [
+          {
+            slug: node.slug,
+            name: locale === "en" && details.nameEn ? details.nameEn : node.title,
+            position: locale === "en" ? (details.positionEn ?? "") : (details.positionUk ?? ""),
+            company: details.company ?? "",
+            text: locale === "en" ? (details.textEn ?? "") : (details.textUk ?? ""),
+            category: details.category ?? "",
+            rating: details.rating ?? 5,
+            metrics: details.metrics ?? [],
+            image: node.featuredImage?.node?.sourceUrl,
+          },
+        ];
+      },
+    );
   } catch {
     return [];
   }

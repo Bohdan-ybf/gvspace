@@ -9,7 +9,7 @@ import { getCaseStudies } from "./wordpress-cases";
 
 export async function CasesPage({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
-  const projects = await getCaseStudies();
+  const projects = await getCaseStudies(locale);
   const uk = locale === "uk";
   const contactText = {
     ...text.contact,

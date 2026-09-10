@@ -6,7 +6,7 @@ import { getVacancyBySlug } from "./wordpress-vacancies";
 import { VacancyApplicationForm } from "./vacancy-application-form";
 
 export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
-  const vacancy = await getVacancyBySlug(slug);
+  const vacancy = await getVacancyBySlug(slug, locale);
   if (!vacancy) notFound();
 
   const uk = locale === "uk";

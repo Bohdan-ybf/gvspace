@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n";
+import { filterPublishedForLocale, type ContentLocalization } from "@/content-localization";
 
 export type TechnologyCategory = { name: string; slug: string };
 
@@ -30,6 +31,7 @@ type TechnologyNode = {
   technologyTitleEn?: string;
   featuredImage?: { node?: { sourceUrl?: string; altText?: string } };
   technologyCategories?: { nodes?: TechnologyCategory[] };
+  gvspaceLocalization?: ContentLocalization | null;
 };
 
 type TechnologyResponse = {
@@ -65,7 +67,7 @@ export async function getTechnologyStack(locale: Locale): Promise<TechnologyStac
           }
           technologies(first: 100) {
             nodes {
-              databaseId title menuOrder technologyTitleEn
+              databaseId title menuOrder technologyTitleEn gvspaceLocalization { locale translationGroup status }
               featuredImage { node { sourceUrl altText } }
               technologyCategories { nodes { name slug } }
             }
@@ -80,7 +82,7 @@ export async function getTechnologyStack(locale: Locale): Promise<TechnologyStac
     if (result.errors) return { categories: fallbackCategories, items: [] };
 
     const categories = result.data?.technologyCategories?.nodes ?? [];
-    const items = (result.data?.technologies?.nodes ?? [])
+    const items = filterPublishedForLocale(result.data?.technologies?.nodes ?? [], locale)
       .map((node): TechnologyItem => ({
         id: node.databaseId,
         title: locale === "en" && node.technologyTitleEn ? node.technologyTitleEn : node.title,
