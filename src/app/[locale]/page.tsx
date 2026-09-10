@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Home } from "@/components/home";
 import type { Metadata } from "next";
 import { defaultLocale, isLocale, locales, type Locale } from "@/i18n";
+import { getLocaleOrigin } from "@/markets";
 
 const localizedMetadata = {
   uk: {
@@ -26,15 +27,18 @@ export async function generateMetadata({
   const { locale: localeParam } = await params;
   const locale = isLocale(localeParam) ? localeParam : defaultLocale;
   const pageMetadata = localizedMetadata[locale];
+  const canonicalUrl = `${getLocaleOrigin(locale)}/${locale}`;
 
   return {
     title: pageMetadata.title,
     description: pageMetadata.description,
     alternates: {
-      canonical: `/${locale}`,
+      canonical: canonicalUrl,
       languages: {
-        ...Object.fromEntries(locales.map((language) => [language, `/${language}`])),
-        "x-default": `/${defaultLocale}`,
+        ...Object.fromEntries(
+          locales.map((language) => [language, `${getLocaleOrigin(language)}/${language}`]),
+        ),
+        "x-default": `${getLocaleOrigin("en")}/en`,
       },
     },
     openGraph: {
@@ -51,7 +55,7 @@ export function generateStaticParams() {
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
+  const siteUrl = getLocaleOrigin(locale);
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",

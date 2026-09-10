@@ -11,6 +11,7 @@ services:
         condition: service_started
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN}
+      UK_SITE_DOMAIN: ${UK_SITE_DOMAIN:-gvspace.com.ua}
       CMS_DOMAIN: ${CMS_DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL}
     ports:
@@ -28,12 +29,16 @@ services:
       context: .
       args:
         NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+        NEXT_PUBLIC_INTL_SITE_URL: https://${SITE_DOMAIN}
+        NEXT_PUBLIC_UK_SITE_URL: https://${UK_SITE_DOMAIN:-gvspace.com.ua}
         WORDPRESS_URL: https://${CMS_DOMAIN}
         WORDPRESS_GRAPHQL_URL: http://wordpress/graphql
         SITE_INDEXING_ENABLED: ${SITE_INDEXING_ENABLED:-false}
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+      NEXT_PUBLIC_INTL_SITE_URL: https://${SITE_DOMAIN}
+      NEXT_PUBLIC_UK_SITE_URL: https://${UK_SITE_DOMAIN:-gvspace.com.ua}
       WORDPRESS_URL: https://${CMS_DOMAIN}
       WORDPRESS_GRAPHQL_URL: http://wordpress/graphql
       SITE_INDEXING_ENABLED: ${SITE_INDEXING_ENABLED:-false}

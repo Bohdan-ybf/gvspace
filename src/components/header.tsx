@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getDictionary, localeNames, locales, type Locale } from "@/i18n";
+import { getLocalizedUrl } from "@/markets";
 import { ChevronDown } from "./icons/chevron-down";
 import { Logo } from "./logo";
 
@@ -14,11 +15,7 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
   const alternateLanguages = locales.filter((language) => language !== locale);
   const pathname = usePathname();
   const languageHref = (language: Locale) => {
-    const localePattern = new RegExp(`^/(${locales.join("|")})(?=/|$)`);
-    const localizedPath = pathname.replace(localePattern, `/${language}`);
-    return localizedPath === pathname && !localePattern.test(pathname)
-      ? `/${language}${pathname === "/" ? "" : pathname}`
-      : localizedPath;
+    return getLocalizedUrl(language, pathname);
   };
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);

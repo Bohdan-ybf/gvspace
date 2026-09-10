@@ -2,7 +2,7 @@
 /**
  * Plugin Name: GVSPACE Core
  * Description: Content types and GraphQL fields used by the GVSPACE frontend.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: GVSPACE
  * Text Domain: gvspace-core
  */
@@ -78,6 +78,18 @@ const GVSPACE_CASE_FIELDS = [
     'industry' => ['label' => 'Індустрія (retail, services, technology)', 'type' => 'text'],
     'badge' => ['label' => 'Бейдж результату для картки', 'type' => 'text'],
 ];
+
+const GVSPACE_LOCALIZED_POST_TYPES = [
+    'post',
+    'gv_vacancy',
+    'gv_case',
+    'gv_service',
+    'gv_review',
+    'gv_technology',
+];
+
+const GVSPACE_CONTENT_LOCALES = ['uk', 'en'];
+const GVSPACE_TRANSLATION_STATUSES = ['missing', 'draft', 'published'];
 
 add_action('after_setup_theme', function (): void {
     add_theme_support('post-thumbnails');
@@ -244,6 +256,30 @@ add_action('init', function (): void {
         'taxonomies' => ['gv_technology_category'],
     ]);
 
+    foreach (GVSPACE_LOCALIZED_POST_TYPES as $post_type) {
+        register_post_meta($post_type, '_gvspace_content_locale', [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'gvspace_sanitize_content_locale',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        register_post_meta($post_type, '_gvspace_translation_group', [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_key',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        register_post_meta($post_type, '_gvspace_translation_status', [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'gvspace_sanitize_translation_status',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
     register_post_meta('gv_technology', '_gvspace_technology_title_en', [
         'type' => 'string',
         'single' => true,
@@ -296,6 +332,105 @@ add_action('init', function (): void {
         'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
     ]);
 });
+
+function gvspace_sanitize_content_locale(string $value): string
+{
+    return in_array($value, GVSPACE_CONTENT_LOCALES, true) ? $value : 'legacy';
+}
+
+function gvspace_sanitize_translation_status(string $value): string
+{
+    return in_array($value, GVSPACE_TRANSLATION_STATUSES, true) ? $value : 'draft';
+}
+
+add_action('add_meta_boxes', function (): void {
+    foreach (GVSPACE_LOCALIZED_POST_TYPES as $post_type) {
+        add_meta_box(
+            'gvspace-localization',
+            'GVSPACE: локалізація',
+            'gvspace_render_localization_fields',
+            $post_type,
+            'side',
+            'high'
+        );
+    }
+});
+
+function gvspace_render_localization_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_localization', 'gvspace_localization_nonce');
+    $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true) ?: 'legacy';
+    $group = (string) get_post_meta($post->ID, '_gvspace_translation_group', true);
+    $status = (string) get_post_meta($post->ID, '_gvspace_translation_status', true) ?: 'published';
+    ?>
+    <p>
+        <label for="gvspace_content_locale"><strong>Мова запису</strong></label><br>
+        <select id="gvspace_content_locale" name="gvspace_content_locale" style="width:100%">
+            <option value="legacy" <?php selected($locale, 'legacy'); ?>>Legacy: UK + EN в одному записі</option>
+            <option value="uk" <?php selected($locale, 'uk'); ?>>Українська</option>
+            <option value="en" <?php selected($locale, 'en'); ?>>English</option>
+        </select>
+    </p>
+    <p>
+        <label for="gvspace_translation_group"><strong>Група перекладів</strong></label><br>
+        <input id="gvspace_translation_group" name="gvspace_translation_group" type="text" value="<?php echo esc_attr($group); ?>" placeholder="service-development" style="width:100%">
+        <span class="description">Однаковий ключ пов’язує переклади.</span>
+    </p>
+    <p>
+        <label for="gvspace_translation_status"><strong>Статус перекладу</strong></label><br>
+        <select id="gvspace_translation_status" name="gvspace_translation_status" style="width:100%">
+            <option value="missing" <?php selected($status, 'missing'); ?>>Відсутній</option>
+            <option value="draft" <?php selected($status, 'draft'); ?>>Чернетка</option>
+            <option value="published" <?php selected($status, 'published'); ?>>Опублікований</option>
+        </select>
+    </p>
+    <?php
+}
+
+add_action('save_post', function (int $post_id, WP_Post $post): void {
+    if (
+        !in_array($post->post_type, GVSPACE_LOCALIZED_POST_TYPES, true)
+        || !isset($_POST['gvspace_localization_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_localization_nonce'])), 'gvspace_save_localization')
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    $locale = isset($_POST['gvspace_content_locale'])
+        ? gvspace_sanitize_content_locale(sanitize_text_field(wp_unslash($_POST['gvspace_content_locale'])))
+        : 'legacy';
+    $group = isset($_POST['gvspace_translation_group'])
+        ? sanitize_key(wp_unslash($_POST['gvspace_translation_group']))
+        : '';
+    $status = isset($_POST['gvspace_translation_status'])
+        ? gvspace_sanitize_translation_status(sanitize_text_field(wp_unslash($_POST['gvspace_translation_status'])))
+        : 'draft';
+
+    update_post_meta($post_id, '_gvspace_content_locale', $locale);
+    update_post_meta($post_id, '_gvspace_translation_group', $group ?: $post->post_type . '-' . $post_id);
+    update_post_meta($post_id, '_gvspace_translation_status', $status);
+}, 10, 2);
+
+foreach (GVSPACE_LOCALIZED_POST_TYPES as $gvspace_localized_post_type) {
+    add_filter("manage_{$gvspace_localized_post_type}_posts_columns", function (array $columns): array {
+        $columns['gvspace_locale'] = 'Мова';
+        $columns['gvspace_translation_status'] = 'Переклад';
+        return $columns;
+    });
+
+    add_action("manage_{$gvspace_localized_post_type}_posts_custom_column", function (string $column, int $post_id): void {
+        if ($column === 'gvspace_locale') {
+            $locale = (string) get_post_meta($post_id, '_gvspace_content_locale', true) ?: 'legacy';
+            echo esc_html(strtoupper($locale));
+        }
+        if ($column === 'gvspace_translation_status') {
+            $status = (string) get_post_meta($post_id, '_gvspace_translation_status', true) ?: 'published';
+            echo esc_html($status);
+        }
+    }, 10, 2);
+}
 
 add_action('add_meta_boxes', function (): void {
     add_meta_box('gvspace-case-details', 'Дані кейсу', 'gvspace_render_case_fields', 'gv_case', 'normal', 'high');
@@ -469,6 +604,29 @@ add_action('save_post_gv_vacancy', function (int $post_id): void {
 add_action('graphql_register_types', function (): void {
     if (!function_exists('register_graphql_object_type')) {
         return;
+    }
+
+    register_graphql_object_type('GvspaceLocalization', [
+        'description' => 'Locale, translation group and editorial readiness for a GVSPACE content item.',
+        'fields' => [
+            'locale' => ['type' => 'String'],
+            'translationGroup' => ['type' => 'String'],
+            'status' => ['type' => 'String'],
+        ],
+    ]);
+
+    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology'] as $graphql_type) {
+        register_graphql_field($graphql_type, 'gvspaceLocalization', [
+            'type' => 'GvspaceLocalization',
+            'resolve' => static function ($source): array {
+                $post_id = (int) ($source->databaseId ?? $source->ID ?? 0);
+                return [
+                    'locale' => (string) get_post_meta($post_id, '_gvspace_content_locale', true) ?: 'legacy',
+                    'translationGroup' => (string) get_post_meta($post_id, '_gvspace_translation_group', true),
+                    'status' => (string) get_post_meta($post_id, '_gvspace_translation_status', true) ?: 'published',
+                ];
+            },
+        ]);
     }
 
     register_graphql_field('Technology', 'technologyTitleEn', [

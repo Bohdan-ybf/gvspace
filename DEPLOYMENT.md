@@ -4,13 +4,15 @@ The production stack contains Caddy (HTTPS/reverse proxy), Next.js, WordPress an
 
 ## 1. DNS
 
-At the DNS provider, create these records and wait for them to resolve:
+At the DNS provider, create these records for `gvspace.com` and the active Ukrainian domain, then wait for them to resolve. Use `gvspace.com.ua` until `gvspace.ua` registration is complete.
 
 | Type | Name  | Value            |
 | ---- | ----- | ---------------- |
 | A    | `@`   | `173.242.58.232` |
 | A    | `www` | `173.242.58.232` |
 | A    | `cms` | `173.242.58.232` |
+
+The `cms` record is required only in the `gvspace.com` zone. Do not remove existing mail records.
 
 Do not enable a proxy/CDN until the first HTTPS certificates have been issued.
 
@@ -44,7 +46,7 @@ cp .env.production.example .env.production
 chmod 600 .env.production
 ```
 
-Edit `.env.production`. Use two different long random database passwords. Confirm the real domain and email. Keep `SITE_INDEXING_ENABLED=false` during migration.
+Edit `.env.production`. Set `SITE_DOMAIN=gvspace.com` and, for the temporary Ukrainian launch, `UK_SITE_DOMAIN=gvspace.com.ua`. After `gvspace.ua` is registered and its DNS is ready, change only `UK_SITE_DOMAIN` to `gvspace.ua` and redirect `gvspace.com.ua` to it. Use two different long random database passwords. Confirm the real domains and email. Keep `SITE_INDEXING_ENABLED=false` throughout development and migration; enable it only after the final content, redirect and SEO review.
 
 For a non-public preview, create `deploy/auth.caddy` from `deploy/auth.caddy.example` and replace the placeholder with a hash produced by `caddy hash-password`. The real file is ignored by Git. Remove the `import /etc/caddy/auth.caddy` line and its Compose mount when public HTTP authentication is no longer required.
 

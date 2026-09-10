@@ -1,5 +1,17 @@
 # GVSPACE Core
 
+## Localization workflow
+
+Every post, service, case, vacancy, review and technology has a **GVSPACE: localization** panel:
+
+1. Existing bilingual records remain `Legacy: UK + EN` and continue to work unchanged.
+2. New single-language records use `uk` or `en`.
+3. Translations of the same item must share one **Translation group** key, for example `service-development`.
+4. Only a translation marked **Published** is ready for the public frontend. **Draft** and **Missing** are editorial states and must not be indexed.
+5. Do not convert legacy records until their separate UK and EN copies have been reviewed.
+
+The fields are available through WPGraphQL as `gvspaceLocalization { locale translationGroup status }`.
+
 ## Технології
 
 У WordPress з'являється розділ **Технології**.

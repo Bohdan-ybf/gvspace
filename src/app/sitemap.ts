@@ -1,16 +1,16 @@
 import type { MetadataRoute } from "next";
+import { getLocaleOrigin } from "@/markets";
 export default function sitemap(): MetadataRoute.Sitemap {
   if (process.env.SITE_INDEXING_ENABLED !== "true") return [];
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
   return ["uk", "en"].map((locale) => ({
-    url: `${siteUrl}/${locale}`,
+    url: `${getLocaleOrigin(locale as "uk" | "en")}/${locale}`,
     changeFrequency: "weekly" as const,
     priority: 1,
     alternates: {
       languages: {
-        uk: `${siteUrl}/uk`,
-        en: `${siteUrl}/en`,
+        uk: `${getLocaleOrigin("uk")}/uk`,
+        en: `${getLocaleOrigin("en")}/en`,
       },
     },
   }));
