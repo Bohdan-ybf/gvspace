@@ -4,12 +4,14 @@ import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
 import { getCaseStudies } from "./wordpress-cases";
 
+import { componentCopy } from "@/i18n/component-copy";
 type CasesSectionProps = {
   locale: Locale;
   text: Messages["cases"];
 };
 
 export async function CasesSection({ locale, text }: CasesSectionProps) {
+  const copy = componentCopy[locale]["cases-section"];
   const projects = (await getCaseStudies(locale)).slice(0, 3);
 
   if (!projects.length) return null;
@@ -28,7 +30,7 @@ export async function CasesSection({ locale, text }: CasesSectionProps) {
       <div className="home-cases-list">
         {projects.map((project) => {
           const dateLabel = project.publishedAt
-            ? new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : "en-US", {
+            ? new Intl.DateTimeFormat(copy.copy1, {
                 month: "long",
                 year: "numeric",
               })
@@ -50,7 +52,7 @@ export async function CasesSection({ locale, text }: CasesSectionProps) {
                 <dl className="home-case-metrics">
                   {project.metrics.slice(0, 2).map((metric) => (
                     <div key={`${metric.value}-${metric.label}`}>
-                      <dt>{locale === "uk" ? "Головна цифра" : "Key figure"}</dt>
+                      <dt>{copy.copy2}</dt>
                       <dd>
                         {metric.value} <small>{metric.label}</small>
                       </dd>
@@ -58,7 +60,7 @@ export async function CasesSection({ locale, text }: CasesSectionProps) {
                   ))}
                 </dl>
                 <Link className="btn home-case-link" href={`/${locale}/cases/${project.slug}`}>
-                  <span>{locale === "uk" ? "Переглянути кейс" : "View case"}</span>
+                  <span>{copy.copy3}</span>
                   <ArrowRight />
                 </Link>
               </div>

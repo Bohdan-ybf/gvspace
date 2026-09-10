@@ -4,6 +4,7 @@ import { ArrowRight } from "./icons/arrow-right";
 import { TechnologyShowcaseTabs } from "./technology-showcase-tabs";
 import { getTechnologyStack } from "./wordpress-technologies";
 
+import { componentCopy } from "@/i18n/component-copy";
 export async function TechnologyShowcaseSection({
   locale,
   eyebrow,
@@ -13,31 +14,26 @@ export async function TechnologyShowcaseSection({
   eyebrow?: string;
   title?: string;
 }) {
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["technology-showcase-section"];
   const stack = await getTechnologyStack(locale);
 
   return (
     <section className="section container technology-showcase">
       <header>
         <div>
-          <span className="mono">
-            {eyebrow ?? (uk ? "ТЕХНОЛОГІЧНИЙ ФУНДАМЕНТ" : "TECHNOLOGY FOUNDATION")}
-          </span>
-          <h2>
-            {title ??
-              (uk ? "Правильний інструмент для кожної задачі" : "The right tool for every task")}
-          </h2>
+          <span className="mono">{eyebrow ?? copy.copy1}</span>
+          <h2>{title ?? copy.copy2}</h2>
         </div>
       </header>
       <div className="technology-showcase-content">
         <TechnologyShowcaseTabs
           categories={stack.categories}
           items={stack.items}
-          emptyLabel={uk ? "Додайте технології у WordPress" : "Add technologies in WordPress"}
+          emptyLabel={copy.copy3}
         />
         <div className="technology-showcase-fade" aria-hidden="true" />
         <Link className="btn technology-showcase-more" href={`/${locale}/technologies`}>
-          {uk ? "Усі технології" : "All technologies"}
+          {copy.copy4}
           <ArrowRight />
         </Link>
       </div>

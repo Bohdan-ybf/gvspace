@@ -5,11 +5,12 @@ import { getDictionary, type Locale } from "@/i18n";
 import { getBlogAuthor } from "./wordpress-authors";
 import { getBlogPostsByAuthor } from "./wordpress-posts";
 
+import { componentCopy } from "@/i18n/component-copy";
 export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: string }) {
   const author = await getBlogAuthor(slug, locale);
   if (!author) notFound();
   const wordpressPosts = await getBlogPostsByAuthor(slug, locale);
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["blog-author-page"];
   const featured = wordpressPosts[0];
 
   return (
@@ -26,32 +27,28 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
           aria-label={author.name}
         />
         <div className="author-bio">
-          <span className="mono">● {uk ? "ПРО АВТОРА" : "ABOUT THE AUTHOR"}</span>
+          <span className="mono">● {copy.copy1}</span>
           <h2>{author.headline}</h2>
           <p>{author.bio}</p>
           <dl>
             <div>
               <dt>{author.experience}</dt>
-              <dd>{uk ? "років досвіду" : "years of experience"}</dd>
+              <dd>{copy.copy2}</dd>
             </div>
             <div>
               <dt>{author.projects}</dt>
-              <dd>{uk ? "успішних проєктів" : "successful projects"}</dd>
+              <dd>{copy.copy3}</dd>
             </div>
           </dl>
         </div>
         <aside>
-          <h2>{uk ? "Маєте питання?" : "Have a question?"}</h2>
-          <p>
-            {uk
-              ? "На безкоштовній особистій консультації розберемо вашу ситуацію та підберемо ефективне рішення."
-              : "We will review your situation during a free personal consultation and find an effective solution."}
-          </p>
-          <Link href={`/${locale}/contacts`}>{uk ? "Запитати автора" : "Ask the author"} →</Link>
+          <h2>{copy.copy4}</h2>
+          <p>{copy.copy5}</p>
+          <Link href={`/${locale}/contacts`}>{copy.copy6} →</Link>
         </aside>
       </section>
       <section className="container author-posts">
-        <h2>{uk ? "Всі статті автора" : "All articles by the author"}</h2>
+        <h2>{copy.copy7}</h2>
         {featured ? (
           <article className="author-featured">
             <div
@@ -74,17 +71,11 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
               </small>
               <h3>{featured.title}</h3>
               <p>{featured.excerpt}</p>
-              <Link href={`/${locale}/blog/${featured.slug}`}>
-                {uk ? "Читати статтю" : "Read article"} →
-              </Link>
+              <Link href={`/${locale}/blog/${featured.slug}`}>{copy.copy8} →</Link>
             </div>
           </article>
         ) : (
-          <p className="blog-empty">
-            {uk
-              ? "Цей автор ще не опублікував статей."
-              : "This author has not published any articles yet."}
-          </p>
+          <p className="blog-empty">{copy.copy9}</p>
         )}
         {wordpressPosts.length > 1 && (
           <div className="author-post-grid">
@@ -108,7 +99,7 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
                   {card.publishedAt} · {card.readingTime} хв
                 </small>
                 <h3>{card.title}</h3>
-                <Link href={`/${locale}/blog/${card.slug}`}>{uk ? "Читати" : "Read"} →</Link>
+                <Link href={`/${locale}/blog/${card.slug}`}>{copy.copy10} →</Link>
               </article>
             ))}
           </div>

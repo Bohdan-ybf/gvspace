@@ -3,6 +3,7 @@ import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { getCaseStudies } from "./wordpress-cases";
 
+import { componentCopy } from "@/i18n/component-copy";
 type CasesShowcaseSectionProps = {
   locale: Locale;
   eyebrow?: string;
@@ -25,7 +26,7 @@ export async function CasesShowcaseSection({
   const projects = (
     filteredProjects.length || !allowExcludedFallback ? filteredProjects : allProjects
   ).slice(0, limit);
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["cases-showcase-section"];
 
   if (!projects.length) return null;
 
@@ -33,13 +34,11 @@ export async function CasesShowcaseSection({
     <section className="section container cases-showcase">
       <header>
         <div>
-          <span className="mono">
-            {eyebrow ?? (uk ? "КЕЙСИ ЦИХ КЛІЄНТІВ" : "THESE CLIENTS’ CASES")}
-          </span>
-          <h2>{title ?? (uk ? "Від хаосу до результату" : "From chaos to results")}</h2>
+          <span className="mono">{eyebrow ?? copy.copy1}</span>
+          <h2>{title ?? copy.copy2}</h2>
         </div>
         <Link className="btn btn-primary" href={`/${locale}/cases`}>
-          {uk ? "Усі кейси" : "All cases"}
+          {copy.copy3}
           <ArrowRight />
         </Link>
       </header>
@@ -47,7 +46,7 @@ export async function CasesShowcaseSection({
       <div className="cases-showcase-grid">
         {projects.map((project) => {
           const dateLabel = project.publishedAt
-            ? new Intl.DateTimeFormat(uk ? "uk-UA" : "en-US", {
+            ? new Intl.DateTimeFormat(copy.copy4, {
                 month: "long",
                 year: "numeric",
               })
@@ -81,7 +80,7 @@ export async function CasesShowcaseSection({
                 <dl>
                   {project.metrics.slice(0, 2).map((metric) => (
                     <div key={`${metric.value}-${metric.label}`}>
-                      <dt>{uk ? "Головна цифра" : "Key figure"}</dt>
+                      <dt>{copy.copy5}</dt>
                       <dd>
                         {metric.value} <small>{metric.label}</small>
                       </dd>

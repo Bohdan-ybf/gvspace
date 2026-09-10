@@ -1,37 +1,30 @@
 import Image from "next/image";
 import type { Locale } from "@/i18n";
 
+import { componentCopy } from "@/i18n/component-copy";
 export function SystemTransitionSection({ locale }: { locale: Locale }) {
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["system-transition-section"];
 
   return (
     <section className="services-method">
       <Image src="/images/services/system-background.webp" alt="" fill sizes="100vw" />
       <div className="container">
-        <span className="mono">{uk ? "НАШ ПІДХІД" : "OUR APPROACH"}</span>
-        <h2>{uk ? "Від Хаосу до Системи" : "From Chaos to System"}</h2>
+        <span className="mono">{copy.copy1}</span>
+        <h2>{copy.copy2}</h2>
 
         <div className="method-flow">
           <article>
-            <small className="mono">{uk ? "ХАОС (ТОЧКА А)" : "CHAOS (POINT A)"}</small>
-            <h3>{uk ? "Дії як лотерея" : "Actions as a lottery"}</h3>
-            <p>
-              {uk
-                ? "Втрачені бюджети, неузгоджені звіти, рішення на основі інтуїції."
-                : "Lost budgets, disconnected reports, decisions based on intuition."}
-            </p>
+            <small className="mono">{copy.copy3}</small>
+            <h3>{copy.copy4}</h3>
+            <p>{copy.copy5}</p>
           </article>
 
           <MethodArrow />
 
           <article>
-            <small className="mono">{uk ? "GVSPACE (ТОЧКА Б)" : "GVSPACE (POINT B)"}</small>
-            <h3>{uk ? "Простір для рішень" : "Space for decisions"}</h3>
-            <p>
-              {uk
-                ? "Прозорі дашборди, масштабування як свідомий крок, а не випадковість."
-                : "Transparent dashboards and deliberate scaling."}
-            </p>
+            <small className="mono">{copy.copy6}</small>
+            <h3>{copy.copy7}</h3>
+            <p>{copy.copy8}</p>
           </article>
         </div>
       </div>

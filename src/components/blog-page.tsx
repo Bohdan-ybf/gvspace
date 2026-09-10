@@ -5,52 +5,9 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import type { BlogPostSummary } from "./wordpress-posts";
 
+import { componentCopy } from "@/i18n/component-copy";
+import { blogText } from "@/i18n/page-copy";
 type Category = "strategy" | "marketing" | "development" | "content" | "case" | "analytics";
-
-const copy = {
-  uk: {
-    eyebrow: "INSIGHTS & CASES",
-    title: "Простір для тих, хто думає про ріст",
-    intro: "Статті, кейси та інсайти про системний маркетинг, IT і стратегію зростання.",
-    all: "Усі",
-    categories: {
-      strategy: "Стратегія",
-      marketing: "Маркетинг",
-      development: "IT-розробка",
-      content: "Контент & Продакшн",
-      case: "Кейс",
-      analytics: "Аналітика",
-    },
-    read: "Читати статтю",
-    more: "Завантажити ще",
-    stay: "ЗАЛИШАТИСЬ В КУРСІ",
-    newsletter: "Інсайти про ріст — раз на тиждень",
-    noSpam: "Без спаму. Тільки те, що допомагає ухвалювати рішення.",
-    email: "your@email.com",
-    subscribe: "Підписатись",
-  },
-  en: {
-    eyebrow: "INSIGHTS & CASES",
-    title: "A space for those who think about growth",
-    intro: "Articles, cases and insights about systematic marketing, IT and growth strategy.",
-    all: "All",
-    categories: {
-      strategy: "Strategy",
-      marketing: "Marketing",
-      development: "IT development",
-      content: "Content & Production",
-      case: "Case",
-      analytics: "Analytics",
-    },
-    read: "Read article",
-    more: "Load more",
-    stay: "STAY UP TO DATE",
-    newsletter: "Growth insights — once a week",
-    noSpam: "No spam. Only ideas that help you make decisions.",
-    email: "your@email.com",
-    subscribe: "Subscribe",
-  },
-} as const;
 
 export const fallbackArticles = [
   {
@@ -126,7 +83,8 @@ function categoryKey(value: string): Category {
 }
 
 export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogPostSummary[] }) {
-  const text = copy[locale];
+  const copy = componentCopy[locale]["blog-page"];
+  const text = blogText[locale];
   const articles = posts.map((post, index) => ({
     category: categoryKey(post.category),
     date: post.publishedAt,
@@ -159,10 +117,7 @@ export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogP
         </div>
       </section>
 
-      <nav
-        className="blog-filters"
-        aria-label={locale === "uk" ? "Категорії блогу" : "Blog categories"}
-      >
+      <nav className="blog-filters" aria-label={copy.copy1}>
         {(["all", ...availableCategories] as const).map((category) => (
           <button
             key={category}
@@ -225,13 +180,7 @@ export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogP
             </article>
           ))}
         </div>
-        {!featured && (
-          <p className="blog-empty">
-            {locale === "uk"
-              ? "Статей ще немає. Опублікуйте перший запис у WordPress."
-              : "There are no articles yet. Publish the first post in WordPress."}
-          </p>
-        )}
+        {!featured && <p className="blog-empty">{copy.copy2}</p>}
         {featured && (
           <button className="btn blog-load-more" type="button">
             {text.more} ↓

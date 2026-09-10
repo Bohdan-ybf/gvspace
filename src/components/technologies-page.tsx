@@ -6,15 +6,14 @@ import { ContactSection } from "./contact-section";
 import { TechnologiesCatalog } from "./technologies-catalog";
 import { TechnologiesOverviewSection } from "./technologies-overview-section";
 
+import { componentCopy } from "@/i18n/component-copy";
 export function TechnologiesPage({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["technologies-page"];
   const contactText = {
     ...text.contact,
-    eyebrow: uk
-      ? "ХОЧЕТЕ ЗРОЗУМІТИ, ЯКІ ІНСТРУМЕНТИ ПОТРІБНІ ВАШОМУ БІЗНЕСУ?"
-      : "WANT TO UNDERSTAND WHICH TOOLS YOUR BUSINESS NEEDS?",
-    title: uk ? "Розберемо це" : "Let’s figure it out",
+    eyebrow: copy.copy1,
+    title: copy.copy2,
     titleSecond: "на Clarity Session",
   };
 
@@ -24,16 +23,10 @@ export function TechnologiesPage({ locale }: { locale: Locale }) {
         <Image src="/images/technologies/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container technologies-hero-content">
           <span className="mono">TECHNOLOGIES</span>
-          <h1>
-            {uk ? "Правильний інструмент для кожної задачі" : "The right tool for every task"}
-          </h1>
-          <p>
-            {uk
-              ? "Ми не використовуємо один стек для всього. Кожен інструмент у нашому арсеналі вирішує конкретну задачу — і тільки її."
-              : "We do not use one stack for everything. Every tool in our arsenal solves a specific task — and only that task."}
-          </p>
+          <h1>{copy.copy3}</h1>
+          <p>{copy.copy4}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {uk ? "Обговорити ваш проєкт" : "Discuss your project"}
+            {copy.copy5}
             <ArrowRight />
           </Link>
         </div>

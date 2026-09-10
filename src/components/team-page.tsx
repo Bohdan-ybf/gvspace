@@ -7,9 +7,10 @@ import { ArrowRight } from "./icons/arrow-right";
 import { TeamDirectorySection } from "./team-directory-section";
 import { TeamFounderSection } from "./team-founder-section";
 
+import { componentCopy } from "@/i18n/component-copy";
 export function TeamPage({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["team-page"];
 
   return (
     <main className="team-page">
@@ -17,14 +18,8 @@ export function TeamPage({ locale }: { locale: Locale }) {
         <Image src="/images/team/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container team-hero-content">
           <span className="mono">TEAM</span>
-          <h1>
-            {uk ? "Люди, які будують системи зростання" : "The people who build growth systems"}
-          </h1>
-          <p>
-            {uk
-              ? "Ми — команда стратегів, інженерів і маркетологів, яка об’єднує дисципліни навколо одного результату: керованого росту вашого бізнесу."
-              : "We are strategists, engineers, and marketers united around one result: manageable business growth."}
-          </p>
+          <h1>{copy.copy1}</h1>
+          <p>{copy.copy2}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
             {text.common.buildSystem}
             <ArrowRight />

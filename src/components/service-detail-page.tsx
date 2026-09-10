@@ -10,35 +10,30 @@ import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ReviewsSection } from "./reviews-section";
 import { ContactSection } from "./contact-section";
 
+import { componentCopy } from "@/i18n/component-copy";
 export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slugs: string[] }) {
   const result = await getServiceOffering(locale, slugs);
   if (!result) notFound();
   const { item, children } = result;
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["service-detail-page"];
   const isDirection = slugs.length === 1;
   const steps = item.steps.length
     ? item.steps
     : [
         {
           title: "Clarity Session",
-          duration: uk ? "безкоштовно · 30 хв" : "free · 30 min",
-          description: uk
-            ? "Розбираємо вашу поточну ситуацію та визначаємо точки росту."
-            : "We assess the current situation and identify growth points.",
+          duration: copy.copy1,
+          description: copy.copy2,
         },
         {
-          title: uk ? "Архітектура системи" : "System architecture",
+          title: copy.copy3,
           duration: "14 days",
-          description: uk
-            ? "Створюємо план, аналітику та потрібні інструменти."
-            : "We create the plan, analytics and required tools.",
+          description: copy.copy4,
         },
         {
-          title: uk ? "Запуск та оптимізація" : "Launch and optimization",
-          duration: uk ? "від 30 днів" : "from 30 days",
-          description: uk
-            ? "Запускаємо, вимірюємо й покращуємо результат."
-            : "We launch, measure and improve the result.",
+          title: copy.copy5,
+          duration: copy.copy6,
+          description: copy.copy7,
         },
       ];
   const dictionary = getDictionary(locale);
@@ -63,7 +58,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             <h1>{item.headline}</h1>
             <p>{item.description}</p>
             <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-              {uk ? "Обговорити ваш проєкт" : "Discuss your project"}
+              {copy.copy8}
               <ArrowRight />
             </Link>
           </div>
@@ -72,7 +67,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
 
       {(children.length > 0 || item.includes.length > 0) && (
         <section className="section container service-includes">
-          <span className="mono">{uk ? "ЩО ВХОДИТЬ У НАПРЯМОК" : "WHAT IS INCLUDED"}</span>
+          <span className="mono">{copy.copy9}</span>
           <div>
             {(children.length
               ? children.map((child) => ({
@@ -98,16 +93,8 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
 
       <section className={`section service-steps${isDirection ? " container" : " is-process"}`}>
         <div className={isDirection ? "" : "container"}>
-          <span className="mono">{uk ? "НАШ ПІДХІД" : "OUR APPROACH"}</span>
-          <h2>
-            {isDirection
-              ? uk
-                ? "Три кроки до керованого зростання"
-                : "Three steps to managed growth"
-              : uk
-                ? "Від запиту до результату"
-                : "From request to result"}
-          </h2>
+          <span className="mono">{copy.copy10}</span>
+          <h2>{isDirection ? copy.copy11 : copy.copy12}</h2>
           <div>
             {steps.map((step, index) => (
               <article key={`${step.title}-${index}`}>
@@ -125,7 +112,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
       {isDirection && <SystemTransitionSection locale={locale} />}
       {!isDirection && item.metrics.length > 0 && (
         <section className="section container service-results">
-          <span className="mono">{uk ? "РЕЗУЛЬТАТ КЛІЄНТА" : "CLIENT RESULT"}</span>
+          <span className="mono">{copy.copy13}</span>
           <div>
             {item.metrics.map((metric) => (
               <b key={metric}>{metric}</b>
@@ -134,16 +121,13 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         </section>
       )}
       <TechnologyShowcaseSection locale={locale} />
-      <CasesShowcaseSection
-        locale={locale}
-        eyebrow={uk ? "КЕЙСИ ПО НАПРЯМКУ" : "CASES IN THIS DIRECTION"}
-      />
+      <CasesShowcaseSection locale={locale} eyebrow={copy.copy14} />
       <ReviewsSection locale={locale} />
       {item.faq.length > 0 && (
         <section className="section container service-faq">
           <div>
-            <h2>{uk ? "Часті запитання" : "Frequently asked questions"}</h2>
-            <p>{uk ? "та відповіді до них" : "and answers"}</p>
+            <h2>{copy.copy15}</h2>
+            <p>{copy.copy16}</p>
           </div>
           <div>
             {item.faq.map((faq) => (

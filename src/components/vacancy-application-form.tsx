@@ -1,38 +1,29 @@
 import type { Locale } from "@/i18n";
 
+import { componentCopy } from "@/i18n/component-copy";
 export function VacancyApplicationForm({ locale }: { locale: Locale }) {
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["vacancy-application-form"];
 
   return (
     <form className="vacancy-application-form">
-      <span className="mono">{uk ? "ВІДГУКНУТИСЬ" : "APPLY"}</span>
-      <h2>{uk ? "Залишити заявку" : "Submit your application"}</h2>
+      <span className="mono">{copy.copy1}</span>
+      <h2>{copy.copy2}</h2>
       <div>
-        <input aria-label={uk ? "Ім’я" : "Name"} placeholder={uk ? "Ім’я" : "Name"} required />
-        <input aria-label={uk ? "Телефон" : "Phone"} placeholder="+38 0__" inputMode="tel" />
+        <input aria-label={copy.copy3} placeholder={copy.copy4} required />
+        <input aria-label={copy.copy5} placeholder="+38 0__" inputMode="tel" />
       </div>
       <input aria-label="Email" placeholder="Email" type="email" required />
       <input aria-label="Telegram" placeholder="Telegram" />
       <input aria-label="LinkedIn or portfolio" placeholder="LinkedIn або портфоліо" />
-      <textarea
-        aria-label={uk ? "Про себе" : "About you"}
-        placeholder={
-          uk ? "Розкажіть про себе і свій підхід" : "Tell us about yourself and your approach"
-        }
-        required
-      />
+      <textarea aria-label={copy.copy6} placeholder={copy.copy7} required />
       <label className="resume-upload mono">
         <input type="file" accept=".pdf" />
-        {uk ? "Прикріпити резюме (PDF, до 5 МБ)" : "Attach your CV (PDF, up to 5 MB)"}
+        {copy.copy8}
       </label>
       <button className="btn btn-primary" type="submit">
-        {uk ? "Відправити заявку" : "Send application"}
+        {copy.copy9}
       </button>
-      <p className="mono">
-        {uk
-          ? "Натискаючи кнопку, ви погоджуєтесь з обробкою персональних даних"
-          : "By clicking the button, you consent to the processing of personal data"}
-      </p>
+      <p className="mono">{copy.copy10}</p>
     </form>
   );
 }

@@ -7,14 +7,15 @@ import { ContactSection } from "./contact-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getCaseStudies } from "./wordpress-cases";
 
+import { componentCopy } from "@/i18n/component-copy";
 export async function CasesPage({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
   const projects = await getCaseStudies(locale);
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["cases-page"];
   const contactText = {
     ...text.contact,
-    title: uk ? "Ваш бізнес може бути" : "Your business could be",
-    titleSecond: uk ? "наступним у цьому списку" : "the next one on this list",
+    title: copy.copy1,
+    titleSecond: copy.copy2,
   };
 
   return (
@@ -23,28 +24,10 @@ export async function CasesPage({ locale }: { locale: Locale }) {
         <Image src="/images/cases/cases.webp" alt="" fill priority sizes="100vw" />
         <div className="container cases-hero-content">
           <span className="mono">CASES</span>
-          <h1>
-            {uk ? (
-              <>
-                Від цифрового хаосу
-                <br />
-                до вимірюваних результатів
-              </>
-            ) : (
-              <>
-                From digital chaos
-                <br />
-                to measurable results
-              </>
-            )}
-          </h1>
-          <p>
-            {uk
-              ? "Кожен проєкт для нас — це не просто набір послуг, а історія перетворення бізнесу на стабільну систему."
-              : "Every project is more than a set of services. It is the story of turning a business into a stable system."}
-          </p>
+          <h1>{copy.copy3}</h1>
+          <p>{copy.copy4}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {uk ? "Обговорити ваш проєкт" : "Discuss your project"}
+            {copy.copy5}
             <ArrowRight />
           </Link>
         </div>

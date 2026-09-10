@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import type { Locale } from "@/i18n";
 
+import { componentCopy } from "@/i18n/component-copy";
 const categories = [
   { uk: "Маркетинг & Аналітика", en: "Marketing & Analytics" },
   { uk: "Frontend & Web", en: "Frontend & Web" },
@@ -65,11 +66,12 @@ const tools = [
 ];
 
 export function TechnologiesCatalog({ locale }: { locale: Locale }) {
+  const copy = componentCopy[locale]["technologies-catalog"];
   const [activeCategory, setActiveCategory] = useState(0);
 
   return (
     <section className="technologies-catalog section container">
-      <nav aria-label={locale === "uk" ? "Категорії технологій" : "Technology categories"}>
+      <nav aria-label={copy.copy1}>
         {categories.map((category, index) => (
           <button
             className={activeCategory === index ? "is-active" : undefined}

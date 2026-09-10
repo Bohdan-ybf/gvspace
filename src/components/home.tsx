@@ -11,6 +11,7 @@ import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
 import { ReviewsSection } from "./reviews-section";
 import { getServiceOfferings } from "./wordpress-services";
 
+import { componentCopy } from "@/i18n/component-copy";
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
 const approachIcons = ["clarity", "system", "scale"] as const;
 
@@ -174,6 +175,7 @@ function Blog({
   locale: Locale;
   posts: BlogPostSummary[];
 }) {
+  const copy = componentCopy[locale]["home"];
   if (!posts.length) return null;
 
   return (
@@ -181,7 +183,7 @@ function Blog({
       <header className="home-blog-header">
         <h2>{text.blog.title}</h2>
         <Link className="btn btn-primary home-blog-more" href={`/${locale}/blog`}>
-          {locale === "uk" ? "Читати більше" : "Read more"}
+          {copy.copy1}
           <ArrowRight />
         </Link>
       </header>
@@ -207,11 +209,11 @@ function Blog({
                 <span>{post.publishedAt}</span>
                 <span aria-hidden="true">·</span>
                 <span>
-                  {post.readingTime} {locale === "uk" ? "хв читати" : "min read"}
+                  {post.readingTime} {copy.copy2}
                 </span>
                 {index === 0 && (
                   <span className="home-blog-author">
-                    {locale === "uk" ? "Автор" : "Author"}: {post.authorName}
+                    {copy.copy3}: {post.authorName}
                   </span>
                 )}
               </div>
@@ -221,7 +223,7 @@ function Blog({
               <p>{post.excerpt}</p>
               {index !== 0 && (
                 <small className="home-blog-card-author mono">
-                  {locale === "uk" ? "Автор" : "Author"}: {post.authorName}
+                  {copy.copy4}: {post.authorName}
                 </small>
               )}
             </div>

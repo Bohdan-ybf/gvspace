@@ -7,13 +7,14 @@ import { ChevronDown } from "./icons/chevron-down";
 import Link from "next/link";
 import type { CaseStudy } from "./wordpress-cases";
 
+import { componentCopy } from "@/i18n/component-copy";
 type CasesCatalogProps = {
   locale: Locale;
   projects: CaseStudy[];
 };
 
 export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["cases-catalog"];
   const [type, setType] = useState("all");
   const [industry, setIndustry] = useState("all");
   const [visibleCount, setVisibleCount] = useState(4);
@@ -39,26 +40,26 @@ export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
     <section className="cases-catalog section container">
       <div className="cases-filters">
         <label>
-          <span className="sr-only">{uk ? "Тип проєкту" : "Project type"}</span>
+          <span className="sr-only">{copy.copy1}</span>
           <select value={type} onChange={(event) => changeFilter(setType, event.target.value)}>
-            <option value="all">{uk ? "Усі проєкти" : "All projects"}</option>
+            <option value="all">{copy.copy2}</option>
             <option value="ecommerce">E-commerce</option>
-            <option value="strategy">{uk ? "Стратегія" : "Strategy"}</option>
-            <option value="development">{uk ? "Розробка" : "Development"}</option>
-            <option value="marketing">{uk ? "Маркетинг" : "Marketing"}</option>
+            <option value="strategy">{copy.copy3}</option>
+            <option value="development">{copy.copy4}</option>
+            <option value="marketing">{copy.copy5}</option>
           </select>
           <ChevronDown />
         </label>
 
         <label>
-          <span className="sr-only">{uk ? "Індустрія" : "Industry"}</span>
+          <span className="sr-only">{copy.copy6}</span>
           <select
             value={industry}
             onChange={(event) => changeFilter(setIndustry, event.target.value)}
           >
-            <option value="all">{uk ? "Усі індустрії" : "All industries"}</option>
+            <option value="all">{copy.copy7}</option>
             <option value="retail">Retail</option>
-            <option value="services">{uk ? "Послуги" : "Services"}</option>
+            <option value="services">{copy.copy8}</option>
             <option value="technology">Technology</option>
           </select>
           <ChevronDown />
@@ -85,7 +86,7 @@ export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
           type="button"
           onClick={() => setVisibleCount((count) => count + 2)}
         >
-          {uk ? "Більше" : "More"}
+          {copy.copy9}
           <ChevronDown />
         </button>
       )}

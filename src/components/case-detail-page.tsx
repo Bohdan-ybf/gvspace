@@ -4,14 +4,15 @@ import { ContactSection } from "./contact-section";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { getCaseStudy } from "./wordpress-cases";
 
+import { componentCopy } from "@/i18n/component-copy";
 export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
   const data = await getCaseStudy(slug, locale);
   if (!data) notFound();
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["case-detail-page"];
   const contact = {
     ...getDictionary(locale).contact,
-    title: uk ? "Ваш бізнес може бути" : "Your business could be",
-    titleSecond: uk ? "наступним у цьому списку" : "the next one on this list",
+    title: copy.copy1,
+    titleSecond: copy.copy2,
   };
   return (
     <main className="case-detail-page">
@@ -43,11 +44,11 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         <div className="case-two-columns">
           <div>
             <span className="mono">БРИФ</span>
-            <h2>{uk ? "З чим прийшов клієнт?" : "What did the client come with?"}</h2>
+            <h2>{copy.copy3}</h2>
             <p>{data.challenge}</p>
           </div>
           <div>
-            <h3>{uk ? "Список проблем" : "List of problems"}</h3>
+            <h3>{copy.copy4}</h3>
             <ul>
               {data.problems.map((problem) => (
                 <li key={problem}>— {problem}</li>
@@ -58,18 +59,16 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         <div className="case-two-columns case-discovery">
           <div>
             <span className="mono">ПРОЦЕС</span>
-            <h2>{uk ? "Крок 1: Пошук ясності" : "Step 1: Finding clarity"}</h2>
+            <h2>{copy.copy5}</h2>
             <p>{data.discovery}</p>
           </div>
           <div>
-            <h3>{uk ? "Результат етапу:" : "Stage result:"}</h3>
+            <h3>{copy.copy6}</h3>
             <p>{data.discoveryResult}</p>
           </div>
         </div>
         <div className="case-architecture">
-          <h2>
-            {uk ? "Крок 2: Побудова архітектури зростання" : "Step 2: Building growth architecture"}
-          </h2>
+          <h2>{copy.copy7}</h2>
           <div>
             {data.architecture.map((vector) => (
               <article key={vector.title}>
@@ -131,7 +130,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
       <section className="case-testimonial">
         <div className="container">
           <span className="mono">ВІДГУК</span>
-          <h2>{uk ? "Життя після впровадження системи" : "Life after system implementation"}</h2>
+          <h2>{copy.copy8}</h2>
           <blockquote>
             {data.testimonial}
             <b>{data.testimonialAuthor}</b>
@@ -142,8 +141,8 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         locale={locale}
         excludeSlug={data.slug}
         allowExcludedFallback
-        eyebrow={uk ? "ПОДІБНІ ПРОЄКТИ" : "SIMILAR PROJECTS"}
-        title={uk ? "Схожі кейси" : "Similar cases"}
+        eyebrow={copy.copy9}
+        title={copy.copy10}
       />
       <ContactSection text={contact} />
     </main>

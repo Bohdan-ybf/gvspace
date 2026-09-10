@@ -8,9 +8,10 @@ import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
 import { SystemTransitionSection } from "./system-transition-section";
 
+import { componentCopy } from "@/i18n/component-copy";
 export function AboutPage({ locale }: { locale: Locale }) {
   const text = getDictionary(locale);
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["about-page"];
 
   return (
     <main className="about-page">
@@ -21,13 +22,9 @@ export function AboutPage({ locale }: { locale: Locale }) {
           <h1>
             GVSPACE
             <br />
-            {uk ? "Будуємо ваші цифрові екосистеми" : "We build your digital ecosystems"}
+            {copy.copy1}
           </h1>
-          <p>
-            {uk
-              ? "Ми — ваш стратегічний партнер, який перетворює хаос маркетингу на прогнозовану систему зростання."
-              : "We are your strategic partner, turning marketing chaos into a predictable growth system."}
-          </p>
+          <p>{copy.copy2}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
             {text.common.buildSystem}
             <ArrowRight />

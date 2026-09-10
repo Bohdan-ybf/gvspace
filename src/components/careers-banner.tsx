@@ -3,8 +3,9 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 
+import { componentCopy } from "@/i18n/component-copy";
 export function CareersBanner({ locale }: { locale: Locale }) {
-  const uk = locale === "uk";
+  const copy = componentCopy[locale]["careers-banner"];
   return (
     <section className="careers-banner container">
       <Image
@@ -14,17 +15,11 @@ export function CareersBanner({ locale }: { locale: Locale }) {
         sizes="(max-width: 1320px) 100vw, 1280px"
       />
       <div>
-        <h2>
-          {uk ? "Шукаємо людей, які мислять системно" : "We are looking for systematic thinkers"}
-        </h2>
-        <p>
-          {uk
-            ? "Якщо ви фахівець у своїй зоні і хочете працювати в середовищі, де результат важливіший за процес — напишіть нам."
-            : "If you are an expert who wants to work where results matter more than process, get in touch."}
-        </p>
+        <h2>{copy.copy1}</h2>
+        <p>{copy.copy2}</p>
       </div>
       <Link className="btn btn-primary" href={`/${locale}/careers`}>
-        {uk ? "Переглянути вакансії" : "View vacancies"}
+        {copy.copy3}
         <ArrowRight />
       </Link>
     </section>

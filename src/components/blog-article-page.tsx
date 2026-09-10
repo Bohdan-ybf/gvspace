@@ -5,6 +5,7 @@ import { getDictionary } from "@/i18n";
 import { ContactSection } from "./contact-section";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
 
+import { componentCopy } from "@/i18n/component-copy";
 function prepareArticleContent(content: string) {
   const headings: Array<{ id: string; label: string }> = [];
   const html = content.replace(
@@ -24,28 +25,14 @@ function prepareArticleContent(content: string) {
 }
 
 export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: string }) {
+  const copy = componentCopy[locale]["blog-article-page"];
   const post = await getBlogPost(slug, locale);
   if (!post) notFound();
   const { html, headings } = prepareArticleContent(post.content);
   const related = (await getBlogPosts(locale))
     .filter((item) => item.slug !== post.slug)
     .slice(0, 3);
-  const text =
-    locale === "uk"
-      ? {
-          contents: "ЗМІСТ",
-          read: "хв читати",
-          share: "Поділитись",
-          author: "На сторінку автора",
-          related: "ЧИТАЙТЕ ТАКОЖ",
-        }
-      : {
-          contents: "CONTENTS",
-          read: "min read",
-          share: "Share",
-          author: "Author page",
-          related: "READ ALSO",
-        };
+  const text = copy.copy1;
 
   return (
     <main className="article-page">
@@ -132,9 +119,7 @@ export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: 
                   {item.publishedAt} · {item.readingTime} хв
                 </small>
                 <h3>{item.title}</h3>
-                <Link href={`/${locale}/blog/${item.slug}`}>
-                  {locale === "uk" ? "Читати" : "Read"} →
-                </Link>
+                <Link href={`/${locale}/blog/${item.slug}`}>{copy.copy2} →</Link>
               </article>
             ))}
           </div>

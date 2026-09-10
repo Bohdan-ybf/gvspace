@@ -4,15 +4,17 @@ import { ArrowRight } from "./icons/arrow-right";
 import { ReviewCard } from "./review-card";
 import { getClientReviews } from "./wordpress-reviews";
 
+import { componentCopy } from "@/i18n/component-copy";
 export async function ReviewsSection({ locale }: { locale: Locale }) {
+  const copy = componentCopy[locale]["reviews-section"];
   const reviews = (await getClientReviews(locale)).slice(0, 3);
   if (!reviews.length) return null;
   return (
     <section className="section container home-reviews-section">
       <header>
-        <h2>{locale === "uk" ? "Відгуки" : "Reviews"}</h2>
+        <h2>{copy.copy1}</h2>
         <Link className="btn btn-primary" href={`/${locale}/reviews`}>
-          {locale === "uk" ? "Усі відгуки" : "All reviews"}
+          {copy.copy2}
           <ArrowRight />
         </Link>
       </header>
@@ -23,7 +25,7 @@ export async function ReviewsSection({ locale }: { locale: Locale }) {
             key={review.slug}
             review={review}
             readMoreHref={`/${locale}/reviews`}
-            readMoreLabel={locale === "uk" ? "Читати повністю" : "Read in full"}
+            readMoreLabel={copy.copy3}
           />
         ))}
       </div>
