@@ -58,9 +58,7 @@ export function getLocaleOrigin(locale: Locale): string {
 
 export function getLocalizedUrl(locale: Locale, pathname = ""): string {
   const localePattern = /^\/(uk|en)(?=\/|$)/;
-  const localizedPath = localePattern.test(pathname)
-    ? pathname.replace(localePattern, `/${locale}`)
-    : `/${locale}${pathname === "/" ? "" : pathname}`;
+  const localizedPath = pathname.replace(localePattern, "") || "/";
 
   return `${getLocaleOrigin(locale)}${localizedPath}`;
 }

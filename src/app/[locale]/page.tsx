@@ -27,7 +27,7 @@ export async function generateMetadata({
   const { locale: localeParam } = await params;
   const locale = isLocale(localeParam) ? localeParam : defaultLocale;
   const pageMetadata = localizedMetadata[locale];
-  const canonicalUrl = `${getLocaleOrigin(locale)}/${locale}`;
+  const canonicalUrl = getLocaleOrigin(locale);
 
   return {
     title: pageMetadata.title,
@@ -35,10 +35,8 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalUrl,
       languages: {
-        ...Object.fromEntries(
-          locales.map((language) => [language, `${getLocaleOrigin(language)}/${language}`]),
-        ),
-        "x-default": `${getLocaleOrigin("en")}/en`,
+        ...Object.fromEntries(locales.map((language) => [language, getLocaleOrigin(language)])),
+        "x-default": getLocaleOrigin("en"),
       },
     },
     openGraph: {
@@ -60,7 +58,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "GVSPACE",
-    url: `${siteUrl}/${locale}`,
+    url: siteUrl,
     logo: `${siteUrl}/icon.svg`,
   };
 

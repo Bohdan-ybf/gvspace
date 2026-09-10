@@ -10,19 +10,18 @@ export function proxy(request: NextRequest) {
 
   const requestedLocale = request.nextUrl.pathname.split("/")[1];
 
-  if (isLocale(requestedLocale) && requestedLocale !== market.locale) {
+  if (isLocale(requestedLocale)) {
+    const cleanPathname = request.nextUrl.pathname.replace(/^\/(uk|en)(?=\/|$)/, "") || "/";
     const target = new URL(
-      request.nextUrl.pathname + request.nextUrl.search,
+      cleanPathname + request.nextUrl.search,
       getLocaleOrigin(requestedLocale),
     );
     return NextResponse.redirect(target, 307);
   }
 
-  if (request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL(`/${market.locale}`, market.origin), 307);
-  }
-
-  return NextResponse.next();
+  const internalUrl = request.nextUrl.clone();
+  internalUrl.pathname = `/${market.locale}${request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname}`;
+  return NextResponse.rewrite(internalUrl);
 }
 
 export const config = {
