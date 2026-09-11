@@ -43,7 +43,7 @@ Copy `.env.example` to `.env.local`. Never commit `.env.local` or production sec
 
 ## Markets and domains
 
-`src/markets.ts` is the single registry for country domains, content locales, frontend readiness and fallbacks. `gvspace.com` and `gvspace.com.ua` are currently enabled. Reserved country domains are configured but disabled: requests to them are redirected to `gvspace.com`, while `gvspace.ua` falls back to `gvspace.com.ua`.
+`src/markets.ts` is the single registry for country domains, content locales, frontend readiness and fallbacks. `gvspace.com` and `gvspace.ua` are currently enabled. Reserved country domains are configured but disabled and fall back to `gvspace.com`; the legacy `gvspace.com.ua` domain redirects permanently to `gvspace.ua`.
 
 Do not enable a market until all of the following are ready:
 

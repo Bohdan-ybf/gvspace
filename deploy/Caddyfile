@@ -10,6 +10,10 @@ www.{$UK_SITE_DOMAIN} {
 	redir https://{$UK_SITE_DOMAIN}{uri} permanent
 }
 
+{$LEGACY_UK_SITE_DOMAIN}, www.{$LEGACY_UK_SITE_DOMAIN} {
+	redir https://{$UK_SITE_DOMAIN}{uri} permanent
+}
+
 {$SITE_DOMAIN}, {$UK_SITE_DOMAIN} {
 	import /etc/caddy/auth.caddy
 	encode zstd gzip

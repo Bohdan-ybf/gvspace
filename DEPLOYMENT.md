@@ -4,7 +4,7 @@ The production stack contains Caddy (HTTPS/reverse proxy), Next.js, WordPress an
 
 ## 1. DNS
 
-At the DNS provider, create these records for `gvspace.com` and the active Ukrainian domain, then wait for them to resolve. Use `gvspace.com.ua` until `gvspace.ua` registration is complete.
+At the DNS provider, create these records for `gvspace.com`, `gvspace.ua` and the legacy `gvspace.com.ua` domain, then wait for them to resolve. The legacy domain remains pointed at the server so HTTPS requests can be redirected to `gvspace.ua`.
 
 | Type | Name  | Value            |
 | ---- | ----- | ---------------- |
@@ -46,7 +46,7 @@ cp .env.production.example .env.production
 chmod 600 .env.production
 ```
 
-Edit `.env.production`. Set `SITE_DOMAIN=gvspace.com` and, for the temporary Ukrainian launch, `UK_SITE_DOMAIN=gvspace.com.ua`. After `gvspace.ua` is registered and its DNS is ready, change only `UK_SITE_DOMAIN` to `gvspace.ua` and redirect `gvspace.com.ua` to it. Use two different long random database passwords. Confirm the real domains and email. Keep `SITE_INDEXING_ENABLED=false` throughout development and migration; enable it only after the final content, redirect and SEO review.
+Edit `.env.production`. Set `SITE_DOMAIN=gvspace.com`, `UK_SITE_DOMAIN=gvspace.ua`, and `LEGACY_UK_SITE_DOMAIN=gvspace.com.ua`. Keep both Ukrainian domains pointed at the server: Caddy serves `gvspace.ua` and permanently redirects `gvspace.com.ua` (including each path and query string) to it. Use two different long random database passwords. Confirm the real domains and email. Keep `SITE_INDEXING_ENABLED=false` throughout development and migration; enable it only after the final content, redirect and SEO review.
 
 For a non-public preview, create `deploy/auth.caddy` from `deploy/auth.caddy.example` and replace the placeholder with a hash produced by `caddy hash-password`. The real file is ignored by Git. Remove the `import /etc/caddy/auth.caddy` line and its Compose mount when public HTTP authentication is no longer required.
 

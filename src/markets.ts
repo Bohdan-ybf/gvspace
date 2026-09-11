@@ -6,7 +6,7 @@ export type ContentLocale =
 export type MarketId =
   | "international"
   | "ukraine"
-  | "ukraine-short"
+  | "ukraine-legacy"
   | "poland"
   | "germany"
   | "austria"
@@ -35,13 +35,13 @@ const internationalOrigin = trimTrailingSlash(
     "https://gvspace.com",
 );
 const ukrainianOrigin = trimTrailingSlash(
-  process.env.NEXT_PUBLIC_UK_SITE_URL ?? "https://gvspace.com.ua",
+  process.env.NEXT_PUBLIC_UK_SITE_URL ?? "https://gvspace.ua",
 );
 
 const configuredMarkets = [
   market("international", internationalOrigin, "en", "en", true),
   market("ukraine", ukrainianOrigin, "uk", "uk", true),
-  market("ukraine-short", "https://gvspace.ua", "uk", null, false, "ukraine"),
+  market("ukraine-legacy", "https://gvspace.com.ua", "uk", null, false, "ukraine"),
   market("poland", "https://gvspace.pl", "pl", null, false, "international"),
   market("germany", "https://gvspace.de", "de-DE", null, false, "international"),
   market("austria", "https://gvspace.at", "de-AT", null, false, "international"),
