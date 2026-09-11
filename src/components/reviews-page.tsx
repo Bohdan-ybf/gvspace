@@ -5,6 +5,8 @@ import { ReviewsCatalog } from "./reviews-catalog";
 import { getClientReviews } from "./wordpress-reviews";
 
 import { getTranslations } from "@/i18n/pages";
+import { getLocalizedUrl } from "@/markets";
+import { ItemListStructuredData } from "./structured-data";
 export async function ReviewsPage({ locale }: { locale: Locale }) {
   const reviews = await getClientReviews(locale);
   const text = getTranslations("global", locale);
@@ -15,7 +17,15 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
   );
 
   return (
-    <main className="reviews-page">
+    <>
+      <ItemListStructuredData
+        name={locale === "uk" ? "Відгуки клієнтів GVSPACE" : "GVSPACE client reviews"}
+        items={reviews.map((review) => ({
+          name: review.name,
+          url: getLocalizedUrl(locale, `/reviews#${review.slug}`),
+        }))}
+      />
+      <main className="reviews-page">
       <section className="reviews-hero">
         <div className="container reviews-hero-content">
           <span className="mono">CLIENTS &amp; REVIEWS</span>
@@ -65,6 +75,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
           titleSecond: t.contactTitleSecond,
         }}
       />
-    </main>
+      </main>
+    </>
   );
 }

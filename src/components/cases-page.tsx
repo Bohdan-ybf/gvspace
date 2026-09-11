@@ -8,6 +8,8 @@ import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getCaseStudies } from "./wordpress-cases";
 
 import { getTranslations } from "@/i18n/pages";
+import { getLocalizedUrl } from "@/markets";
+import { ItemListStructuredData } from "./structured-data";
 export async function CasesPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const projects = await getCaseStudies(locale);
@@ -19,7 +21,15 @@ export async function CasesPage({ locale }: { locale: Locale }) {
   };
 
   return (
-    <main className="cases-page">
+    <>
+      <ItemListStructuredData
+        name={locale === "uk" ? "Кейси GVSPACE" : "GVSPACE case studies"}
+        items={projects.map((project) => ({
+          name: project.title,
+          url: getLocalizedUrl(locale, `/cases/${project.slug}`),
+        }))}
+      />
+      <main className="cases-page">
       <section className="cases-hero">
         <Image src="/images/cases/cases.webp" alt="" fill priority sizes="100vw" />
         <div className="container cases-hero-content">
@@ -36,6 +46,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
       <CasesCatalog locale={locale} projects={projects} />
       <TechnologyShowcaseSection locale={locale} />
       <ContactSection text={contactText} />
-    </main>
+      </main>
+    </>
   );
 }

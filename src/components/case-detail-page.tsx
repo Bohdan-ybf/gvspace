@@ -5,17 +5,37 @@ import { CasesShowcaseSection } from "./cases-showcase-section";
 import { getCaseStudy } from "./wordpress-cases";
 
 import { getTranslations } from "@/i18n/pages";
+import { getDynamicSeo } from "@/wordpress-seo";
+import { Breadcrumbs } from "./breadcrumbs";
+import { StructuredData } from "./structured-data";
 export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
   const data = await getCaseStudy(slug, locale);
   if (!data) notFound();
+  const seo = await getDynamicSeo("case", slug, locale);
   const t = getTranslations("cases", locale).detail;
   const contact = {
     ...getTranslations("global", locale).contact,
     title: t.contactTitle,
     titleSecond: t.contactTitleSecond,
   };
+  const caseSchema = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: seo?.h1 || data.title,
+    description: seo?.description || data.result,
+    image: seo?.openGraphImage || data.image,
+    datePublished: seo?.datePublished,
+    dateModified: seo?.dateModified,
+    author: { "@type": "Organization", name: "GVSPACE" },
+  };
   return (
-    <main className="case-detail-page">
+    <>
+      <StructuredData data={caseSchema} />
+      <Breadcrumbs
+        locale={locale}
+        items={[{ label: locale === "uk" ? "Кейси" : "Cases", pathname: "/cases" }, { label: seo?.h1 || data.title }]}
+      />
+      <main className="case-detail-page">
       <section className="case-detail-hero">
         <div className="container">
           <p className="mono">CASES / {data.title}</p>
@@ -26,7 +46,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                   <b key={item}>{item}</b>
                 ))}
               </span>
-              <h1>{data.title}</h1>
+              <h1>{seo?.h1 || data.title}</h1>
               <h2>{data.result}</h2>
             </div>
             <dl>
@@ -145,6 +165,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         title={t.relatedTitle}
       />
       <ContactSection text={contact} />
-    </main>
+      </main>
+    </>
   );
 }

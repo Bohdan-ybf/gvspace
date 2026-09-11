@@ -1,6 +1,14 @@
 import type { MetadataRoute } from "next";
-export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
+import { headers } from "next/headers";
+import { getMarket, getMarketById } from "@/markets";
+
+export const dynamic = "force-dynamic";
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const requestHeaders = await headers();
+  const requestedMarket = getMarket(requestHeaders.get("host") ?? "");
+  const market = requestedMarket?.enabled ? requestedMarket : getMarketById("international");
+  const siteUrl = market.origin;
   const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
 
   if (!indexingEnabled) {

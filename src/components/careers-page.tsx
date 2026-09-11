@@ -6,12 +6,22 @@ import { VacancyCard } from "./vacancy-card";
 import { getVacancies } from "./wordpress-vacancies";
 
 import { getTranslations } from "@/i18n/pages";
+import { getLocalizedUrl } from "@/markets";
+import { ItemListStructuredData } from "./structured-data";
 export async function CareersPage({ locale }: { locale: Locale }) {
   const t = getTranslations("careers", locale).page;
   const vacancies = await getVacancies(locale);
 
   return (
-    <main className="careers-page">
+    <>
+      <ItemListStructuredData
+        name={locale === "uk" ? "Кар’єра в GVSPACE" : "Careers at GVSPACE"}
+        items={vacancies.map((vacancy) => ({
+          name: vacancy.title,
+          url: getLocalizedUrl(locale, `/careers/${vacancy.slug}`),
+        }))}
+      />
+      <main className="careers-page">
       <section className="careers-hero">
         <Image src="/images/careers/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container careers-hero-content">
@@ -39,6 +49,7 @@ export async function CareersPage({ locale }: { locale: Locale }) {
 
       <CareersValuesSection locale={locale} />
       <OpenApplicationBanner locale={locale} />
-    </main>
+      </main>
+    </>
   );
 }

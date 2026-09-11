@@ -18,6 +18,7 @@ export type ServiceOffering = {
   steps: ServiceStep[];
   metrics: string[];
   faq: Array<{ question: string; answer: string }>;
+  modifiedAt?: string;
 };
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -71,6 +72,7 @@ type Node = {
   databaseId: number;
   slug: string;
   title: string;
+  modified?: string;
   menuOrder?: number;
   parent?: {
     node?: { slug?: string; gvspaceLocalization?: ContentLocalization | null };
@@ -114,7 +116,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails { headline description includes steps { title duration description } faq { question answer } titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
+        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails { headline description includes steps { title duration description } faq { question answer } titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
       }),
       next: { revalidate: 10 },
     });
@@ -150,6 +152,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
           steps: localized ? (d.steps ?? []) : ((en ? d.stepsEn : d.stepsUk) ?? []),
           metrics: d.metrics ?? [],
           faq: localized ? (d.faq ?? []) : ((en ? d.faqEn : d.faqUk) ?? []),
+          modifiedAt: node.modified,
         };
       });
   } catch {

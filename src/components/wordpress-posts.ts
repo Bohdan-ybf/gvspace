@@ -26,6 +26,7 @@ export type BlogPostSummary = {
   readingTime: number;
   authorName: string;
   image?: string;
+  modifiedAt?: string;
 };
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -64,6 +65,7 @@ type WordPressPost = {
   excerpt: string;
   content: string;
   date: string;
+  modified?: string;
   author?: {
     node?: {
       slug?: string;
@@ -92,7 +94,7 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Posts { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`,
+        query: `query Posts { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date modified gvspaceLocalization { locale translationGroup status } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`,
       }),
       next: { revalidate: 60 },
     });
@@ -117,6 +119,7 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
           ),
           authorName: post.author?.node?.name ?? "GVSPACE",
           image: post.featuredImage?.node?.sourceUrl,
+          modifiedAt: post.modified,
         })) ?? []
     );
   } catch {

@@ -11,6 +11,8 @@ import { getServiceOfferings } from "./wordpress-services";
 import { ReviewsSection } from "./reviews-section";
 
 import { getTranslations } from "@/i18n/pages";
+import { getLocalizedUrl } from "@/markets";
+import { ItemListStructuredData } from "./structured-data";
 export async function ServicesPage({ locale }: { locale: Locale }) {
   const t = getTranslations("services", locale).page;
   const serviceItems = await getServiceOfferings(locale);
@@ -39,7 +41,20 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
       }));
   const text = getTranslations("global", locale);
   return (
-    <main className="services-page">
+    <>
+      <ItemListStructuredData
+        name={t.heroTitle}
+        items={serviceItems.map((service) => ({
+          name: service.title,
+          url: getLocalizedUrl(
+            locale,
+            service.parentSlug
+              ? `/services/${service.parentSlug}/${service.slug}`
+              : `/services/${service.slug}`,
+          ),
+        }))}
+      />
+      <main className="services-page">
       <section className="services-hero">
         <Image src="/images/services/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container services-hero-copy">
@@ -100,6 +115,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
       <CasesSection locale={locale} text={text.cases} />
       <ReviewsSection locale={locale} />
       <ContactSection text={text.contact} />
-    </main>
+      </main>
+    </>
   );
 }

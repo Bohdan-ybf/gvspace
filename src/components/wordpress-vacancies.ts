@@ -35,6 +35,7 @@ type VacancyDetails = {
 type VacancyNode = {
   slug: string;
   title: string;
+  modified?: string;
   vacancyDetails: VacancyDetails;
   gvspaceLocalization?: ContentLocalization | null;
 };
@@ -46,11 +47,13 @@ export type VacancySummary = {
   salary: string;
   hot: boolean;
   tags: string[];
+  modifiedAt?: string;
 };
 
 const vacancyFields = `
   slug
   title
+  modified
   gvspaceLocalization { locale translationGroup status }
   vacancyDetails {
     excerpt role tasks requirements benefits
@@ -141,6 +144,7 @@ export async function getVacancies(locale: Locale): Promise<VacancySummary[]> {
       salary: node.vacancyDetails.salary,
       hot: node.vacancyDetails.hot,
       tags: node.vacancyDetails.tags,
+      modifiedAt: node.modified,
     }));
   }
 

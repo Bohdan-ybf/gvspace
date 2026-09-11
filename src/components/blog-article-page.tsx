@@ -5,6 +5,9 @@ import { ContactSection } from "./contact-section";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
 
 import { getTranslations } from "@/i18n/pages";
+import { getDynamicSeo } from "@/wordpress-seo";
+import { Breadcrumbs } from "./breadcrumbs";
+import { StructuredData } from "./structured-data";
 function prepareArticleContent(content: string) {
   const headings: Array<{ id: string; label: string }> = [];
   const html = content.replace(
@@ -27,21 +30,39 @@ export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: 
   const t = getTranslations("blog", locale).article;
   const post = await getBlogPost(slug, locale);
   if (!post) notFound();
+  const seo = await getDynamicSeo("blog", slug, locale);
   const { html, headings } = prepareArticleContent(post.content);
   const related = (await getBlogPosts(locale))
     .filter((item) => item.slug !== post.slug)
     .slice(0, 3);
   const text = t.labels;
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: seo?.h1 || post.title,
+    description: seo?.description || post.excerpt,
+    datePublished: seo?.datePublished,
+    dateModified: seo?.dateModified,
+    image: seo?.openGraphImage,
+    author: { "@type": "Person", name: post.author.name },
+    publisher: { "@type": "Organization", name: "GVSPACE" },
+  };
 
   return (
-    <main className="article-page">
+    <>
+      <StructuredData data={articleSchema} />
+      <Breadcrumbs
+        locale={locale}
+        items={[{ label: locale === "uk" ? "Блог" : "Blog", pathname: "/blog" }, { label: seo?.h1 || post.title }]}
+      />
+      <main className="article-page">
       <header className="article-hero">
         <div className="container">
           <span className="mono">{post.category}</span>
           <small className="mono">
             {post.publishedAt} · {post.readingTime} {text.read}
           </small>
-          <h1>{post.title}</h1>
+          <h1>{seo?.h1 || post.title}</h1>
           <p>{post.excerpt}</p>
           <div className="article-author">
             <i
@@ -125,6 +146,7 @@ export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: 
         </section>
       )}
       <ContactSection text={getTranslations("global", locale).contact} />
-    </main>
+      </main>
+    </>
   );
 }

@@ -89,7 +89,12 @@ export function TechnologiesCatalog({ locale }: { locale: Locale }) {
         {tools.map(([slug, name, description, tag]) => (
           <article key={slug}>
             <div className="technology-logo">
-              <Image src={`/images/technologies/logos/${slug}.svg`} alt="" fill sizes="72px" />
+              <Image
+                src={`/images/technologies/logos/${slug}.svg`}
+                alt={`${name} logo`}
+                fill
+                sizes="72px"
+              />
             </div>
             <div>
               <h3>{name}</h3>

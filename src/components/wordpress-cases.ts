@@ -9,6 +9,7 @@ export type CaseStudy = {
   slug: string;
   title: string;
   publishedAt?: string;
+  modifiedAt?: string;
   result: string;
   services: string[];
   metrics: Array<{ value: string; label: string }>;
@@ -66,12 +67,13 @@ type CaseNode = {
   slug: string;
   title: string;
   date?: string;
+  modified?: string;
   featuredImage?: { node?: { sourceUrl?: string } };
   caseDetails?: Omit<CaseStudy, "slug" | "title" | "image">;
   gvspaceLocalization?: ContentLocalization | null;
 };
 
-const fields = `slug title date gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
+const fields = `slug title date modified gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
 
 function mapCase(node: CaseNode): CaseStudy | undefined {
   if (!node.caseDetails) return undefined;
@@ -79,6 +81,7 @@ function mapCase(node: CaseNode): CaseStudy | undefined {
     slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
     title: node.title,
     publishedAt: node.date,
+    modifiedAt: node.modified,
     image: node.featuredImage?.node?.sourceUrl,
     ...node.caseDetails,
   };

@@ -6538,3 +6538,25 @@ footer {
     margin-top: 12px;
   }
 }
+.seo-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding-block: 1rem;
+  font-size: 0.75rem;
+  color: #5f5f7a;
+}
+
+.seo-breadcrumbs > span {
+  display: inline-flex;
+  gap: 0.55rem;
+}
+
+.seo-breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.seo-breadcrumbs a:hover {
+  color: var(--accent, #5d00ff);
+}

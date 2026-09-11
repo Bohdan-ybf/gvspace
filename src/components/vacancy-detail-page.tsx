@@ -1,14 +1,17 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
 import { getVacancyBySlug } from "./wordpress-vacancies";
 import { VacancyApplicationForm } from "./vacancy-application-form";
 
 import { getTranslations } from "@/i18n/pages";
+import { getDynamicSeo } from "@/wordpress-seo";
+import { Breadcrumbs } from "./breadcrumbs";
+import { StructuredData } from "./structured-data";
 export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
   const vacancy = await getVacancyBySlug(slug, locale);
   if (!vacancy) notFound();
+  const seo = await getDynamicSeo("vacancy", slug, locale);
   const t = getTranslations("vacancies", locale).detail;
   const sectionTitles = {
     role: t.roleTitle,
@@ -19,17 +22,31 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
   };
 
   return (
-    <main className="vacancy-detail-page">
+    <>
+      <StructuredData
+        data={{
+          "@context": "https://schema.org",
+          "@type": "JobPosting",
+          title: seo?.h1 || vacancy.title[locale],
+          description: vacancy.role.map((item) => item[locale]).join("\n\n"),
+          hiringOrganization: {
+            "@type": "Organization",
+            name: "GVSPACE",
+            sameAs: "https://gvspace.com",
+          },
+          ...(seo?.datePublished ? { datePosted: seo.datePublished } : {}),
+        }}
+      />
+      <Breadcrumbs
+        locale={locale}
+        items={[{ label: t.careersLabel, pathname: "/careers" }, { label: seo?.h1 || vacancy.title[locale] }]}
+      />
+      <main className="vacancy-detail-page">
       <section className="vacancy-detail-hero">
         <Image src={vacancy.heroImage} alt="" fill priority sizes="100vw" />
         <div className="container vacancy-detail-hero-content">
-          <nav className="vacancy-breadcrumbs mono" aria-label={t.breadcrumbLabel}>
-            <Link href={`/${locale}/careers`}>{t.careersLabel}</Link>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">{vacancy.title[locale]}</span>
-          </nav>
           <div className="vacancy-title-row">
-            <h1>{vacancy.title[locale]}</h1>
+            <h1>{seo?.h1 || vacancy.title[locale]}</h1>
             {vacancy.hot && <span className="mono">{t.hotLabel}</span>}
           </div>
           <div className="vacancy-detail-tags mono">
@@ -74,7 +91,8 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
         </div>
         <VacancyApplicationForm locale={locale} />
       </div>
-    </main>
+      </main>
+    </>
   );
 }
 

@@ -6,6 +6,7 @@ import { getBlogAuthor } from "./wordpress-authors";
 import { getBlogPostsByAuthor } from "./wordpress-posts";
 
 import { getTranslations } from "@/i18n/pages";
+import { StructuredData } from "./structured-data";
 export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: string }) {
   const author = await getBlogAuthor(slug, locale);
   if (!author) notFound();
@@ -14,7 +15,22 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
   const featured = wordpressPosts[0];
 
   return (
-    <main className="author-page">
+    <>
+      <StructuredData
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          mainEntity: {
+            "@type": "Person",
+            name: author.name,
+            jobTitle: author.role,
+            description: author.bio,
+            image: author.photo,
+            worksFor: { "@type": "Organization", name: "GVSPACE" },
+          },
+        }}
+      />
+      <main className="author-page">
       <section className="container author-profile">
         <header>
           <h1>{author.name}</h1>
@@ -106,6 +122,7 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
         )}
       </section>
       <ContactSection text={getTranslations("global", locale).contact} />
-    </main>
+      </main>
+    </>
   );
 }

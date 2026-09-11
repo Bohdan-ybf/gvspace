@@ -11,10 +11,14 @@ import { ReviewsSection } from "./reviews-section";
 import { ContactSection } from "./contact-section";
 
 import { getTranslations } from "@/i18n/pages";
+import { getDynamicSeo } from "@/wordpress-seo";
+import { Breadcrumbs, type BreadcrumbItem } from "./breadcrumbs";
+import { StructuredData } from "./structured-data";
 export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slugs: string[] }) {
   const result = await getServiceOffering(locale, slugs);
   if (!result) notFound();
   const { item, children } = result;
+  const seo = await getDynamicSeo("service", item.slug, locale);
   const t = getTranslations("services", locale).detail;
   const isDirection = slugs.length === 1;
   const steps = item.steps.length
@@ -37,25 +41,55 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         },
       ];
   const dictionary = getTranslations("global", locale);
+  const serviceBreadcrumbs: BreadcrumbItem[] = [
+    { label: locale === "uk" ? "Послуги" : "Services", pathname: "/services" },
+    ...(item.parentSlug
+      ? [{ label: item.parentSlug, pathname: `/services/${item.parentSlug}` }]
+      : []),
+    { label: seo?.h1 || item.title },
+  ];
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: seo?.h1 || item.title,
+    description: seo?.description || item.description,
+    provider: { "@type": "Organization", name: "GVSPACE" },
+  };
+  const faqSchema = item.faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: item.faq.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: { "@type": "Answer", text: faq.answer },
+        })),
+      }
+    : undefined;
 
   return (
-    <main className="service-detail-page">
+    <>
+      <StructuredData data={faqSchema ? [serviceSchema, faqSchema] : serviceSchema} />
+      <Breadcrumbs locale={locale} items={serviceBreadcrumbs} />
+      <main className="service-detail-page">
       <section className={`service-detail-hero${isDirection ? " is-direction" : ""}`}>
-        <div className="container service-breadcrumb mono">
-          SERVICES / {slugs.map((slug) => slug.toUpperCase()).join(" / ")}
-        </div>
         <div className="container service-detail-hero-grid">
           {isDirection && (
             <div className="service-detail-icon">
               {item.image ? (
-                <Image src={item.image} alt="" fill sizes="220px" unoptimized />
+                <Image src={item.image} alt={item.title} fill sizes="220px" unoptimized />
               ) : (
-                <Image src={`/images/services/icons/${item.slug}.webp`} alt="" fill sizes="220px" />
+                <Image
+                  src={`/images/services/icons/${item.slug}.webp`}
+                  alt={item.title}
+                  fill
+                  sizes="220px"
+                />
               )}
             </div>
           )}
           <div>
-            <h1>{item.headline}</h1>
+            <h1>{seo?.h1 || item.headline}</h1>
             <p>{item.description}</p>
             <Link className="btn btn-primary" href={`/${locale}/contacts`}>
               {t.heroAction}
@@ -143,6 +177,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         </section>
       )}
       <ContactSection text={dictionary.contact} />
-    </main>
+      </main>
+    </>
   );
 }
