@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n";
 import {
   filterPublishedForLocale,
-  isContentPublishedForLocale,
+  getPublicContentSlug,
   type ContentLocalization,
 } from "@/content-localization";
 
@@ -76,7 +76,7 @@ const fields = `slug title date gvspaceLocalization { locale translationGroup st
 function mapCase(node: CaseNode): CaseStudy | undefined {
   if (!node.caseDetails) return undefined;
   return {
-    slug: node.slug,
+    slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
     title: node.title,
     publishedAt: node.date,
     image: node.featuredImage?.node?.sourceUrl,
@@ -108,22 +108,6 @@ export async function getCaseStudies(locale: Locale): Promise<CaseStudy[]> {
 }
 
 export async function getCaseStudy(slug: string, locale: Locale): Promise<CaseStudy | undefined> {
-  if (endpoint) {
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `query CaseStudy($slug: ID!) { projectCase(id: $slug, idType: SLUG) { ${fields} } }`,
-          variables: { slug },
-        }),
-        next: { revalidate: 60 },
-      });
-      const result = (await response.json()) as { data?: { projectCase?: CaseNode } };
-      const node = result.data?.projectCase;
-      if (node && isContentPublishedForLocale(node.gvspaceLocalization, locale))
-        return mapCase(node);
-    } catch {}
-  }
-  return undefined;
+  const cases = await getCaseStudies(locale);
+  return cases.find((item) => item.slug === slug);
 }

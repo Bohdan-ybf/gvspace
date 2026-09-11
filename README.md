@@ -41,6 +41,31 @@ npm run build
 
 Copy `.env.example` to `.env.local`. Never commit `.env.local` or production secrets.
 
+## Markets and domains
+
+`src/markets.ts` is the single registry for country domains, content locales, frontend readiness and fallbacks. `gvspace.com` and `gvspace.com.ua` are currently enabled. Reserved country domains are configured but disabled: requests to them are redirected to `gvspace.com`, while `gvspace.ua` falls back to `gvspace.com.ua`.
+
+Do not enable a market until all of the following are ready:
+
+1. Static dictionaries exist for its `routeLocale`.
+2. WordPress content for its `contentLocale` is reviewed and marked **Published**.
+3. DNS, TLS and the deployment proxy accept the domain.
+4. Canonical URLs, language alternates and the sitemap have been verified.
+
+Global indexing remains controlled by `SITE_INDEXING_ENABLED` and must stay `false` during development.
+
+### Adding a frontend locale
+
+Use this order when a country version is prepared:
+
+1. Add the locale to `src/i18n/index.ts`.
+2. Add its file to every directory in `src/i18n/pages/` and register each file in `src/i18n/pages/index.ts`.
+3. Set the market's `routeLocale` in `src/markets.ts`. Keep `enabled: false` while content is reviewed.
+4. Run `npm run check` and `npm run build`. The typed translation registry fails when any page dictionary is missing, and market validation rejects unavailable fallbacks or an enabled market without dictionaries.
+5. After DNS, TLS, WordPress content and SEO metadata are verified, change only that market's `enabled` value to `true`.
+
+This final `enabled` switch is the release gate. Disabled markets remain outside the sitemap and redirect to their configured fallback.
+
 ## Project structure
 
 ```text

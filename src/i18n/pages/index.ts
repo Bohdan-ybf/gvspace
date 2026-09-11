@@ -43,9 +43,12 @@ const translations = {
   contacts: { uk: contactsUK, en: contactsEN },
   legal: { uk: legalUK, en: legalEN },
   global: { uk: globalUK, en: globalEN },
-} as const;
+} as const satisfies Record<string, Record<Locale, unknown>>;
 
 export type TranslationPage = keyof typeof translations;
+
+/** Locales listed here have a complete static dictionary for every page section. */
+export const dictionaryLocales = Object.keys(translations.global) as Locale[];
 
 export function getTranslations<P extends TranslationPage>(
   page: P,

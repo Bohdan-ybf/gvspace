@@ -2,7 +2,7 @@
 /**
  * Plugin Name: GVSPACE Core
  * Description: Content types and GraphQL fields used by the GVSPACE frontend.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Author: GVSPACE
  * Text Domain: gvspace-core
  */
@@ -62,6 +62,37 @@ const GVSPACE_SERVICE_FIELDS = [
     'faq_en' => ['label' => 'FAQ англійською: питання | відповідь', 'type' => 'textarea'],
 ];
 
+// New localized records contain exactly one language. Legacy field sets above
+// remain available while existing UK + EN records are being migrated.
+const GVSPACE_LOCALIZED_VACANCY_FIELDS = [
+    'excerpt' => ['label' => 'Короткий опис', 'type' => 'textarea'],
+    'salary' => ['label' => 'Зарплата', 'type' => 'text'],
+    'tags' => ['label' => 'Теги (кожен з нового рядка)', 'type' => 'textarea'],
+    'role' => ['label' => 'Про роль (абзац з нового рядка)', 'type' => 'textarea'],
+    'tasks' => ['label' => 'Задачі (пункт з нового рядка)', 'type' => 'textarea'],
+    'requirements' => ['label' => 'Вимоги (пункт з нового рядка)', 'type' => 'textarea'],
+    'tools' => ['label' => 'Інструменти (кожен з нового рядка)', 'type' => 'textarea'],
+    'benefits' => ['label' => 'Ми пропонуємо (пункт з нового рядка)', 'type' => 'textarea'],
+];
+
+const GVSPACE_LOCALIZED_REVIEW_FIELDS = [
+    'position' => ['label' => 'Посада', 'type' => 'text'],
+    'company' => ['label' => 'Компанія', 'type' => 'text'],
+    'text' => ['label' => 'Текст відгуку', 'type' => 'textarea'],
+    'category' => ['label' => 'Категорія (strategy, marketing, development, content)', 'type' => 'text'],
+    'rating' => ['label' => 'Оцінка від 1 до 5', 'type' => 'number'],
+    'metrics' => ['label' => 'Метрики (кожна з нового рядка)', 'type' => 'textarea'],
+];
+
+const GVSPACE_LOCALIZED_SERVICE_FIELDS = [
+    'headline' => ['label' => 'Головний заголовок', 'type' => 'text'],
+    'description' => ['label' => 'Опис', 'type' => 'textarea'],
+    'includes' => ['label' => 'Що входить (кожне з нового рядка)', 'type' => 'textarea'],
+    'steps' => ['label' => 'Етапи: назва | термін | опис', 'type' => 'textarea'],
+    'metrics' => ['label' => 'Метрики результату (кожна з нового рядка)', 'type' => 'textarea'],
+    'faq' => ['label' => 'FAQ: питання | відповідь', 'type' => 'textarea'],
+];
+
 const GVSPACE_CASE_FIELDS = [
     'result' => ['label' => 'Головний результат одним реченням', 'type' => 'textarea'],
     'services' => ['label' => 'Послуги (кожна з нового рядка)', 'type' => 'textarea'],
@@ -88,8 +119,30 @@ const GVSPACE_LOCALIZED_POST_TYPES = [
     'gv_technology',
 ];
 
-const GVSPACE_CONTENT_LOCALES = ['uk', 'en'];
+const GVSPACE_CONTENT_LOCALES = [
+    'uk' => 'Українська (Україна)',
+    'en' => 'English (International)',
+    'pl' => 'Polski (Polska)',
+    'de-DE' => 'Deutsch (Deutschland)',
+    'de-AT' => 'Deutsch (Österreich)',
+    'es' => 'Español (España)',
+    'fr' => 'Français (France)',
+    'it' => 'Italiano (Italia)',
+    'nl' => 'Nederlands (Nederland)',
+    'cs' => 'Čeština (Česko)',
+    'sk' => 'Slovenčina (Slovensko)',
+    'en-GB' => 'English (United Kingdom)',
+];
 const GVSPACE_TRANSLATION_STATUSES = ['missing', 'draft', 'published'];
+
+const GVSPACE_SEO_FIELDS = [
+    'title' => ['label' => 'SEO Title', 'type' => 'text', 'limit' => 60],
+    'description' => ['label' => 'Meta Description', 'type' => 'textarea', 'limit' => 160],
+    'h1' => ['label' => 'H1 сторінки', 'type' => 'text', 'limit' => 0],
+    'og_title' => ['label' => 'Open Graph Title', 'type' => 'text', 'limit' => 0],
+    'og_description' => ['label' => 'Open Graph Description', 'type' => 'textarea', 'limit' => 0],
+    'og_image' => ['label' => 'Open Graph Image URL', 'type' => 'url', 'limit' => 0],
+];
 
 add_action('after_setup_theme', function (): void {
     add_theme_support('post-thumbnails');
@@ -278,6 +331,18 @@ add_action('init', function (): void {
             'sanitize_callback' => 'gvspace_sanitize_translation_status',
             'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
         ]);
+
+        foreach (array_keys(GVSPACE_SEO_FIELDS) as $seo_field) {
+            foreach (['', '_uk', '_en'] as $locale_suffix) {
+                register_post_meta($post_type, '_gvspace_seo_' . $seo_field . $locale_suffix, [
+                    'type' => 'string',
+                    'single' => true,
+                    'show_in_rest' => true,
+                    'sanitize_callback' => $seo_field === 'og_image' ? 'esc_url_raw' : 'sanitize_textarea_field',
+                    'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+                ]);
+            }
+        }
     }
 
     register_post_meta('gv_technology', '_gvspace_technology_title_en', [
@@ -306,6 +371,14 @@ add_action('init', function (): void {
         ]);
     }
 
+    foreach (array_keys(GVSPACE_LOCALIZED_SERVICE_FIELDS) as $field) {
+        register_post_meta('gv_service', '_gvspace_service_localized_' . $field, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
     foreach (array_keys(GVSPACE_REVIEW_FIELDS) as $field) {
         register_post_meta('gv_review', '_gvspace_review_' . $field, [
             'type' => 'string', 'single' => true, 'show_in_rest' => true,
@@ -314,8 +387,26 @@ add_action('init', function (): void {
         ]);
     }
 
+    foreach (array_keys(GVSPACE_LOCALIZED_REVIEW_FIELDS) as $field) {
+        register_post_meta('gv_review', '_gvspace_review_localized_' . $field, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
     foreach (array_keys(GVSPACE_VACANCY_FIELDS) as $field) {
         register_post_meta('gv_vacancy', '_gvspace_' . $field, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
+    foreach (array_keys(GVSPACE_LOCALIZED_VACANCY_FIELDS) as $field) {
+        register_post_meta('gv_vacancy', '_gvspace_vacancy_localized_' . $field, [
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
@@ -335,7 +426,40 @@ add_action('init', function (): void {
 
 function gvspace_sanitize_content_locale(string $value): string
 {
-    return in_array($value, GVSPACE_CONTENT_LOCALES, true) ? $value : 'legacy';
+    return array_key_exists($value, GVSPACE_CONTENT_LOCALES) ? $value : 'legacy';
+}
+
+function gvspace_get_content_locale(WP_Post $post): string
+{
+    if (isset($_POST['gvspace_content_locale'])) {
+        return gvspace_sanitize_content_locale(sanitize_text_field(wp_unslash($_POST['gvspace_content_locale'])));
+    }
+
+    $stored_locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true);
+    return $stored_locale ?: ($post->post_status === 'auto-draft' ? 'uk' : 'legacy');
+}
+
+function gvspace_render_field_set(WP_Post $post, array $fields, string $name_prefix, string $meta_prefix): void
+{
+    foreach ($fields as $key => $config) {
+        $field_name = $name_prefix . $key;
+        $value = (string) get_post_meta($post->ID, $meta_prefix . $key, true);
+        echo '<p><label for="' . esc_attr($field_name) . '"><strong>' . esc_html($config['label']) . '</strong></label><br>';
+        if ($config['type'] === 'textarea') {
+            echo '<textarea id="' . esc_attr($field_name) . '" name="' . esc_attr($field_name) . '" rows="4" style="width:100%">' . esc_textarea($value) . '</textarea>';
+        } else {
+            echo '<input type="' . esc_attr($config['type'] === 'number' ? 'number' : 'text') . '" id="' . esc_attr($field_name) . '" name="' . esc_attr($field_name) . '" value="' . esc_attr($value) . '" style="width:100%">';
+        }
+        echo '</p>';
+    }
+}
+
+function gvspace_save_field_set(int $post_id, array $fields, string $name_prefix, string $meta_prefix): void
+{
+    foreach (array_keys($fields) as $field) {
+        if (!isset($_POST[$name_prefix . $field])) continue;
+        update_post_meta($post_id, $meta_prefix . $field, sanitize_textarea_field(wp_unslash($_POST[$name_prefix . $field])));
+    }
 }
 
 function gvspace_sanitize_translation_status(string $value): string
@@ -369,14 +493,16 @@ function gvspace_render_localization_fields(WP_Post $post): void
         <label for="gvspace_content_locale"><strong>Мова запису</strong></label><br>
         <select id="gvspace_content_locale" name="gvspace_content_locale" style="width:100%">
             <option value="legacy" <?php selected($locale, 'legacy'); ?>>Legacy: UK + EN в одному записі</option>
-            <option value="uk" <?php selected($locale, 'uk'); ?>>Українська</option>
-            <option value="en" <?php selected($locale, 'en'); ?>>English</option>
+            <?php foreach (GVSPACE_CONTENT_LOCALES as $locale_code => $locale_label) : ?>
+                <option value="<?php echo esc_attr($locale_code); ?>" <?php selected($locale, $locale_code); ?>><?php echo esc_html($locale_label); ?></option>
+            <?php endforeach; ?>
         </select>
+        <span class="description">Один запис містить контент лише вибраною мовою. Після зміни мови збережіть запис.</span>
     </p>
     <p>
         <label for="gvspace_translation_group"><strong>Група перекладів</strong></label><br>
         <input id="gvspace_translation_group" name="gvspace_translation_group" type="text" value="<?php echo esc_attr($group); ?>" placeholder="service-development" style="width:100%">
-        <span class="description">Однаковий ключ пов’язує переклади.</span>
+        <span class="description">Однаковий ключ пов’язує переклади та використовується як спільна частина URL. Після публікації не змінюйте його без налаштування редиректу.</span>
     </p>
     <p>
         <label for="gvspace_translation_status"><strong>Статус перекладу</strong></label><br>
@@ -389,7 +515,7 @@ function gvspace_render_localization_fields(WP_Post $post): void
     <?php if ($post->post_status !== 'auto-draft') : ?>
         <hr>
         <p><strong>Створити переклад</strong></p>
-        <?php foreach (GVSPACE_CONTENT_LOCALES as $target_locale) : ?>
+        <?php foreach (GVSPACE_CONTENT_LOCALES as $target_locale => $target_label) : ?>
             <?php if ($target_locale === $locale) continue; ?>
             <?php
             $translation_url = wp_nonce_url(
@@ -402,7 +528,7 @@ function gvspace_render_localization_fields(WP_Post $post): void
             );
             ?>
             <a class="button" href="<?php echo esc_url($translation_url); ?>" style="margin:0 4px 4px 0">
-                <?php echo esc_html(strtoupper($target_locale)); ?>
+                <?php echo esc_html($target_label); ?>
             </a>
         <?php endforeach; ?>
         <p class="description">Буде створена чернетка в цій самій групі перекладів.</p>
@@ -432,8 +558,84 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
         : 'draft';
 
     update_post_meta($post_id, '_gvspace_content_locale', $locale);
-    update_post_meta($post_id, '_gvspace_translation_group', $group ?: $post->post_type . '-' . $post_id);
+    $default_group = sanitize_title($post->post_name ?: $post->post_title);
+    update_post_meta($post_id, '_gvspace_translation_group', $group ?: ($default_group ?: $post->post_type . '-' . $post_id));
     update_post_meta($post_id, '_gvspace_translation_status', $status);
+}, 10, 2);
+
+add_action('add_meta_boxes', function (): void {
+    foreach (GVSPACE_LOCALIZED_POST_TYPES as $post_type) {
+        add_meta_box(
+            'gvspace-seo',
+            'GVSPACE: SEO та соцмережі',
+            'gvspace_render_seo_fields',
+            $post_type,
+            'normal',
+            'high'
+        );
+    }
+});
+
+function gvspace_render_seo_field(WP_Post $post, string $key, array $config, string $locale_suffix = ''): void
+{
+    $field_id = 'gvspace_seo_' . $key . $locale_suffix;
+    $value = (string) get_post_meta($post->ID, '_gvspace_seo_' . $key . $locale_suffix, true);
+    $limit = (int) ($config['limit'] ?? 0);
+    echo '<p><label for="' . esc_attr($field_id) . '"><strong>' . esc_html($config['label']) . '</strong></label><br>';
+    if ($config['type'] === 'textarea') {
+        echo '<textarea id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" rows="3" style="width:100%">' . esc_textarea($value) . '</textarea>';
+    } else {
+        $type = $config['type'] === 'url' ? 'url' : 'text';
+        echo '<input type="' . esc_attr($type) . '" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" value="' . esc_attr($value) . '" style="width:100%">';
+    }
+    if ($limit) echo '<span class="description">Рекомендовано до ' . esc_html((string) $limit) . ' символів.</span>';
+    echo '</p>';
+}
+
+function gvspace_render_seo_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_seo', 'gvspace_seo_nonce');
+    $locale = gvspace_get_content_locale($post);
+    echo '<p class="description">Поля належать лише цьому мовному запису. Якщо Open Graph поля порожні, сайт використає SEO Title, Meta Description і головне зображення. Canonical та hreflang генеруються автоматично.</p>';
+
+    if ($locale === 'legacy') {
+        foreach (['uk' => 'Українська', 'en' => 'English'] as $legacy_locale => $label) {
+            echo '<hr><h3>' . esc_html($label) . '</h3>';
+            foreach (GVSPACE_SEO_FIELDS as $key => $config) {
+                gvspace_render_seo_field($post, $key, $config, '_' . $legacy_locale);
+            }
+        }
+        return;
+    }
+
+    echo '<p><strong>Мова SEO: ' . esc_html(GVSPACE_CONTENT_LOCALES[$locale]) . '</strong></p>';
+    foreach (GVSPACE_SEO_FIELDS as $key => $config) {
+        gvspace_render_seo_field($post, $key, $config);
+    }
+}
+
+add_action('save_post', function (int $post_id, WP_Post $post): void {
+    if (
+        !in_array($post->post_type, GVSPACE_LOCALIZED_POST_TYPES, true)
+        || !isset($_POST['gvspace_seo_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_seo_nonce'])), 'gvspace_save_seo')
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    $locale = gvspace_get_content_locale($post);
+    $suffixes = $locale === 'legacy' ? ['_uk', '_en'] : [''];
+    foreach ($suffixes as $locale_suffix) {
+        foreach (array_keys(GVSPACE_SEO_FIELDS) as $key) {
+            $field_name = 'gvspace_seo_' . $key . $locale_suffix;
+            if (!isset($_POST[$field_name])) continue;
+            $raw_value = wp_unslash($_POST[$field_name]);
+            $value = $key === 'og_image' ? esc_url_raw($raw_value) : sanitize_textarea_field($raw_value);
+            update_post_meta($post_id, '_gvspace_seo_' . $key . $locale_suffix, $value);
+        }
+    }
 }, 10, 2);
 
 foreach (GVSPACE_LOCALIZED_POST_TYPES as $gvspace_localized_post_type) {
@@ -463,6 +665,11 @@ add_action('add_meta_boxes', function (): void {
 function gvspace_render_technology_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_technology', 'gvspace_technology_nonce');
+    $locale = gvspace_get_content_locale($post);
+    if ($locale !== 'legacy') {
+        echo '<p class="description">Назву введіть у стандартному полі заголовка вибраною мовою. Іконку завантажте через «Головне зображення», таб оберіть у «Категоріях», позицію — у полі «Порядок».</p>';
+        return;
+    }
     $title_en = (string) get_post_meta($post->ID, '_gvspace_technology_title_en', true);
     ?>
     <p class="description">
@@ -486,6 +693,9 @@ add_action('save_post_gv_technology', function (int $post_id): void {
         return;
     }
 
+    $post = get_post($post_id);
+    if (!$post || gvspace_get_content_locale($post) !== 'legacy') return;
+
     $title_en = isset($_POST['gvspace_technology_title_en'])
         ? sanitize_text_field(wp_unslash($_POST['gvspace_technology_title_en']))
         : '';
@@ -495,7 +705,7 @@ add_action('save_post_gv_technology', function (int $post_id): void {
 function gvspace_render_case_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_case', 'gvspace_case_nonce');
-    echo '<p class="description">Назва кейсу задається у стандартному полі заголовка, а обкладинка — у полі «Головне зображення».</p>';
+    echo '<p class="description">Усі поля цього запису заповнюйте мовою, вибраною у блоці «GVSPACE: локалізація». Назва задається у стандартному заголовку, обкладинка — у «Головному зображенні».</p>';
     foreach (GVSPACE_CASE_FIELDS as $key => $config) {
         $value = (string) get_post_meta($post->ID, '_gvspace_case_' . $key, true);
         echo '<p><label for="gvspace_case_' . esc_attr($key) . '"><strong>' . esc_html($config['label']) . '</strong></label><br>';
@@ -523,26 +733,23 @@ add_action('add_meta_boxes', function (): void {
 function gvspace_render_review_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_review', 'gvspace_review_nonce');
-    echo '<p class="description">Ім’я українською задайте у заголовку, фото автора — у полі «Головне зображення», порядок — у полі «Порядок».</p>';
-    foreach (GVSPACE_REVIEW_FIELDS as $key => $config) {
-        $value = (string) get_post_meta($post->ID, '_gvspace_review_' . $key, true);
-        echo '<p><label for="gvspace_review_' . esc_attr($key) . '"><strong>' . esc_html($config['label']) . '</strong></label><br>';
-        if ($config['type'] === 'textarea') {
-            echo '<textarea id="gvspace_review_' . esc_attr($key) . '" name="gvspace_review_' . esc_attr($key) . '" rows="4" style="width:100%">' . esc_textarea($value) . '</textarea>';
-        } else {
-            $type = $config['type'] === 'number' ? 'number' : 'text';
-            echo '<input type="' . esc_attr($type) . '" id="gvspace_review_' . esc_attr($key) . '" name="gvspace_review_' . esc_attr($key) . '" value="' . esc_attr($value) . '" style="width:100%">';
-        }
-        echo '</p>';
+    $locale = gvspace_get_content_locale($post);
+    echo '<p class="description">Ім’я задайте у заголовку, фото — у «Головному зображенні», порядок — у полі «Порядок».</p>';
+    if ($locale === 'legacy') {
+        echo '<p class="description"><strong>Legacy:</strong> старий запис із двома мовами.</p>';
+        gvspace_render_field_set($post, GVSPACE_REVIEW_FIELDS, 'gvspace_review_', '_gvspace_review_');
+    } else {
+        echo '<p class="description">Заповнюйте всі поля мовою запису: <strong>' . esc_html(GVSPACE_CONTENT_LOCALES[$locale]) . '</strong>.</p>';
+        gvspace_render_field_set($post, GVSPACE_LOCALIZED_REVIEW_FIELDS, 'gvspace_review_localized_', '_gvspace_review_localized_');
     }
 }
 
 add_action('save_post_gv_review', function (int $post_id): void {
     if (!isset($_POST['gvspace_review_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_review_nonce'])), 'gvspace_save_review') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return;
-    foreach (array_keys(GVSPACE_REVIEW_FIELDS) as $field) {
-        $value = isset($_POST['gvspace_review_' . $field]) ? sanitize_textarea_field(wp_unslash($_POST['gvspace_review_' . $field])) : '';
-        update_post_meta($post_id, '_gvspace_review_' . $field, $value);
-    }
+    $post = get_post($post_id);
+    if (!$post) return;
+    if (gvspace_get_content_locale($post) === 'legacy') gvspace_save_field_set($post_id, GVSPACE_REVIEW_FIELDS, 'gvspace_review_', '_gvspace_review_');
+    else gvspace_save_field_set($post_id, GVSPACE_LOCALIZED_REVIEW_FIELDS, 'gvspace_review_localized_', '_gvspace_review_localized_');
 });
 
 add_action('add_meta_boxes', function (): void {
@@ -552,19 +759,21 @@ function gvspace_render_service_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_service', 'gvspace_service_nonce');
     echo '<p class="description">Запис без батьківського елемента — напрямок (L2), дочірній запис — конкретна послуга (L3). Іконку напрямку завантажте як головне зображення.</p>';
-    foreach (GVSPACE_SERVICE_FIELDS as $key => $config) {
-        $value = (string) get_post_meta($post->ID, '_gvspace_service_' . $key, true);
-        echo '<p><label><strong>' . esc_html($config['label']) . '</strong></label><br>';
-        if ($config['type'] === 'textarea') echo '<textarea name="gvspace_service_' . esc_attr($key) . '" rows="4" style="width:100%">' . esc_textarea($value) . '</textarea>';
-        else echo '<input name="gvspace_service_' . esc_attr($key) . '" value="' . esc_attr($value) . '" style="width:100%">';
-        echo '</p>';
+    $locale = gvspace_get_content_locale($post);
+    if ($locale === 'legacy') {
+        echo '<p class="description"><strong>Legacy:</strong> старий запис із двома мовами.</p>';
+        gvspace_render_field_set($post, GVSPACE_SERVICE_FIELDS, 'gvspace_service_', '_gvspace_service_');
+    } else {
+        echo '<p class="description">Назву введіть у заголовку, решту полів — мовою запису: <strong>' . esc_html(GVSPACE_CONTENT_LOCALES[$locale]) . '</strong>.</p>';
+        gvspace_render_field_set($post, GVSPACE_LOCALIZED_SERVICE_FIELDS, 'gvspace_service_localized_', '_gvspace_service_localized_');
     }
 }
 add_action('save_post_gv_service', function (int $post_id): void {
     if (!isset($_POST['gvspace_service_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_service_nonce'])), 'gvspace_save_service') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return;
-    foreach (array_keys(GVSPACE_SERVICE_FIELDS) as $field) {
-        update_post_meta($post_id, '_gvspace_service_' . $field, isset($_POST['gvspace_service_' . $field]) ? sanitize_textarea_field(wp_unslash($_POST['gvspace_service_' . $field])) : '');
-    }
+    $post = get_post($post_id);
+    if (!$post) return;
+    if (gvspace_get_content_locale($post) === 'legacy') gvspace_save_field_set($post_id, GVSPACE_SERVICE_FIELDS, 'gvspace_service_', '_gvspace_service_');
+    else gvspace_save_field_set($post_id, GVSPACE_LOCALIZED_SERVICE_FIELDS, 'gvspace_service_localized_', '_gvspace_service_localized_');
 });
 
 add_action('add_meta_boxes', function (): void {
@@ -589,19 +798,16 @@ function gvspace_render_vacancy_fields(WP_Post $post): void
             Позначити вакансію як гарячу
         </label>
     </p>
-    <p class="description">Назва українською задається у стандартному полі заголовка. Банер вакансії є спільним і задається у Next.js.</p>
-    <?php foreach (GVSPACE_VACANCY_FIELDS as $key => $config) :
-        $value = (string) get_post_meta($post->ID, '_gvspace_' . $key, true);
-        ?>
-        <p>
-            <label for="gvspace_<?php echo esc_attr($key); ?>"><strong><?php echo esc_html($config['label']); ?></strong></label><br>
-            <?php if ($config['type'] === 'textarea') : ?>
-                <textarea id="gvspace_<?php echo esc_attr($key); ?>" name="gvspace_<?php echo esc_attr($key); ?>" rows="5" style="width:100%;"><?php echo esc_textarea($value); ?></textarea>
-            <?php else : ?>
-                <input id="gvspace_<?php echo esc_attr($key); ?>" name="gvspace_<?php echo esc_attr($key); ?>" type="text" value="<?php echo esc_attr($value); ?>" style="width:100%;">
-            <?php endif; ?>
-        </p>
-    <?php endforeach;
+    <p class="description">Назву введіть у стандартному полі заголовка. Банер вакансії є спільним і задається у Next.js.</p>
+    <?php
+    $locale = gvspace_get_content_locale($post);
+    if ($locale === 'legacy') {
+        echo '<p class="description"><strong>Legacy:</strong> старий запис із двома мовами.</p>';
+        gvspace_render_field_set($post, GVSPACE_VACANCY_FIELDS, 'gvspace_', '_gvspace_');
+    } else {
+        echo '<p class="description">Заповнюйте всі поля мовою запису: <strong>' . esc_html(GVSPACE_CONTENT_LOCALES[$locale]) . '</strong>.</p>';
+        gvspace_render_field_set($post, GVSPACE_LOCALIZED_VACANCY_FIELDS, 'gvspace_vacancy_localized_', '_gvspace_vacancy_localized_');
+    }
 }
 
 add_action('save_post_gv_vacancy', function (int $post_id): void {
@@ -616,12 +822,10 @@ add_action('save_post_gv_vacancy', function (int $post_id): void {
 
     update_post_meta($post_id, '_gvspace_hot', isset($_POST['gvspace_hot']));
 
-    foreach (array_keys(GVSPACE_VACANCY_FIELDS) as $field) {
-        $value = isset($_POST['gvspace_' . $field])
-            ? sanitize_textarea_field(wp_unslash($_POST['gvspace_' . $field]))
-            : '';
-        update_post_meta($post_id, '_gvspace_' . $field, $value);
-    }
+    $post = get_post($post_id);
+    if (!$post) return;
+    if (gvspace_get_content_locale($post) === 'legacy') gvspace_save_field_set($post_id, GVSPACE_VACANCY_FIELDS, 'gvspace_', '_gvspace_');
+    else gvspace_save_field_set($post_id, GVSPACE_LOCALIZED_VACANCY_FIELDS, 'gvspace_vacancy_localized_', '_gvspace_vacancy_localized_');
 });
 
 add_action('graphql_register_types', function (): void {
@@ -638,6 +842,20 @@ add_action('graphql_register_types', function (): void {
         ],
     ]);
 
+    register_graphql_object_type('GvspaceSeo', [
+        'description' => 'Resolved SEO data for one GVSPACE content language.',
+        'fields' => [
+            'title' => ['type' => 'String'],
+            'description' => ['type' => 'String'],
+            'h1' => ['type' => 'String'],
+            'openGraphTitle' => ['type' => 'String'],
+            'openGraphDescription' => ['type' => 'String'],
+            'openGraphImage' => ['type' => 'String'],
+            'datePublished' => ['type' => 'String'],
+            'dateModified' => ['type' => 'String'],
+        ],
+    ]);
+
     foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology'] as $graphql_type) {
         register_graphql_field($graphql_type, 'gvspaceLocalization', [
             'type' => 'GvspaceLocalization',
@@ -647,6 +865,46 @@ add_action('graphql_register_types', function (): void {
                     'locale' => (string) get_post_meta($post_id, '_gvspace_content_locale', true) ?: 'legacy',
                     'translationGroup' => (string) get_post_meta($post_id, '_gvspace_translation_group', true),
                     'status' => (string) get_post_meta($post_id, '_gvspace_translation_status', true) ?: 'published',
+                ];
+            },
+        ]);
+
+        register_graphql_field($graphql_type, 'gvspaceSeo', [
+            'type' => 'GvspaceSeo',
+            'args' => [
+                'locale' => [
+                    'type' => 'String',
+                    'description' => 'Requested language for a legacy bilingual record (uk or en).',
+                ],
+            ],
+            'resolve' => static function ($source, array $args): array {
+                $post_id = (int) ($source->databaseId ?? $source->ID ?? 0);
+                $post = get_post($post_id);
+                if (!$post) return [];
+
+                $content_locale = (string) get_post_meta($post_id, '_gvspace_content_locale', true) ?: 'legacy';
+                $requested_locale = isset($args['locale']) ? sanitize_key((string) $args['locale']) : 'uk';
+                $suffix = $content_locale === 'legacy' ? '_' . ($requested_locale === 'en' ? 'en' : 'uk') : '';
+                $value = static fn (string $key): string => trim((string) get_post_meta($post_id, '_gvspace_seo_' . $key . $suffix, true));
+
+                $fallback_description = trim((string) $post->post_excerpt);
+                if ($fallback_description === '') {
+                    $fallback_description = wp_trim_words(wp_strip_all_tags(strip_shortcodes((string) $post->post_content)), 30, '…');
+                }
+                $title = $value('title') ?: get_the_title($post_id);
+                $description = $value('description') ?: $fallback_description;
+                $featured_image = get_post_thumbnail_id($post_id);
+                $featured_image_url = $featured_image ? (string) wp_get_attachment_image_url($featured_image, 'full') : '';
+
+                return [
+                    'title' => $title,
+                    'description' => $description,
+                    'h1' => $value('h1') ?: get_the_title($post_id),
+                    'openGraphTitle' => $value('og_title') ?: $title,
+                    'openGraphDescription' => $value('og_description') ?: $description,
+                    'openGraphImage' => $value('og_image') ?: $featured_image_url,
+                    'datePublished' => get_post_time(DATE_W3C, true, $post_id),
+                    'dateModified' => get_post_modified_time(DATE_W3C, true, $post_id),
                 ];
             },
         ]);
@@ -663,6 +921,11 @@ add_action('graphql_register_types', function (): void {
     register_graphql_object_type('VacancyDetails', [
         'description' => 'Editable GVSPACE vacancy fields.',
         'fields' => [
+            'excerpt' => ['type' => 'String'],
+            'role' => ['type' => ['list_of' => 'String']],
+            'tasks' => ['type' => ['list_of' => 'String']],
+            'requirements' => ['type' => ['list_of' => 'String']],
+            'benefits' => ['type' => ['list_of' => 'String']],
             'titleEn' => ['type' => 'String'],
             'excerptUk' => ['type' => 'String'],
             'excerptEn' => ['type' => 'String'],
@@ -686,24 +949,34 @@ add_action('graphql_register_types', function (): void {
         'resolve' => static function ($source): array {
             $post_id = (int) $source->databaseId;
             $value = static fn (string $key): string => (string) get_post_meta($post_id, '_gvspace_' . $key, true);
+            $localized_value = static fn (string $key): string => (string) get_post_meta($post_id, '_gvspace_vacancy_localized_' . $key, true);
             $lines = static function (string $key) use ($value): array {
                 return array_values(array_filter(array_map('trim', preg_split('/\R/', $value($key)) ?: [])));
             };
+            $localized_lines = static function (string $key) use ($localized_value): array {
+                return array_values(array_filter(array_map('trim', preg_split('/\R/', $localized_value($key)) ?: [])));
+            };
+            $locale = (string) get_post_meta($post_id, '_gvspace_content_locale', true) ?: 'legacy';
 
             return [
+                'excerpt' => $localized_value('excerpt'),
+                'role' => $localized_lines('role'),
+                'tasks' => $localized_lines('tasks'),
+                'requirements' => $localized_lines('requirements'),
+                'benefits' => $localized_lines('benefits'),
                 'titleEn' => $value('title_en'),
                 'excerptUk' => $value('excerpt_uk'),
                 'excerptEn' => $value('excerpt_en'),
-                'salary' => $value('salary'),
+                'salary' => $locale === 'legacy' ? $value('salary') : $localized_value('salary'),
                 'hot' => (bool) get_post_meta($post_id, '_gvspace_hot', true),
-                'tags' => $lines('tags'),
+                'tags' => $locale === 'legacy' ? $lines('tags') : $localized_lines('tags'),
                 'roleUk' => $lines('role_uk'),
                 'roleEn' => $lines('role_en'),
                 'tasksUk' => $lines('tasks_uk'),
                 'tasksEn' => $lines('tasks_en'),
                 'requirementsUk' => $lines('requirements_uk'),
                 'requirementsEn' => $lines('requirements_en'),
-                'tools' => $lines('tools'),
+                'tools' => $locale === 'legacy' ? $lines('tools') : $localized_lines('tools'),
                 'benefitsUk' => $lines('benefits_uk'),
                 'benefitsEn' => $lines('benefits_en'),
             ];
@@ -781,6 +1054,7 @@ add_action('graphql_register_types', function (): void {
 
     register_graphql_object_type('GvspaceReviewDetails', [
         'fields' => [
+            'position' => ['type' => 'String'], 'text' => ['type' => 'String'],
             'nameEn' => ['type' => 'String'], 'positionUk' => ['type' => 'String'],
             'positionEn' => ['type' => 'String'], 'company' => ['type' => 'String'],
             'textUk' => ['type' => 'String'], 'textEn' => ['type' => 'String'],
@@ -791,6 +1065,9 @@ add_action('graphql_register_types', function (): void {
     register_graphql_object_type('GvspaceServiceStep', ['fields' => ['title' => ['type' => 'String'], 'duration' => ['type' => 'String'], 'description' => ['type' => 'String']]]);
     register_graphql_object_type('GvspaceServiceFaq', ['fields' => ['question' => ['type' => 'String'], 'answer' => ['type' => 'String']]]);
     register_graphql_object_type('GvspaceServiceDetails', ['fields' => [
+        'headline' => ['type' => 'String'], 'description' => ['type' => 'String'],
+        'includes' => ['type' => ['list_of' => 'String']], 'steps' => ['type' => ['list_of' => 'GvspaceServiceStep']],
+        'faq' => ['type' => ['list_of' => 'GvspaceServiceFaq']],
         'titleEn' => ['type' => 'String'], 'headlineUk' => ['type' => 'String'], 'headlineEn' => ['type' => 'String'],
         'descriptionUk' => ['type' => 'String'], 'descriptionEn' => ['type' => 'String'],
         'includesUk' => ['type' => ['list_of' => 'String']], 'includesEn' => ['type' => ['list_of' => 'String']],
@@ -800,22 +1077,32 @@ add_action('graphql_register_types', function (): void {
     register_graphql_field('ServiceOffering', 'serviceDetails', ['type' => 'GvspaceServiceDetails', 'resolve' => static function ($source): array {
         $id = (int) $source->databaseId;
         $value = static fn (string $key): string => (string) get_post_meta($id, '_gvspace_service_' . $key, true);
+        $localizedValue = static fn (string $key): string => (string) get_post_meta($id, '_gvspace_service_localized_' . $key, true);
         $lines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/', $value($key)) ?: [])));
+        $localizedLines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/', $localizedValue($key)) ?: [])));
         $steps = static fn (string $key): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 3)); return ['title' => $p[0] ?? '', 'duration' => $p[1] ?? '', 'description' => $p[2] ?? '']; }, $lines($key));
+        $localizedSteps = static fn (): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 3)); return ['title' => $p[0] ?? '', 'duration' => $p[1] ?? '', 'description' => $p[2] ?? '']; }, $localizedLines('steps'));
         $faq = static fn (string $key): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 2)); return ['question' => $p[0] ?? '', 'answer' => $p[1] ?? '']; }, $lines($key));
-        return ['titleEn' => $value('title_en'), 'headlineUk' => $value('headline_uk'), 'headlineEn' => $value('headline_en'), 'descriptionUk' => $value('description_uk'), 'descriptionEn' => $value('description_en'), 'includesUk' => $lines('includes_uk'), 'includesEn' => $lines('includes_en'), 'stepsUk' => $steps('steps_uk'), 'stepsEn' => $steps('steps_en'), 'metrics' => $lines('metrics'), 'faqUk' => $faq('faq_uk'), 'faqEn' => $faq('faq_en')];
+        $localizedFaq = static fn (): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 2)); return ['question' => $p[0] ?? '', 'answer' => $p[1] ?? '']; }, $localizedLines('faq'));
+        $locale = (string) get_post_meta($id, '_gvspace_content_locale', true) ?: 'legacy';
+        return ['headline' => $localizedValue('headline'), 'description' => $localizedValue('description'), 'includes' => $localizedLines('includes'), 'steps' => $localizedSteps(), 'faq' => $localizedFaq(), 'titleEn' => $value('title_en'), 'headlineUk' => $value('headline_uk'), 'headlineEn' => $value('headline_en'), 'descriptionUk' => $value('description_uk'), 'descriptionEn' => $value('description_en'), 'includesUk' => $lines('includes_uk'), 'includesEn' => $lines('includes_en'), 'stepsUk' => $steps('steps_uk'), 'stepsEn' => $steps('steps_en'), 'metrics' => $locale === 'legacy' ? $lines('metrics') : $localizedLines('metrics'), 'faqUk' => $faq('faq_uk'), 'faqEn' => $faq('faq_en')];
     }]);
     register_graphql_field('ClientReview', 'reviewDetails', [
         'type' => 'GvspaceReviewDetails',
         'resolve' => static function ($source): array {
             $post_id = (int) $source->databaseId;
             $value = static fn (string $key): string => (string) get_post_meta($post_id, '_gvspace_review_' . $key, true);
+            $localizedValue = static fn (string $key): string => (string) get_post_meta($post_id, '_gvspace_review_localized_' . $key, true);
+            $locale = (string) get_post_meta($post_id, '_gvspace_content_locale', true) ?: 'legacy';
             return [
+                'position' => $localizedValue('position'), 'text' => $localizedValue('text'),
                 'nameEn' => $value('name_en'), 'positionUk' => $value('position_uk'),
-                'positionEn' => $value('position_en'), 'company' => $value('company'),
+                'positionEn' => $value('position_en'),
                 'textUk' => $value('text_uk'), 'textEn' => $value('text_en'),
-                'category' => $value('category'), 'rating' => max(1, min(5, (int) $value('rating'))),
-                'metrics' => array_values(array_filter(array_map('trim', preg_split('/\R/', $value('metrics')) ?: []))),
+                'company' => $locale === 'legacy' ? $value('company') : $localizedValue('company'),
+                'category' => $locale === 'legacy' ? $value('category') : $localizedValue('category'),
+                'rating' => max(1, min(5, (int) ($locale === 'legacy' ? $value('rating') : $localizedValue('rating')))),
+                'metrics' => array_values(array_filter(array_map('trim', preg_split('/\R/', $locale === 'legacy' ? $value('metrics') : $localizedValue('metrics')) ?: []))),
             ];
         },
     ]);
@@ -900,6 +1187,68 @@ add_filter('pings_open', '__return_false', 100);
 
 const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology'];
 
+function gvspace_prepare_localized_duplicate(int $source_id, int $duplicate_id, string $target_locale): void
+{
+    $source_locale = (string) get_post_meta($source_id, '_gvspace_content_locale', true) ?: 'legacy';
+    if ($source_locale !== 'legacy') return;
+
+    $language_suffix = $target_locale === 'uk' ? 'uk' : 'en';
+    $post_type = get_post_type($source_id);
+    $maps = [
+        'gv_vacancy' => [
+            'prefix' => '_gvspace_vacancy_localized_',
+            'fields' => [
+                'excerpt' => 'excerpt_' . $language_suffix,
+                'salary' => 'salary', 'tags' => 'tags', 'role' => 'role_' . $language_suffix,
+                'tasks' => 'tasks_' . $language_suffix, 'requirements' => 'requirements_' . $language_suffix,
+                'tools' => 'tools', 'benefits' => 'benefits_' . $language_suffix,
+            ],
+            'source_prefix' => '_gvspace_',
+            'title_meta' => '_gvspace_title_en',
+        ],
+        'gv_review' => [
+            'prefix' => '_gvspace_review_localized_',
+            'fields' => [
+                'position' => 'position_' . $language_suffix, 'company' => 'company',
+                'text' => 'text_' . $language_suffix, 'category' => 'category',
+                'rating' => 'rating', 'metrics' => 'metrics',
+            ],
+            'source_prefix' => '_gvspace_review_',
+            'title_meta' => '_gvspace_review_name_en',
+        ],
+        'gv_service' => [
+            'prefix' => '_gvspace_service_localized_',
+            'fields' => [
+                'headline' => 'headline_' . $language_suffix, 'description' => 'description_' . $language_suffix,
+                'includes' => 'includes_' . $language_suffix, 'steps' => 'steps_' . $language_suffix,
+                'metrics' => 'metrics', 'faq' => 'faq_' . $language_suffix,
+            ],
+            'source_prefix' => '_gvspace_service_',
+            'title_meta' => '_gvspace_service_title_en',
+        ],
+    ];
+
+    if (isset($maps[$post_type])) {
+        $map = $maps[$post_type];
+        foreach ($map['fields'] as $localized_field => $legacy_field) {
+            update_post_meta(
+                $duplicate_id,
+                $map['prefix'] . $localized_field,
+                (string) get_post_meta($source_id, $map['source_prefix'] . $legacy_field, true)
+            );
+        }
+        if ($language_suffix === 'en') {
+            $translated_title = (string) get_post_meta($source_id, $map['title_meta'], true);
+            if ($translated_title !== '') wp_update_post(['ID' => $duplicate_id, 'post_title' => $translated_title]);
+        }
+    }
+
+    if ($post_type === 'gv_technology' && $language_suffix === 'en') {
+        $translated_title = (string) get_post_meta($source_id, '_gvspace_technology_title_en', true);
+        if ($translated_title !== '') wp_update_post(['ID' => $duplicate_id, 'post_title' => $translated_title]);
+    }
+}
+
 function gvspace_duplicate_post_link(array $actions, WP_Post $post): array
 {
     if (!in_array($post->post_type, GVSPACE_DUPLICABLE_POST_TYPES, true) || !current_user_can('edit_post', $post->ID)) {
@@ -968,13 +1317,15 @@ add_action('admin_post_gvspace_duplicate_post', function (): void {
     if ($target_locale && $target_locale !== 'legacy') {
         $translation_group = (string) get_post_meta($post_id, '_gvspace_translation_group', true);
         if (!$translation_group) {
-            $translation_group = sanitize_key($post->post_type . '-' . ($post->post_name ?: $post_id));
+            $translation_group = sanitize_title($post->post_name ?: $post->post_title);
+            if (!$translation_group) $translation_group = sanitize_key($post->post_type . '-' . $post_id);
             update_post_meta($post_id, '_gvspace_translation_group', $translation_group);
         }
 
         update_post_meta($duplicate_id, '_gvspace_content_locale', $target_locale);
         update_post_meta($duplicate_id, '_gvspace_translation_group', $translation_group);
         update_post_meta($duplicate_id, '_gvspace_translation_status', 'draft');
+        gvspace_prepare_localized_duplicate($post_id, $duplicate_id, $target_locale);
     }
 
     wp_safe_redirect(admin_url('post.php?action=edit&post=' . $duplicate_id));

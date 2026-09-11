@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLocaleOrigin, getMarket } from "@/markets";
+import { getFallbackMarket, getLocaleOrigin, getMarket } from "@/markets";
 import { isLocale } from "@/i18n";
 
 export function proxy(request: NextRequest) {
@@ -21,6 +21,16 @@ export function proxy(request: NextRequest) {
   // Local development and preview hosts keep the existing locale routing.
   if (!market) return NextResponse.next();
 
+  // Domains can be connected before their dictionaries and content are ready.
+  // Disabled markets always redirect to their explicitly configured fallback.
+  if (!market.enabled || !market.routeLocale) {
+    const fallback = getFallbackMarket(market);
+    return NextResponse.redirect(
+      new URL(request.nextUrl.pathname + request.nextUrl.search, fallback.origin),
+      307,
+    );
+  }
+
   const requestedLocale = request.nextUrl.pathname.split("/")[1];
 
   if (isLocale(requestedLocale)) {
@@ -33,7 +43,7 @@ export function proxy(request: NextRequest) {
   }
 
   const internalUrl = request.nextUrl.clone();
-  internalUrl.pathname = `/${market.locale}${request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname}`;
+  internalUrl.pathname = `/${market.routeLocale}${request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname}`;
   return NextResponse.rewrite(internalUrl);
 }
 

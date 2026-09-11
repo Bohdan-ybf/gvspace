@@ -1,5 +1,9 @@
 import type { Locale } from "@/i18n";
-import { filterPublishedForLocale, type ContentLocalization } from "@/content-localization";
+import {
+  filterPublishedForLocale,
+  getPublicContentSlug,
+  type ContentLocalization,
+} from "@/content-localization";
 
 export type ServiceStep = { title: string; duration: string; description: string };
 export type ServiceOffering = {
@@ -68,9 +72,16 @@ type Node = {
   slug: string;
   title: string;
   menuOrder?: number;
-  parent?: { node?: { slug?: string } };
+  parent?: {
+    node?: { slug?: string; gvspaceLocalization?: ContentLocalization | null };
+  };
   featuredImage?: { node?: { sourceUrl?: string } };
   serviceDetails?: {
+    headline?: string;
+    description?: string;
+    includes?: string[];
+    steps?: ServiceStep[];
+    faq?: ServiceOffering["faq"];
     titleEn?: string;
     headlineUk?: string;
     headlineEn?: string;
@@ -103,12 +114,14 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug } } featuredImage { node { sourceUrl } } serviceDetails { titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
+        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails { headline description includes steps { title duration description } faq { question answer } titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
       }),
       next: { revalidate: 10 },
     });
     if (!response.ok) return fallback;
-    const json = (await response.json()) as { data?: { serviceOfferings?: { nodes?: Node[] } } };
+    const json = (await response.json()) as {
+      data?: { serviceOfferings?: { nodes?: Node[] } };
+    };
     const nodes = json.data?.serviceOfferings?.nodes ?? [];
     if (!nodes.length) return fallback;
     return filterPublishedForLocale(nodes, locale)
@@ -116,19 +129,27 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       .map((node) => {
         const d = node.serviceDetails ?? {};
         const en = locale === "en";
+        const localized = Boolean(
+          node.gvspaceLocalization?.locale && node.gvspaceLocalization.locale !== "legacy",
+        );
         return {
           id: node.databaseId,
-          slug: node.slug,
-          parentSlug: node.parent?.node?.slug,
-          title: en && d.titleEn ? d.titleEn : node.title,
-          headline:
-            (en ? d.headlineEn : d.headlineUk) || (en && d.titleEn ? d.titleEn : node.title),
-          description: (en ? d.descriptionEn : d.descriptionUk) ?? "",
+          slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
+          parentSlug: node.parent?.node?.slug
+            ? getPublicContentSlug(node.parent.node.slug, node.parent.node.gvspaceLocalization)
+            : undefined,
+          title: localized ? node.title : en && d.titleEn ? d.titleEn : node.title,
+          headline: localized
+            ? (d.headline ?? node.title)
+            : (en ? d.headlineEn : d.headlineUk) || (en && d.titleEn ? d.titleEn : node.title),
+          description: localized
+            ? (d.description ?? "")
+            : ((en ? d.descriptionEn : d.descriptionUk) ?? ""),
           image: node.featuredImage?.node?.sourceUrl,
-          includes: (en ? d.includesEn : d.includesUk) ?? [],
-          steps: (en ? d.stepsEn : d.stepsUk) ?? [],
+          includes: localized ? (d.includes ?? []) : ((en ? d.includesEn : d.includesUk) ?? []),
+          steps: localized ? (d.steps ?? []) : ((en ? d.stepsEn : d.stepsUk) ?? []),
           metrics: d.metrics ?? [],
-          faq: (en ? d.faqEn : d.faqUk) ?? [],
+          faq: localized ? (d.faq ?? []) : ((en ? d.faqEn : d.faqUk) ?? []),
         };
       });
   } catch {

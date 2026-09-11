@@ -1,5 +1,9 @@
 import type { Locale } from "@/i18n";
-import { isContentPublishedForLocale, type ContentLocalization } from "@/content-localization";
+import {
+  getPublicContentSlug,
+  isContentPublishedForLocale,
+  type ContentLocalization,
+} from "@/content-localization";
 
 export type BlogPost = {
   slug: string;
@@ -98,7 +102,7 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
       result.data?.posts?.nodes
         ?.filter((post) => isContentPublishedForLocale(post.gvspaceLocalization, locale))
         .map((post) => ({
-          slug: post.slug,
+          slug: getPublicContentSlug(post.slug, post.gvspaceLocalization),
           title: stripHtml(post.title),
           excerpt: stripHtml(post.excerpt),
           category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
@@ -143,7 +147,7 @@ export async function getBlogPostsByAuthor(
       result.data?.user?.posts?.nodes
         ?.filter((post) => isContentPublishedForLocale(post.gvspaceLocalization, locale))
         .map((post) => ({
-          slug: post.slug,
+          slug: getPublicContentSlug(post.slug, post.gvspaceLocalization),
           title: stripHtml(post.title),
           excerpt: stripHtml(post.excerpt),
           category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
@@ -172,17 +176,22 @@ export async function getBlogPost(slug: string, locale: Locale): Promise<BlogPos
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          query: `query Post($slug: ID!) { post(id: $slug, idType: SLUG) { slug title excerpt content date gvspaceLocalization { locale translationGroup status } author { node { slug name avatar { url } gvspaceAuthorProfile { role } } } categories { nodes { name } } tags { nodes { name } } featuredImage { node { sourceUrl } } } }`,
-          variables: { slug },
+          query: `query PostsForRoute { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } author { node { slug name avatar { url } gvspaceAuthorProfile { role } } } categories { nodes { name } } tags { nodes { name } } featuredImage { node { sourceUrl } } } } }`,
         }),
         next: { revalidate: 60 },
       });
-      const result = (await response.json()) as { data?: { post?: WordPressPost } };
-      const post = result.data?.post;
+      const result = (await response.json()) as {
+        data?: { posts?: { nodes?: WordPressPost[] } };
+      };
+      const post = result.data?.posts?.nodes?.find(
+        (candidate) =>
+          isContentPublishedForLocale(candidate.gvspaceLocalization, locale) &&
+          getPublicContentSlug(candidate.slug, candidate.gvspaceLocalization) === slug,
+      );
       if (post && isContentPublishedForLocale(post.gvspaceLocalization, locale)) {
         const words = stripHtml(post.content).split(" ").length;
         return {
-          slug: post.slug,
+          slug: getPublicContentSlug(post.slug, post.gvspaceLocalization),
           title: stripHtml(post.title),
           excerpt: stripHtml(post.excerpt),
           content: post.content,

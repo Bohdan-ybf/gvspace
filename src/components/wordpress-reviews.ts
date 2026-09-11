@@ -1,5 +1,9 @@
 import type { Locale } from "@/i18n";
-import { filterPublishedForLocale, type ContentLocalization } from "@/content-localization";
+import {
+  filterPublishedForLocale,
+  getPublicContentSlug,
+  type ContentLocalization,
+} from "@/content-localization";
 
 export type ClientReview = {
   slug: string;
@@ -18,6 +22,8 @@ type ReviewNode = {
   title: string;
   featuredImage?: { node?: { sourceUrl?: string } };
   reviewDetails?: {
+    position?: string;
+    text?: string;
     nameEn?: string;
     positionUk?: string;
     positionEn?: string;
@@ -40,7 +46,7 @@ export async function getClientReviews(locale: Locale): Promise<ClientReview[]> 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Reviews { clientReviews(first: 100) { nodes { slug title gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } reviewDetails { nameEn positionUk positionEn company textUk textEn category rating metrics } } } }`,
+        query: `query Reviews { clientReviews(first: 100) { nodes { slug title gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } reviewDetails { position text nameEn positionUk positionEn company textUk textEn category rating metrics } } } }`,
       }),
       next: { revalidate: 60 },
     });
@@ -52,13 +58,28 @@ export async function getClientReviews(locale: Locale): Promise<ClientReview[]> 
       (node) => {
         const details = node.reviewDetails;
         if (!details) return [];
+        const localized = Boolean(
+          node.gvspaceLocalization?.locale && node.gvspaceLocalization.locale !== "legacy",
+        );
         return [
           {
-            slug: node.slug,
-            name: locale === "en" && details.nameEn ? details.nameEn : node.title,
-            position: locale === "en" ? (details.positionEn ?? "") : (details.positionUk ?? ""),
+            slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
+            name: localized
+              ? node.title
+              : locale === "en" && details.nameEn
+                ? details.nameEn
+                : node.title,
+            position: localized
+              ? (details.position ?? "")
+              : locale === "en"
+                ? (details.positionEn ?? "")
+                : (details.positionUk ?? ""),
             company: details.company ?? "",
-            text: locale === "en" ? (details.textEn ?? "") : (details.textUk ?? ""),
+            text: localized
+              ? (details.text ?? "")
+              : locale === "en"
+                ? (details.textEn ?? "")
+                : (details.textUk ?? ""),
             category: details.category ?? "",
             rating: details.rating ?? 5,
             metrics: details.metrics ?? [],
