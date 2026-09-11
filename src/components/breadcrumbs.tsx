@@ -22,7 +22,7 @@ export function Breadcrumbs({ locale, items }: { locale: Locale; items: Breadcru
   return (
     <>
       <StructuredData data={schema} />
-      <nav className="seo-breadcrumbs container mono" aria-label="Breadcrumb">
+      <nav className="seo-breadcrumbs container mono sr-only" aria-label="Breadcrumb">
         {allItems.map((item, index) => (
           <span key={`${item.label}-${index}`}>
             {index > 0 && <span aria-hidden="true">/</span>}
