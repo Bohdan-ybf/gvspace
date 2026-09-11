@@ -13,6 +13,7 @@ import { ReviewsSection } from "./reviews-section";
 import { getTranslations } from "@/i18n/pages";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
+import { Breadcrumbs } from "./breadcrumbs";
 export async function ServicesPage({ locale }: { locale: Locale }) {
   const t = getTranslations("services", locale).page;
   const serviceItems = await getServiceOfferings(locale);
@@ -118,6 +119,11 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
         <TechnologyShowcaseSection locale={locale} />
         <CasesSection locale={locale} text={text.cases} />
         <ReviewsSection locale={locale} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Послуги" : "Services" }]}
+          visible
+        />
         <ContactSection text={text.contact} />
       </main>
     </>

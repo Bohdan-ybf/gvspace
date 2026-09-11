@@ -52,14 +52,19 @@ export async function Home({ locale }: { locale: Locale }) {
       <main>
         <Problems text={text} />
         <Approach text={text} locale={locale} />
-        <ServiceVectors text={text.vectors} locale={locale} services={services} />
+        <ServiceVectors
+          text={text.vectors}
+          clarity={text.clarity}
+          locale={locale}
+          services={services}
+        />
         <MobileClarity text={text} locale={locale} />
         <TechnologySection locale={locale} title={text.technology.title} />
         <CasesSection text={text.cases} locale={locale} />
         <People text={text} />
         <ReviewsSection locale={locale} />
         <Blog text={text} locale={locale} posts={blogPosts} />
-        <Faq text={text} />
+        <Faq text={text} locale={locale} />
         <section className="mission container">
           <b>{text.mission.statement}</b>
           <p>{text.mission.description}</p>
@@ -234,19 +239,27 @@ function Blog({
   );
 }
 
-function Faq({ text }: { text: Messages }) {
+function Faq({ text, locale }: { text: Messages; locale: Locale }) {
   return (
     <section className="section container faq">
-      <h2>{text.faq.title}</h2>
-      {text.faq.questions.map((question) => (
-        <details key={question}>
-          <summary>
-            {question}
-            <span>+</span>
-          </summary>
-          <p className="muted">{text.faq.answer}</p>
-        </details>
-      ))}
+      <div className="faq-intro">
+        <h2>{text.faq.title}</h2>
+        <p>{text.faq.subtitle}</p>
+        <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+          {text.faq.action}
+        </Link>
+      </div>
+      <div className="faq-list">
+        {text.faq.questions.map((question, index) => (
+          <details key={question} open={index === 1}>
+            <summary>
+              {question}
+              <span>+</span>
+            </summary>
+            <p>{text.faq.answer}</p>
+          </details>
+        ))}
+      </div>
     </section>
   );
 }

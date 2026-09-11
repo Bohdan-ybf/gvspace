@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Locale } from "@/i18n";
+import { ArrowRight } from "./icons/arrow-right";
 
 import { getTranslations } from "@/i18n/pages";
 export function SystemTransitionSection({ locale }: { locale: Locale }) {
@@ -27,6 +29,10 @@ export function SystemTransitionSection({ locale }: { locale: Locale }) {
             <p>{t.afterDescription}</p>
           </article>
         </div>
+        <Link className="btn btn-primary method-cta" href={`/${locale}/contacts`}>
+          {t.action}
+          <ArrowRight />
+        </Link>
       </div>
     </section>
   );

@@ -12,7 +12,10 @@ export async function ReviewsSection({ locale }: { locale: Locale }) {
   return (
     <section className="section container home-reviews-section">
       <header>
-        <h2>{t.title}</h2>
+        <div>
+          <span className="mono">{t.eyebrow}</span>
+          <h2>{t.title}</h2>
+        </div>
         <Link className="btn btn-primary" href={`/${locale}/reviews`}>
           {t.allReviews}
           <ArrowRight />

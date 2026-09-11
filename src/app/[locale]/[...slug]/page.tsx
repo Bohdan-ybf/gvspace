@@ -99,7 +99,7 @@ export default async function RoutedPage({
     </>
   );
   if (isLocale(locale) && slug.length === 1 && slug[0] === "services") {
-    return section("services", <ServicesPage locale={locale} />);
+    return <ServicesPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length >= 2 && slug.length <= 3 && slug[0] === "services") {
     return <ServiceDetailPage locale={locale} slugs={slug.slice(1)} />;
@@ -114,10 +114,10 @@ export default async function RoutedPage({
     return <CaseDetailPage locale={locale} slug={slug[1]} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "about") {
-    return section("about", <AboutPage locale={locale} />);
+    return <AboutPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "team") {
-    return section("team", <TeamPage locale={locale} />);
+    return <TeamPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "careers") {
     return section("careers", <CareersPage locale={locale} />);

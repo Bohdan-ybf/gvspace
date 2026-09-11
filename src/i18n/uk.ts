@@ -5,9 +5,9 @@ export const uk = {
   hero: {
     eyebrow: "CLARITY BEFORE GROWTH",
     title: "Проєктуємо простір",
-    titleSecond: "вашого масштабування",
+    titleSecond: "вашого зростання",
     description:
-      "Замінюємо хаос інструментів на керовану систему. Синхронізуємо маркетинг, IT та стратегію для вашого росту.",
+      "Замінюємо хаос на систему. Синхронізуємо маркетинг, IT та стратегію для вашого масштабування.",
   },
   problems: {
     title: "Чому зростання зупинилося в хаосі?",
@@ -75,7 +75,7 @@ export const uk = {
     title: "Почніть з ясності, а не з витрат",
     description:
       "Забронюйте Clarity Session — 30-хвилинний розбір вашого маркетингу. Ви отримаєте карту вузьких місць та розуміння наступних кроків.",
-    action: "Забронювати безкоштовну Clarity Session",
+    action: "Записатися на Clarity Session",
   },
   cases: {
     title: "Кейси",
@@ -107,8 +107,11 @@ export const uk = {
     articleIntro: "Короткий опис превʼю статті на один абзац.",
   },
   faq: {
-    title: "FAQ",
-    answer: "Звʼяжіться з нами — підготуємо відповідь для вашого бізнесу.",
+    title: "Часті запитання",
+    subtitle: "та відповіді до них",
+    action: "Поставити питання",
+    answer:
+      "Працюємо з B2C та B2B бізнесами з digital-залежною моделлю росту: eCommerce, EdTech, IT/SaaS, сервісні бізнеси з середнім і високим чеком.",
     questions: [
       "Скільки часу займає впровадження системи?",
       "Чи працюєте ви з моєю нішею?",
@@ -118,7 +121,8 @@ export const uk = {
   },
   mission: {
     statement: "Ми віримо, що український бізнес заслуговує на простір для росту без хаосу.",
-    description: "Наша місія — дати CEO інструменти керування, а не просто звіти.",
+    description:
+      "Наша місія — дати CEO інструменти керування, а не просто звіти. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.",
   },
   contact: {
     eyebrow: "ОСТАННІЙ КРОК ДО СИСТЕМИ",

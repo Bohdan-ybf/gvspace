@@ -23,7 +23,8 @@ export default {
     navigationLabel: "Категорії відгуків",
   },
   summary: {
-    title: "Відгуки",
+    eyebrow: "ВІДГУКИ",
+    title: "Чи задоволені клієнти?",
     allReviews: "Усі відгуки",
     readMore: "Читати повністю",
   },

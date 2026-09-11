@@ -2,7 +2,7 @@
 /**
  * Plugin Name: GVSPACE Core
  * Description: Content types and GraphQL fields used by the GVSPACE frontend.
- * Version: 0.4.0
+ * Version: 0.5.0
  * Author: GVSPACE
  * Text Domain: gvspace-core
  */
@@ -62,6 +62,11 @@ const GVSPACE_SERVICE_FIELDS = [
     'faq_en' => ['label' => 'FAQ англійською: питання | відповідь', 'type' => 'textarea'],
 ];
 
+const GVSPACE_TEAM_MEMBER_FIELDS = [
+    'role' => ['label' => 'Посада / роль', 'type' => 'text'],
+    'tags' => ['label' => 'Компетенції (кожна з нового рядка)', 'type' => 'textarea'],
+];
+
 // New localized records contain exactly one language. Legacy field sets above
 // remain available while existing UK + EN records are being migrated.
 const GVSPACE_LOCALIZED_VACANCY_FIELDS = [
@@ -117,6 +122,7 @@ const GVSPACE_LOCALIZED_POST_TYPES = [
     'gv_service',
     'gv_review',
     'gv_technology',
+    'gv_team_member',
 ];
 
 const GVSPACE_CONTENT_LOCALES = [
@@ -268,6 +274,32 @@ add_action('init', function (): void {
         'supports' => ['title', 'thumbnail', 'page-attributes'],
     ]);
 
+    register_taxonomy('gv_team_member_category', ['gv_team_member'], [
+        'labels' => [
+            'name' => 'Таби команди', 'singular_name' => 'Таб команди', 'menu_name' => 'Таби',
+            'all_items' => 'Усі таби', 'edit_item' => 'Редагувати таб', 'add_new_item' => 'Додати таб',
+        ],
+        'public' => true, 'hierarchical' => false, 'show_admin_column' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'teamMemberCategory',
+        'graphql_plural_name' => 'teamMemberCategories',
+    ]);
+
+    register_post_type('gv_team_member', [
+        'labels' => [
+            'name' => 'Команда', 'singular_name' => 'Учасник команди', 'menu_name' => 'Команда',
+            'add_new_item' => 'Додати людину', 'edit_item' => 'Редагувати профіль',
+            'new_item' => 'Новий учасник команди', 'all_items' => 'Усі люди',
+            'not_found' => 'Учасників команди не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'teamMember', 'graphql_plural_name' => 'teamMembers',
+        'menu_icon' => 'dashicons-groups',
+        'supports' => ['title', 'thumbnail', 'page-attributes'],
+        'taxonomies' => ['gv_team_member_category'],
+    ]);
+
     register_taxonomy('gv_technology_category', ['gv_technology'], [
         'labels' => [
             'name' => 'Категорії технологій',
@@ -410,6 +442,14 @@ add_action('init', function (): void {
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
+    foreach (array_keys(GVSPACE_TEAM_MEMBER_FIELDS) as $field) {
+        register_post_meta('gv_team_member', '_gvspace_team_member_' . $field, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_textarea_field',
             'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
         ]);
@@ -660,6 +700,24 @@ foreach (GVSPACE_LOCALIZED_POST_TYPES as $gvspace_localized_post_type) {
 add_action('add_meta_boxes', function (): void {
     add_meta_box('gvspace-case-details', 'Дані кейсу', 'gvspace_render_case_fields', 'gv_case', 'normal', 'high');
     add_meta_box('gvspace-technology-details', 'Налаштування технології', 'gvspace_render_technology_fields', 'gv_technology', 'normal', 'high');
+    add_meta_box('gvspace-team-member-details', 'Дані учасника команди', 'gvspace_render_team_member_fields', 'gv_team_member', 'normal', 'high');
+});
+
+function gvspace_render_team_member_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_team_member', 'gvspace_team_member_nonce');
+    echo '<p class="description">Ім’я вкажіть у заголовку, фото — у «Головному зображенні», таби — у блоці «Таби команди», позицію картки — у полі «Порядок».</p>';
+    gvspace_render_field_set($post, GVSPACE_TEAM_MEMBER_FIELDS, 'gvspace_team_member_', '_gvspace_team_member_');
+}
+
+add_action('save_post_gv_team_member', function (int $post_id): void {
+    if (
+        !isset($_POST['gvspace_team_member_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_team_member_nonce'])), 'gvspace_save_team_member')
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || !current_user_can('edit_post', $post_id)
+    ) return;
+    gvspace_save_field_set($post_id, GVSPACE_TEAM_MEMBER_FIELDS, 'gvspace_team_member_', '_gvspace_team_member_');
 });
 
 function gvspace_render_technology_fields(WP_Post $post): void
@@ -856,7 +914,7 @@ add_action('graphql_register_types', function (): void {
         ],
     ]);
 
-    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology'] as $graphql_type) {
+    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember'] as $graphql_type) {
         register_graphql_field($graphql_type, 'gvspaceLocalization', [
             'type' => 'GvspaceLocalization',
             'resolve' => static function ($source): array {
@@ -915,6 +973,26 @@ add_action('graphql_register_types', function (): void {
         'description' => 'English technology name.',
         'resolve' => static function ($source): string {
             return (string) get_post_meta((int) $source->databaseId, '_gvspace_technology_title_en', true);
+        },
+    ]);
+
+    register_graphql_object_type('GvspaceTeamMemberDetails', [
+        'description' => 'Editable fields displayed on a GVSPACE team card.',
+        'fields' => [
+            'role' => ['type' => 'String'],
+            'tags' => ['type' => ['list_of' => 'String']],
+        ],
+    ]);
+    register_graphql_field('TeamMember', 'teamMemberDetails', [
+        'type' => 'GvspaceTeamMemberDetails',
+        'resolve' => static function ($source): array {
+            $post_id = (int) $source->databaseId;
+            $role = (string) get_post_meta($post_id, '_gvspace_team_member_role', true);
+            $tags = (string) get_post_meta($post_id, '_gvspace_team_member_tags', true);
+            return [
+                'role' => $role,
+                'tags' => array_values(array_filter(array_map('trim', preg_split('/\R/', $tags) ?: []))),
+            ];
         },
     ]);
 
@@ -1116,6 +1194,61 @@ register_activation_hook(__FILE__, function (): void {
 
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
 
+function gvspace_seed_team_tabs(): void
+{
+    $tabs = [
+        'core-team' => 'CORE TEAM',
+        'strategy' => 'STRATEGY',
+        'marketing' => 'MARKETING',
+        'development' => 'DEVELOPMENT',
+        'content' => 'CONTENT',
+    ];
+    foreach ($tabs as $slug => $name) {
+        if (!term_exists($slug, 'gv_team_member_category')) {
+            wp_insert_term($name, 'gv_team_member_category', ['slug' => $slug]);
+        }
+    }
+}
+add_action('admin_init', 'gvspace_seed_team_tabs');
+
+add_filter('manage_gv_team_member_posts_columns', function (array $columns): array {
+    $columns['menu_order'] = 'Порядок';
+    return $columns;
+});
+
+add_action('manage_gv_team_member_posts_custom_column', function (string $column, int $post_id): void {
+    if ($column === 'menu_order') echo esc_html((string) get_post_field('menu_order', $post_id));
+}, 10, 2);
+
+add_filter('manage_edit-gv_team_member_sortable_columns', function (array $columns): array {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+});
+
+add_action('restrict_manage_posts', function (string $post_type): void {
+    if ($post_type !== 'gv_team_member') return;
+    $selected = isset($_GET['gv_team_member_category'])
+        ? sanitize_key(wp_unslash($_GET['gv_team_member_category']))
+        : '';
+    wp_dropdown_categories([
+        'show_option_all' => 'Усі таби команди',
+        'taxonomy' => 'gv_team_member_category',
+        'name' => 'gv_team_member_category',
+        'orderby' => 'name',
+        'selected' => $selected,
+        'hierarchical' => false,
+        'hide_empty' => false,
+        'value_field' => 'slug',
+    ]);
+});
+
+add_action('pre_get_posts', function (WP_Query $query): void {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'gv_team_member') return;
+    if (!$query->get('orderby')) {
+        $query->set('orderby', ['menu_order' => 'ASC', 'date' => 'DESC']);
+    }
+});
+
 function gvspace_seed_services(): void
 {
     if (get_option('gvspace_services_seeded_v1')) return;
@@ -1185,7 +1318,7 @@ add_action('init', function (): void {
 add_filter('comments_open', '__return_false', 100);
 add_filter('pings_open', '__return_false', 100);
 
-const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology'];
+const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology', 'gv_team_member'];
 
 function gvspace_prepare_localized_duplicate(int $source_id, int $duplicate_id, string $target_locale): void
 {

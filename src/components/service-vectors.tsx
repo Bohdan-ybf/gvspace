@@ -11,10 +11,11 @@ import type { ServiceOffering } from "./wordpress-services";
 type ServiceVectorsProps = {
   locale: Locale;
   text: Messages["vectors"];
+  clarity: Messages["clarity"];
   services: ServiceOffering[];
 };
 
-export function ServiceVectors({ locale, text, services }: ServiceVectorsProps) {
+export function ServiceVectors({ locale, text, clarity, services }: ServiceVectorsProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
   const directions = text.slugs.map((slug, index) => {
     const direction = services.find((service) => service.slug === slug && !service.parentSlug);
@@ -35,15 +36,31 @@ export function ServiceVectors({ locale, text, services }: ServiceVectorsProps) 
 
   return (
     <section className="section container vectors-section">
-      <h2>{text.title}</h2>
+      <header className="vectors-header">
+        <h2>{text.title}</h2>
+        <Link className="btn btn-primary vectors-all" href={`/${locale}/services`}>
+          <span>{locale === "uk" ? "Усі послуги" : "All services"}</span>
+          <ArrowRight />
+        </Link>
+      </header>
       <div className="vectors">
-        <Image
-          src="/images/figma/service-vectors.webp"
-          width={410}
-          height={385}
-          sizes="(max-width: 900px) 100vw, 410px"
-          alt={text.imageAlt}
-        />
+        <aside className="vectors-visual">
+          <Image
+            src="/images/figma/service-vectors.webp"
+            width={410}
+            height={385}
+            sizes="(max-width: 900px) 100vw, 410px"
+            alt={text.imageAlt}
+          />
+          <div className="vectors-clarity-card">
+            <h3>{clarity.title}</h3>
+            <p>{clarity.description}</p>
+            <Link href={`/${locale}/contacts`}>
+              <span>{clarity.action}</span>
+              <ArrowRight />
+            </Link>
+          </div>
+        </aside>
         <div className="vectors-accordion">
           {directions.map((direction, index) => {
             const isOpen = activeIndex === index;
@@ -67,8 +84,8 @@ export function ServiceVectors({ locale, text, services }: ServiceVectorsProps) 
                     <span>]</span>
                   </span>
                 </button>
+                <p className="vector-description">{direction.description}</p>
                 <div className="vector-panel" id={panelId} hidden={!isOpen}>
-                  <p className="muted">{direction.description}</p>
                   <ul>
                     {direction.children.map((service) => (
                       <li key={service.id}>

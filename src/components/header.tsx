@@ -10,6 +10,57 @@ import { Logo } from "./logo";
 
 import { getTranslations } from "@/i18n/pages";
 const routes = ["services", "cases", "expertise", "about", "blog", "contacts"];
+const serviceSlugs = {
+  strategy: [
+    "strategic-audit",
+    "digital-audit",
+    "market-analysis",
+    "clarity-session",
+    "growth-roadmap",
+    "marketing-process-audit",
+  ],
+  marketing: [
+    "performance-marketing",
+    "analytics-dashboards",
+    "smm-strategy",
+    "seo",
+    "retention-crm",
+  ],
+  development: [
+    "corporate-websites",
+    "business-systems",
+    "technical-support",
+    "ecommerce",
+    "product-discovery",
+  ],
+  content: [
+    "brand-design",
+    "photo-production",
+    "creative-concepts",
+    "video-production",
+    "copywriting",
+  ],
+} as const;
+
+function MenuArrowIcon() {
+  return (
+    <svg
+      className="menu-arrow-icon"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M13.7498 0H0V6.25018H12.2437C9.96615 10.6981 5.33352 13.7498 0 13.7498V20C5.32506 20 10.165 17.9185 13.7498 14.5226V20H20V0H13.7498Z"
+        fill="currentColor"
+        fillOpacity="0.7"
+      />
+    </svg>
+  );
+}
 
 export function Header({ locale, forceSolid = false }: { locale: Locale; forceSolid?: boolean }) {
   const t = getTranslations("common", locale).header;
@@ -23,6 +74,8 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const serviceDirections = t.serviceDirections;
+  const serviceMenuDirections = getTranslations("services", locale).directions;
+  const companyLinks = t.companyLinks;
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,12 +128,50 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
                 <ChevronDown className="chevron" />
               </Link>
               <div className="services-dropdown">
-                {serviceDirections.map((direction) => (
-                  <Link href={`/${locale}/services/${direction.slug}`} key={direction.slug}>
-                    <span>{direction.title}</span>
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                ))}
+                <div className="services-dropdown-grid">
+                  {serviceMenuDirections.map((direction) => (
+                    <section className="services-dropdown-group" key={direction.slug}>
+                      <Link
+                        className="services-dropdown-title"
+                        href={`/${locale}/services/${direction.slug}`}
+                      >
+                        <MenuArrowIcon />
+                        {direction.title}
+                      </Link>
+                      <ul>
+                        {direction.services.map((service, serviceIndex) => (
+                          <li key={service}>
+                            <Link
+                              href={`/${locale}/services/${direction.slug}/${serviceSlugs[direction.slug][serviceIndex]}`}
+                            >
+                              {service}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : index === 3 ? (
+            <div className="company-menu" key="about">
+              <Link href={`/${locale}/about`}>
+                {label.toUpperCase()}
+                <ChevronDown className="chevron" />
+              </Link>
+              <div className="company-dropdown">
+                <div className="company-dropdown-grid">
+                  {companyLinks.map((item) => (
+                    <Link href={`/${locale}${item.href}`} key={item.title}>
+                      <strong>
+                        <MenuArrowIcon />
+                        {item.title}
+                      </strong>
+                      <span>{item.description}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (

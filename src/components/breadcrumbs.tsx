@@ -5,7 +5,15 @@ import { StructuredData } from "./structured-data";
 
 export type BreadcrumbItem = { label: string; pathname?: string };
 
-export function Breadcrumbs({ locale, items }: { locale: Locale; items: BreadcrumbItem[] }) {
+export function Breadcrumbs({
+  locale,
+  items,
+  visible = false,
+}: {
+  locale: Locale;
+  items: BreadcrumbItem[];
+  visible?: boolean;
+}) {
   const homeLabel = locale === "uk" ? "Головна" : "Home";
   const allItems = [{ label: homeLabel, pathname: "/" }, ...items];
   const schema = {
@@ -22,7 +30,10 @@ export function Breadcrumbs({ locale, items }: { locale: Locale; items: Breadcru
   return (
     <>
       <StructuredData data={schema} />
-      <nav className="seo-breadcrumbs container mono sr-only" aria-label="Breadcrumb">
+      <nav
+        className={`seo-breadcrumbs container mono${visible ? "" : " sr-only"}`}
+        aria-label="Breadcrumb"
+      >
         {allItems.map((item, index) => (
           <span key={`${item.label}-${index}`}>
             {index > 0 && <span aria-hidden="true">/</span>}

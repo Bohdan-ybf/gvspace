@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n";
 import { AboutPrinciplesSection } from "./about-principles-section";
 import { AboutStatsSection } from "./about-stats-section";
 import { AgencyComparisonSection } from "./agency-comparison-section";
+import { Breadcrumbs } from "./breadcrumbs";
 import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
 import { SystemTransitionSection } from "./system-transition-section";
@@ -35,6 +36,11 @@ export function AboutPage({ locale }: { locale: Locale }) {
       <SystemTransitionSection locale={locale} />
       <AboutPrinciplesSection locale={locale} />
       <AgencyComparisonSection locale={locale} />
+      <Breadcrumbs
+        locale={locale}
+        items={[{ label: locale === "uk" ? "Про компанію" : "About us" }]}
+        visible
+      />
       <ContactSection text={text.contact} />
     </main>
   );

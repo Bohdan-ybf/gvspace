@@ -41,6 +41,9 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         },
       ];
   const dictionary = getTranslations("global", locale);
+  const faqs = item.faq.length
+    ? item.faq
+    : dictionary.faq.questions.map((question) => ({ question, answer: dictionary.faq.answer }));
   const serviceBreadcrumbs: BreadcrumbItem[] = [
     { label: locale === "uk" ? "Послуги" : "Services", pathname: "/services" },
     ...(item.parentSlug
@@ -55,11 +58,11 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
     description: seo?.description || item.description,
     provider: { "@type": "Organization", name: "GVSPACE" },
   };
-  const faqSchema = item.faq.length
+  const faqSchema = faqs.length
     ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: item.faq.map((faq) => ({
+        mainEntity: faqs.map((faq) => ({
           "@type": "Question",
           name: faq.question,
           acceptedAnswer: { "@type": "Answer", text: faq.answer },
@@ -70,7 +73,6 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
   return (
     <>
       <StructuredData data={faqSchema ? [serviceSchema, faqSchema] : serviceSchema} />
-      <Breadcrumbs locale={locale} items={serviceBreadcrumbs} />
       <main className="service-detail-page">
         <section className={`service-detail-hero${isDirection ? " is-direction" : ""}`}>
           <div className="container service-detail-hero-grid">
@@ -157,25 +159,27 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         <TechnologyShowcaseSection locale={locale} />
         <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
         <ReviewsSection locale={locale} />
-        {item.faq.length > 0 && (
-          <section className="section container service-faq">
-            <div>
-              <h2>{t.faqTitle}</h2>
-              <p>{t.faqDescription}</p>
-            </div>
-            <div>
-              {item.faq.map((faq) => (
-                <details key={faq.question}>
-                  <summary>
-                    {faq.question}
-                    <span>+</span>
-                  </summary>
-                  <p>{faq.answer}</p>
-                </details>
-              ))}
-            </div>
-          </section>
-        )}
+        <section className="section container service-faq">
+          <div>
+            <h2>{t.faqTitle}</h2>
+            <p>{t.faqDescription}</p>
+            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+              {dictionary.faq.action}
+            </Link>
+          </div>
+          <div>
+            {faqs.map((faq) => (
+              <details key={faq.question}>
+                <summary>
+                  {faq.question}
+                  <span>+</span>
+                </summary>
+                <p>{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+        <Breadcrumbs locale={locale} items={serviceBreadcrumbs} visible />
         <ContactSection text={dictionary.contact} />
       </main>
     </>

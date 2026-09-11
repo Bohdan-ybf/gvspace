@@ -23,7 +23,8 @@ export default {
     navigationLabel: "Review categories",
   },
   summary: {
-    title: "Reviews",
+    eyebrow: "REVIEWS",
+    title: "Are our clients satisfied?",
     allReviews: "All reviews",
     readMore: "Read in full",
   },

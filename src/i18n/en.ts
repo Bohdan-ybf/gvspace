@@ -109,8 +109,11 @@ export const en: Messages = {
     articleIntro: "A short one-paragraph preview of the article.",
   },
   faq: {
-    title: "FAQ",
-    answer: "Contact us and we will prepare an answer tailored to your business.",
+    title: "Frequently asked questions",
+    subtitle: "and answers to them",
+    action: "Ask a question",
+    answer:
+      "We work with B2C and B2B companies with digital-led growth models: eCommerce, EdTech, IT/SaaS, and service businesses with medium and high average order values.",
     questions: [
       "How long does system implementation take?",
       "Do you work with my industry?",
@@ -120,7 +123,8 @@ export const en: Messages = {
   },
   mission: {
     statement: "We believe Ukrainian businesses deserve room to grow without chaos.",
-    description: "Our mission is to give CEOs management tools, not just reports.",
+    description:
+      "Our mission is to give CEOs management tools, not just reports. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.",
   },
   contact: {
     eyebrow: "THE FINAL STEP TOWARD A SYSTEM",
