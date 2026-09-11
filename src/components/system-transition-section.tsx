@@ -1,30 +1,30 @@
 import Image from "next/image";
 import type { Locale } from "@/i18n";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function SystemTransitionSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["system-transition-section"];
+  const t = getTranslations("common", locale).systemTransition;
 
   return (
     <section className="services-method">
       <Image src="/images/services/system-background.webp" alt="" fill sizes="100vw" />
       <div className="container">
-        <span className="mono">{copy.copy1}</span>
-        <h2>{copy.copy2}</h2>
+        <span className="mono">{t.eyebrow}</span>
+        <h2>{t.title}</h2>
 
         <div className="method-flow">
           <article>
-            <small className="mono">{copy.copy3}</small>
-            <h3>{copy.copy4}</h3>
-            <p>{copy.copy5}</p>
+            <small className="mono">{t.beforeLabel}</small>
+            <h3>{t.beforeTitle}</h3>
+            <p>{t.beforeDescription}</p>
           </article>
 
           <MethodArrow />
 
           <article>
-            <small className="mono">{copy.copy6}</small>
-            <h3>{copy.copy7}</h3>
-            <p>{copy.copy8}</p>
+            <small className="mono">{t.afterLabel}</small>
+            <h3>{t.afterTitle}</h3>
+            <p>{t.afterDescription}</p>
           </article>
         </div>
       </div>

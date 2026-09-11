@@ -1,0 +1,50 @@
+export default {
+  article: {
+    labels: {
+      contents: "CONTENTS",
+      read: "min read",
+      share: "Share",
+      author: "Author page",
+      related: "READ ALSO",
+    },
+    readMore: "Read",
+  },
+  page: {
+    filtersLabel: "Blog categories",
+    emptyState: "There are no articles yet. Publish the first post in WordPress.",
+  },
+  author: {
+    aboutLabel: "ABOUT THE AUTHOR",
+    experienceLabel: "years of experience",
+    projectsLabel: "successful projects",
+    questionTitle: "Have a question?",
+    questionDescription:
+      "We will review your situation during a free personal consultation and find an effective solution.",
+    askAuthor: "Ask the author",
+    articlesTitle: "All articles by the author",
+    readArticle: "Read article",
+    emptyState: "This author has not published any articles yet.",
+    readMore: "Read",
+  },
+  content: {
+    eyebrow: "INSIGHTS & CASES",
+    title: "A space for those who think about growth",
+    intro: "Articles, cases and insights about systematic marketing, IT and growth strategy.",
+    all: "All",
+    categories: {
+      strategy: "Strategy",
+      marketing: "Marketing",
+      development: "IT development",
+      content: "Content & Production",
+      case: "Case",
+      analytics: "Analytics",
+    },
+    read: "Read article",
+    more: "Load more",
+    stay: "STAY UP TO DATE",
+    newsletter: "Growth insights — once a week",
+    noSpam: "No spam. Only ideas that help you make decisions.",
+    email: "your@email.com",
+    subscribe: "Subscribe",
+  },
+} as const;

@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContactSection } from "./contact-section";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { getBlogAuthor } from "./wordpress-authors";
 import { getBlogPostsByAuthor } from "./wordpress-posts";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: string }) {
   const author = await getBlogAuthor(slug, locale);
   if (!author) notFound();
   const wordpressPosts = await getBlogPostsByAuthor(slug, locale);
-  const copy = componentCopy[locale]["blog-author-page"];
+  const t = getTranslations("blog", locale).author;
   const featured = wordpressPosts[0];
 
   return (
@@ -27,28 +27,28 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
           aria-label={author.name}
         />
         <div className="author-bio">
-          <span className="mono">● {copy.copy1}</span>
+          <span className="mono">● {t.aboutLabel}</span>
           <h2>{author.headline}</h2>
           <p>{author.bio}</p>
           <dl>
             <div>
               <dt>{author.experience}</dt>
-              <dd>{copy.copy2}</dd>
+              <dd>{t.experienceLabel}</dd>
             </div>
             <div>
               <dt>{author.projects}</dt>
-              <dd>{copy.copy3}</dd>
+              <dd>{t.projectsLabel}</dd>
             </div>
           </dl>
         </div>
         <aside>
-          <h2>{copy.copy4}</h2>
-          <p>{copy.copy5}</p>
-          <Link href={`/${locale}/contacts`}>{copy.copy6} →</Link>
+          <h2>{t.questionTitle}</h2>
+          <p>{t.questionDescription}</p>
+          <Link href={`/${locale}/contacts`}>{t.askAuthor} →</Link>
         </aside>
       </section>
       <section className="container author-posts">
-        <h2>{copy.copy7}</h2>
+        <h2>{t.articlesTitle}</h2>
         {featured ? (
           <article className="author-featured">
             <div
@@ -71,11 +71,11 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
               </small>
               <h3>{featured.title}</h3>
               <p>{featured.excerpt}</p>
-              <Link href={`/${locale}/blog/${featured.slug}`}>{copy.copy8} →</Link>
+              <Link href={`/${locale}/blog/${featured.slug}`}>{t.readArticle} →</Link>
             </div>
           </article>
         ) : (
-          <p className="blog-empty">{copy.copy9}</p>
+          <p className="blog-empty">{t.emptyState}</p>
         )}
         {wordpressPosts.length > 1 && (
           <div className="author-post-grid">
@@ -99,13 +99,13 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
                   {card.publishedAt} · {card.readingTime} хв
                 </small>
                 <h3>{card.title}</h3>
-                <Link href={`/${locale}/blog/${card.slug}`}>{copy.copy10} →</Link>
+                <Link href={`/${locale}/blog/${card.slug}`}>{t.readMore} →</Link>
               </article>
             ))}
           </div>
         )}
       </section>
-      <ContactSection text={getDictionary(locale).contact} />
+      <ContactSection text={getTranslations("global", locale).contact} />
     </main>
   );
 }

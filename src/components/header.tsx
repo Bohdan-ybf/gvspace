@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getDictionary, localeNames, locales, type Locale } from "@/i18n";
+import { localeNames, locales, type Locale } from "@/i18n";
 import { getLocalizedUrl } from "@/markets";
 import { ChevronDown } from "./icons/chevron-down";
 import { Logo } from "./logo";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 const routes = ["services", "cases", "expertise", "about", "blog", "contacts"];
 
 export function Header({ locale, forceSolid = false }: { locale: Locale; forceSolid?: boolean }) {
-  const copy = componentCopy[locale]["header"];
-  const text = getDictionary(locale);
+  const t = getTranslations("common", locale).header;
+  const text = getTranslations("global", locale);
   const alternateLanguages = locales.filter((language) => language !== locale);
   const pathname = usePathname();
   const languageHref = (language: Locale) => {
@@ -22,7 +22,7 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
-  const serviceDirections = copy.copy1;
+  const serviceDirections = t.serviceDirections;
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
       <Link className="logo" href={`/${locale}`} aria-label="GVSPACE">
         <Logo variant="header" priority />
       </Link>
-      <nav className="desktop-only" aria-label={copy.copy2}>
+      <nav className="desktop-only" aria-label={t.mainNavigationLabel}>
         {text.navigation.map((label, index) =>
           index === 0 ? (
             <div className="services-menu" key="services">
@@ -99,7 +99,7 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
           {text.common.buildSystem}
         </Link>
         <Link className="btn btn-primary mobile-header-cta" href={`/${locale}/contacts`}>
-          {copy.copy3}
+          {t.mobileAction}
         </Link>
         <div className="language-switcher" ref={languageSwitcherRef}>
           <button
@@ -151,7 +151,7 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
       <nav
         id="mobile-navigation"
         className={`mobile-navigation${isMenuOpen ? " is-open" : ""}`}
-        aria-label={copy.copy4}
+        aria-label={t.mobileNavigationLabel}
         aria-hidden={!isMenuOpen}
       >
         {text.navigation.map((label, index) => (

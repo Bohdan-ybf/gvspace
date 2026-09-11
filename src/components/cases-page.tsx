@@ -1,21 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { CasesCatalog } from "./cases-catalog";
 import { ContactSection } from "./contact-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getCaseStudies } from "./wordpress-cases";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function CasesPage({ locale }: { locale: Locale }) {
-  const text = getDictionary(locale);
+  const text = getTranslations("global", locale);
   const projects = await getCaseStudies(locale);
-  const copy = componentCopy[locale]["cases-page"];
+  const t = getTranslations("cases", locale).page;
   const contactText = {
     ...text.contact,
-    title: copy.copy1,
-    titleSecond: copy.copy2,
+    title: t.contactTitle,
+    titleSecond: t.contactTitleSecond,
   };
 
   return (
@@ -24,10 +24,10 @@ export async function CasesPage({ locale }: { locale: Locale }) {
         <Image src="/images/cases/cases.webp" alt="" fill priority sizes="100vw" />
         <div className="container cases-hero-content">
           <span className="mono">CASES</span>
-          <h1>{copy.copy3}</h1>
-          <p>{copy.copy4}</p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroDescription}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {copy.copy5}
+            {t.heroAction}
             <ArrowRight />
           </Link>
         </div>

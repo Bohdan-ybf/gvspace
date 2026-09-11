@@ -7,14 +7,14 @@ import { ChevronDown } from "./icons/chevron-down";
 import Link from "next/link";
 import type { CaseStudy } from "./wordpress-cases";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 type CasesCatalogProps = {
   locale: Locale;
   projects: CaseStudy[];
 };
 
 export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
-  const copy = componentCopy[locale]["cases-catalog"];
+  const t = getTranslations("cases", locale).catalog;
   const [type, setType] = useState("all");
   const [industry, setIndustry] = useState("all");
   const [visibleCount, setVisibleCount] = useState(4);
@@ -40,26 +40,26 @@ export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
     <section className="cases-catalog section container">
       <div className="cases-filters">
         <label>
-          <span className="sr-only">{copy.copy1}</span>
+          <span className="sr-only">{t.typeLabel}</span>
           <select value={type} onChange={(event) => changeFilter(setType, event.target.value)}>
-            <option value="all">{copy.copy2}</option>
+            <option value="all">{t.allTypes}</option>
             <option value="ecommerce">E-commerce</option>
-            <option value="strategy">{copy.copy3}</option>
-            <option value="development">{copy.copy4}</option>
-            <option value="marketing">{copy.copy5}</option>
+            <option value="strategy">{t.strategy}</option>
+            <option value="development">{t.development}</option>
+            <option value="marketing">{t.marketing}</option>
           </select>
           <ChevronDown />
         </label>
 
         <label>
-          <span className="sr-only">{copy.copy6}</span>
+          <span className="sr-only">{t.industryLabel}</span>
           <select
             value={industry}
             onChange={(event) => changeFilter(setIndustry, event.target.value)}
           >
-            <option value="all">{copy.copy7}</option>
+            <option value="all">{t.allIndustries}</option>
             <option value="retail">Retail</option>
-            <option value="services">{copy.copy8}</option>
+            <option value="services">{t.services}</option>
             <option value="technology">Technology</option>
           </select>
           <ChevronDown />
@@ -86,7 +86,7 @@ export function CasesCatalog({ locale, projects }: CasesCatalogProps) {
           type="button"
           onClick={() => setVisibleCount((count) => count + 2)}
         >
-          {copy.copy9}
+          {t.loadMore}
           <ChevronDown />
         </button>
       )}

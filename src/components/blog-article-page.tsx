@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
-import { getDictionary } from "@/i18n";
 import { ContactSection } from "./contact-section";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 function prepareArticleContent(content: string) {
   const headings: Array<{ id: string; label: string }> = [];
   const html = content.replace(
@@ -25,14 +24,14 @@ function prepareArticleContent(content: string) {
 }
 
 export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: string }) {
-  const copy = componentCopy[locale]["blog-article-page"];
+  const t = getTranslations("blog", locale).article;
   const post = await getBlogPost(slug, locale);
   if (!post) notFound();
   const { html, headings } = prepareArticleContent(post.content);
   const related = (await getBlogPosts(locale))
     .filter((item) => item.slug !== post.slug)
     .slice(0, 3);
-  const text = copy.copy1;
+  const text = t.labels;
 
   return (
     <main className="article-page">
@@ -119,13 +118,13 @@ export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: 
                   {item.publishedAt} · {item.readingTime} хв
                 </small>
                 <h3>{item.title}</h3>
-                <Link href={`/${locale}/blog/${item.slug}`}>{copy.copy2} →</Link>
+                <Link href={`/${locale}/blog/${item.slug}`}>{t.readMore} →</Link>
               </article>
             ))}
           </div>
         </section>
       )}
-      <ContactSection text={getDictionary(locale).contact} />
+      <ContactSection text={getTranslations("global", locale).contact} />
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
 import { ServiceVectors } from "./service-vectors";
@@ -11,12 +11,12 @@ import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
 import { ReviewsSection } from "./reviews-section";
 import { getServiceOfferings } from "./wordpress-services";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
 const approachIcons = ["clarity", "system", "scale"] as const;
 
 export async function Home({ locale }: { locale: Locale }) {
-  const text = getDictionary(locale);
+  const text = getTranslations("global", locale);
   const [blogPostsResult, services] = await Promise.all([
     getBlogPosts(locale),
     getServiceOfferings(locale),
@@ -175,7 +175,7 @@ function Blog({
   locale: Locale;
   posts: BlogPostSummary[];
 }) {
-  const copy = componentCopy[locale]["home"];
+  const t = getTranslations("home", locale).blog;
   if (!posts.length) return null;
 
   return (
@@ -183,7 +183,7 @@ function Blog({
       <header className="home-blog-header">
         <h2>{text.blog.title}</h2>
         <Link className="btn btn-primary home-blog-more" href={`/${locale}/blog`}>
-          {copy.copy1}
+          {t.allArticles}
           <ArrowRight />
         </Link>
       </header>
@@ -209,11 +209,11 @@ function Blog({
                 <span>{post.publishedAt}</span>
                 <span aria-hidden="true">·</span>
                 <span>
-                  {post.readingTime} {copy.copy2}
+                  {post.readingTime} {t.minutesLabel}
                 </span>
                 {index === 0 && (
                   <span className="home-blog-author">
-                    {copy.copy3}: {post.authorName}
+                    {t.authorLabel}: {post.authorName}
                   </span>
                 )}
               </div>
@@ -223,7 +223,7 @@ function Blog({
               <p>{post.excerpt}</p>
               {index !== 0 && (
                 <small className="home-blog-card-author mono">
-                  {copy.copy4}: {post.authorName}
+                  {t.cardAuthorLabel}: {post.authorName}
                 </small>
               )}
             </div>

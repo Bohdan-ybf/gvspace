@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { CareersBanner } from "./careers-banner";
 import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
 import { TeamDirectorySection } from "./team-directory-section";
 import { TeamFounderSection } from "./team-founder-section";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function TeamPage({ locale }: { locale: Locale }) {
-  const text = getDictionary(locale);
-  const copy = componentCopy[locale]["team-page"];
+  const text = getTranslations("global", locale);
+  const t = getTranslations("team", locale).page;
 
   return (
     <main className="team-page">
@@ -18,8 +18,8 @@ export function TeamPage({ locale }: { locale: Locale }) {
         <Image src="/images/team/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container team-hero-content">
           <span className="mono">TEAM</span>
-          <h1>{copy.copy1}</h1>
-          <p>{copy.copy2}</p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroDescription}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
             {text.common.buildSystem}
             <ArrowRight />

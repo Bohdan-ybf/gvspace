@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ReviewCard } from "./review-card";
 import type { ClientReview } from "./wordpress-reviews";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 const categories = ["all", "strategy", "marketing", "development", "content"] as const;
 
 export function ReviewsCatalog({
@@ -14,16 +14,16 @@ export function ReviewsCatalog({
   reviews: ClientReview[];
   locale: "uk" | "en";
 }) {
-  const copy = componentCopy[locale]["reviews-catalog"];
+  const t = getTranslations("reviews", locale).catalog;
   const [active, setActive] = useState<(typeof categories)[number]>("all");
-  const labels = copy.copy1;
+  const labels = t.categoryLabels;
   const visible =
     active === "all" ? reviews : reviews.filter((review) => review.category === active);
 
   return (
     <section className="section container reviews-catalog">
-      <span className="reviews-eyebrow mono">{copy.copy2}</span>
-      <nav aria-label={copy.copy3}>
+      <span className="reviews-eyebrow mono">{t.eyebrow}</span>
+      <nav aria-label={t.navigationLabel}>
         {categories.map((category, index) => (
           <button
             className={active === category ? "is-active" : ""}

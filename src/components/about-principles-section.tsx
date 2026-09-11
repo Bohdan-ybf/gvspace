@@ -1,24 +1,24 @@
 import type { Locale } from "@/i18n";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function AboutPrinciplesSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["about-principles-section"];
+  const t = getTranslations("about", locale).principles;
 
   return (
     <section className="about-principles section container">
       <div className="about-team">
-        <div className="about-team-photo">{copy.copy1}</div>
+        <div className="about-team-photo">{t.photoLabel}</div>
         <div>
-          <h2>{copy.copy2}</h2>
-          <p>{copy.copy3}</p>
+          <h2>{t.teamTitle}</h2>
+          <p>{t.teamDescription}</p>
         </div>
       </div>
 
       <div className="about-values">
-        <h2>{copy.copy4}</h2>
-        <span>{copy.copy5}</span>
+        <h2>{t.valuesTitle}</h2>
+        <span>{t.visionLabel}</span>
         <div className="about-values-grid">
-          {copy.copy6.map(([title, description]) => (
+          {t.values.map(([title, description]) => (
             <article key={title}>
               <h3>{title}</h3>
               <p>{description}</p>
@@ -28,14 +28,14 @@ export function AboutPrinciplesSection({ locale }: { locale: Locale }) {
       </div>
 
       <div className="about-vision">
-        <span>{copy.copy7}</span>
-        <h2>{copy.copy8}</h2>
+        <span>{t.valuesLabel}</span>
+        <h2>{t.visionTitle}</h2>
         <div>
           <div>
-            <p>{copy.copy9}</p>
-            <p>{copy.copy10}</p>
+            <p>{t.visionLead}</p>
+            <p>{t.visionDescription}</p>
           </div>
-          <p>{copy.copy11}</p>
+          <p>{t.visionSummary}</p>
         </div>
       </div>
     </section>

@@ -5,8 +5,7 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import type { BlogPostSummary } from "./wordpress-posts";
 
-import { componentCopy } from "@/i18n/component-copy";
-import { blogText } from "@/i18n/page-copy";
+import { getTranslations } from "@/i18n/pages";
 type Category = "strategy" | "marketing" | "development" | "content" | "case" | "analytics";
 
 export const fallbackArticles = [
@@ -83,8 +82,8 @@ function categoryKey(value: string): Category {
 }
 
 export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogPostSummary[] }) {
-  const copy = componentCopy[locale]["blog-page"];
-  const text = blogText[locale];
+  const t = getTranslations("blog", locale).page;
+  const text = getTranslations("blog", locale).content;
   const articles = posts.map((post, index) => ({
     category: categoryKey(post.category),
     date: post.publishedAt,
@@ -117,7 +116,7 @@ export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogP
         </div>
       </section>
 
-      <nav className="blog-filters" aria-label={copy.copy1}>
+      <nav className="blog-filters" aria-label={t.filtersLabel}>
         {(["all", ...availableCategories] as const).map((category) => (
           <button
             key={category}
@@ -180,7 +179,7 @@ export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogP
             </article>
           ))}
         </div>
-        {!featured && <p className="blog-empty">{copy.copy2}</p>}
+        {!featured && <p className="blog-empty">{t.emptyState}</p>}
         {featured && (
           <button className="btn blog-load-more" type="button">
             {text.more} ↓

@@ -1,7 +1,7 @@
 import { LegalNavigation } from "./legal-navigation";
 import type { Locale } from "@/i18n";
 
-import { privacyContent, termsContent } from "@/i18n/page-copy";
+import { getTranslations } from "@/i18n/pages";
 type LegalKind = "privacy" | "terms";
 type LegalSection = {
   title: string;
@@ -11,7 +11,8 @@ type LegalSection = {
 };
 
 function LegalDocument({ locale, kind }: { locale: Locale; kind: LegalKind }) {
-  const document = kind === "privacy" ? privacyContent[locale] : termsContent[locale];
+  const t = getTranslations("legal", locale);
+  const document = kind === "privacy" ? t.privacy : t.terms;
   const sections = document.sections as readonly LegalSection[];
   const navigationSections = sections.map((section) => ({
     id: `section-${section.title.split(".")[0]}`,

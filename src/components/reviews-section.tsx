@@ -4,17 +4,17 @@ import { ArrowRight } from "./icons/arrow-right";
 import { ReviewCard } from "./review-card";
 import { getClientReviews } from "./wordpress-reviews";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function ReviewsSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["reviews-section"];
+  const t = getTranslations("reviews", locale).summary;
   const reviews = (await getClientReviews(locale)).slice(0, 3);
   if (!reviews.length) return null;
   return (
     <section className="section container home-reviews-section">
       <header>
-        <h2>{copy.copy1}</h2>
+        <h2>{t.title}</h2>
         <Link className="btn btn-primary" href={`/${locale}/reviews`}>
-          {copy.copy2}
+          {t.allReviews}
           <ArrowRight />
         </Link>
       </header>
@@ -25,7 +25,7 @@ export async function ReviewsSection({ locale }: { locale: Locale }) {
             key={review.slug}
             review={review}
             readMoreHref={`/${locale}/reviews`}
-            readMoreLabel={copy.copy3}
+            readMoreLabel={t.readMore}
           />
         ))}
       </div>

@@ -4,7 +4,7 @@ import { ArrowRight } from "./icons/arrow-right";
 import { TechnologyShowcaseTabs } from "./technology-showcase-tabs";
 import { getTechnologyStack } from "./wordpress-technologies";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function TechnologyShowcaseSection({
   locale,
   eyebrow,
@@ -14,26 +14,26 @@ export async function TechnologyShowcaseSection({
   eyebrow?: string;
   title?: string;
 }) {
-  const copy = componentCopy[locale]["technology-showcase-section"];
+  const t = getTranslations("technologies", locale).showcase;
   const stack = await getTechnologyStack(locale);
 
   return (
     <section className="section container technology-showcase">
       <header>
         <div>
-          <span className="mono">{eyebrow ?? copy.copy1}</span>
-          <h2>{title ?? copy.copy2}</h2>
+          <span className="mono">{eyebrow ?? t.eyebrow}</span>
+          <h2>{title ?? t.title}</h2>
         </div>
       </header>
       <div className="technology-showcase-content">
         <TechnologyShowcaseTabs
           categories={stack.categories}
           items={stack.items}
-          emptyLabel={copy.copy3}
+          emptyLabel={t.emptyState}
         />
         <div className="technology-showcase-fade" aria-hidden="true" />
         <Link className="btn technology-showcase-more" href={`/${locale}/technologies`}>
-          {copy.copy4}
+          {t.allTechnologies}
           <ArrowRight />
         </Link>
       </div>

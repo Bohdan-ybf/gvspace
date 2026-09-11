@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function OpenApplicationBanner({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["open-application-banner"];
+  const t = getTranslations("careers", locale).openApplication;
 
   return (
     <section className="open-application container">
@@ -15,11 +15,11 @@ export function OpenApplicationBanner({ locale }: { locale: Locale }) {
         sizes="(max-width: 1320px) 100vw, 1280px"
       />
       <div>
-        <h2>{copy.copy1}</h2>
-        <p>{copy.copy2}</p>
+        <h2>{t.title}</h2>
+        <p>{t.description}</p>
       </div>
       <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-        {copy.copy3}
+        {t.action}
       </Link>
     </section>
   );

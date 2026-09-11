@@ -3,32 +3,32 @@ import type { Locale } from "@/i18n";
 import { InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 import { ArrowRight } from "./icons/arrow-right";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function TeamFounderSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["team-founder-section"];
+  const t = getTranslations("team", locale).founder;
 
   return (
     <section className="team-founder section container">
       <div className="team-philosophy">
-        <span className="mono">{copy.copy1}</span>
-        <p>{copy.copy2}</p>
+        <span className="mono">{t.eyebrow}</span>
+        <p>{t.philosophy}</p>
       </div>
 
       <div className="founder-profile">
         <div className="founder-photo">
           <Image
             src="/images/team/founder.webp"
-            alt={copy.copy3}
+            alt={t.imageAlt}
             fill
             sizes="(max-width: 700px) 100vw, 500px"
           />
         </div>
         <div className="founder-copy">
           <span className="mono">CEO &amp; FOUNDER</span>
-          <h2>{copy.copy4}</h2>
-          <blockquote>{copy.copy5}</blockquote>
-          <p>{copy.copy6}</p>
-          <p>{copy.copy7}</p>
+          <h2>{t.name}</h2>
+          <blockquote>{t.quote}</blockquote>
+          <p>{t.description}</p>
+          <p>{t.summary}</p>
           <div className="founder-socials">
             <a href="https://linkedin.com" target="_blank" rel="noreferrer">
               <LinkedinIcon />

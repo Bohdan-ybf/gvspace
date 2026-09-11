@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { Logo } from "./logo";
 import { ClutchIcon, FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 const routes = ["services", "about", "blog"];
 
 export function Footer({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["footer"];
-  const { footer } = getDictionary(locale);
+  const t = getTranslations("common", locale).footer;
+  const { footer } = getTranslations("global", locale);
 
   return (
     <footer>
@@ -17,7 +17,7 @@ export function Footer({ locale }: { locale: Locale }) {
           <div className="footer-logo">
             <Logo variant="footer" />
           </div>
-          <nav className="social" aria-label={copy.copy1}>
+          <nav className="social" aria-label={t.socialNavigationLabel}>
             <a href="#" aria-label="Facebook">
               <FacebookIcon />
             </a>
@@ -66,7 +66,7 @@ export function Footer({ locale }: { locale: Locale }) {
       </div>
       <div className="legal container">
         © 2026 GVSPACE. {footer.copyright}
-        <nav aria-label={copy.copy2}>
+        <nav aria-label={t.legalNavigationLabel}>
           <Link href={`/${locale}/privacy-policy`}>{footer.privacy}</Link>
           <Link href={`/${locale}/terms-of-use`}>{footer.terms}</Link>
         </nav>

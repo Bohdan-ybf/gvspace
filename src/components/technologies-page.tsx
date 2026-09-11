@@ -1,19 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { ContactSection } from "./contact-section";
 import { TechnologiesCatalog } from "./technologies-catalog";
 import { TechnologiesOverviewSection } from "./technologies-overview-section";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function TechnologiesPage({ locale }: { locale: Locale }) {
-  const text = getDictionary(locale);
-  const copy = componentCopy[locale]["technologies-page"];
+  const text = getTranslations("global", locale);
+  const t = getTranslations("technologies", locale).page;
   const contactText = {
     ...text.contact,
-    eyebrow: copy.copy1,
-    title: copy.copy2,
+    eyebrow: t.contactEyebrow,
+    title: t.contactTitle,
     titleSecond: "на Clarity Session",
   };
 
@@ -23,10 +23,10 @@ export function TechnologiesPage({ locale }: { locale: Locale }) {
         <Image src="/images/technologies/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container technologies-hero-content">
           <span className="mono">TECHNOLOGIES</span>
-          <h1>{copy.copy3}</h1>
-          <p>{copy.copy4}</p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroDescription}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {copy.copy5}
+            {t.heroAction}
             <ArrowRight />
           </Link>
         </div>

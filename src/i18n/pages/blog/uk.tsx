@@ -1,0 +1,50 @@
+export default {
+  article: {
+    labels: {
+      contents: "ЗМІСТ",
+      read: "хв читати",
+      share: "Поділитись",
+      author: "На сторінку автора",
+      related: "ЧИТАЙТЕ ТАКОЖ",
+    },
+    readMore: "Читати",
+  },
+  page: {
+    filtersLabel: "Категорії блогу",
+    emptyState: "Статей ще немає. Опублікуйте перший запис у WordPress.",
+  },
+  author: {
+    aboutLabel: "ПРО АВТОРА",
+    experienceLabel: "років досвіду",
+    projectsLabel: "успішних проєктів",
+    questionTitle: "Маєте питання?",
+    questionDescription:
+      "На безкоштовній особистій консультації розберемо вашу ситуацію та підберемо ефективне рішення.",
+    askAuthor: "Запитати автора",
+    articlesTitle: "Всі статті автора",
+    readArticle: "Читати статтю",
+    emptyState: "Цей автор ще не опублікував статей.",
+    readMore: "Читати",
+  },
+  content: {
+    eyebrow: "INSIGHTS & CASES",
+    title: "Простір для тих, хто думає про ріст",
+    intro: "Статті, кейси та інсайти про системний маркетинг, IT і стратегію зростання.",
+    all: "Усі",
+    categories: {
+      strategy: "Стратегія",
+      marketing: "Маркетинг",
+      development: "IT-розробка",
+      content: "Контент & Продакшн",
+      case: "Кейс",
+      analytics: "Аналітика",
+    },
+    read: "Читати статтю",
+    more: "Завантажити ще",
+    stay: "ЗАЛИШАТИСЬ В КУРСІ",
+    newsletter: "Інсайти про ріст — раз на тиждень",
+    noSpam: "Без спаму. Тільки те, що допомагає ухвалювати рішення.",
+    email: "your@email.com",
+    subscribe: "Підписатись",
+  },
+} as const;

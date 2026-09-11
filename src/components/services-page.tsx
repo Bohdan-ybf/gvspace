@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { CasesSection } from "./cases-section";
 import { ContactSection } from "./contact-section";
@@ -10,14 +10,12 @@ import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getServiceOfferings } from "./wordpress-services";
 import { ReviewsSection } from "./reviews-section";
 
-import { componentCopy } from "@/i18n/component-copy";
-
-import { ukDirections, enDirections } from "@/i18n/page-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function ServicesPage({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["services-page"];
+  const t = getTranslations("services", locale).page;
   const serviceItems = await getServiceOfferings(locale);
   const directionSlugs = ["strategy", "marketing", "development", "content"];
-  const staticDirections = { uk: ukDirections, en: enDirections }[locale];
+  const staticDirections = getTranslations("services", locale).directions;
   const dynamicDirections = serviceItems
     .filter((item) => !item.parentSlug && directionSlugs.includes(item.slug))
     .sort((a, b) => directionSlugs.indexOf(a.slug) - directionSlugs.indexOf(b.slug))
@@ -39,17 +37,17 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
         image: undefined,
         services: direction.services.map((title, index) => ({ id: index, slug: "", title })),
       }));
-  const text = getDictionary(locale);
+  const text = getTranslations("global", locale);
   return (
     <main className="services-page">
       <section className="services-hero">
         <Image src="/images/services/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container services-hero-copy">
           <span className="mono">SERVICES & SOLUTIONS</span>
-          <h1>{copy.copy2}</h1>
-          <p>{copy.copy3}</p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroDescription}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {copy.copy4}
+            {t.heroAction}
             <ArrowRight />
           </Link>
         </div>
@@ -71,7 +69,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
                 <span className="mono service-number">[0{index + 1}]</span>
                 <h2>{direction.title}</h2>
                 <Link className="btn" href={`/${locale}/services/${direction.slug}`}>
-                  {copy.copy5}
+                  {t.detailsAction}
                   <ArrowRight />
                 </Link>
               </div>

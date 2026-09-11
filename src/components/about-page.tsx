@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { AboutPrinciplesSection } from "./about-principles-section";
 import { AboutStatsSection } from "./about-stats-section";
 import { AgencyComparisonSection } from "./agency-comparison-section";
@@ -8,10 +8,10 @@ import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
 import { SystemTransitionSection } from "./system-transition-section";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function AboutPage({ locale }: { locale: Locale }) {
-  const text = getDictionary(locale);
-  const copy = componentCopy[locale]["about-page"];
+  const text = getTranslations("global", locale);
+  const t = getTranslations("about", locale).page;
 
   return (
     <main className="about-page">
@@ -22,9 +22,9 @@ export function AboutPage({ locale }: { locale: Locale }) {
           <h1>
             GVSPACE
             <br />
-            {copy.copy1}
+            {t.heroTitle}
           </h1>
-          <p>{copy.copy2}</p>
+          <p>{t.heroDescription}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
             {text.common.buildSystem}
             <ArrowRight />

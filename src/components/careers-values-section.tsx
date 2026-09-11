@@ -1,13 +1,13 @@
 import type { Locale } from "@/i18n";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function CareersValuesSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["careers-values-section"];
-  const values = copy.copy1;
+  const t = getTranslations("careers", locale).values;
+  const values = t.items;
 
   return (
     <section className="careers-values section container">
-      <span className="mono">{copy.copy2}</span>
+      <span className="mono">{t.eyebrow}</span>
       <div className="careers-values-grid">
         {values.map(([title, description], index) => (
           <article key={title}>

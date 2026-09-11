@@ -10,7 +10,7 @@ import {
   TelegramIcon,
 } from "./icons/social-icons";
 
-import { contactsContent as content } from "@/i18n/page-copy";
+import { getTranslations } from "@/i18n/pages";
 const socials = [
   { name: "LinkedIn", handle: "linkedin.com/company/[gvspace]", Icon: LinkedinIcon },
   { name: "Instagram", handle: "@[gvspace]", Icon: InstagramIcon },
@@ -18,8 +18,8 @@ const socials = [
 ];
 
 export function ContactsPage({ locale }: { locale: Locale }) {
-  const text = content[locale];
-  const cards = [text.telegram, text.email, text.phone];
+  const t = getTranslations("contacts", locale).page;
+  const cards = [t.telegram, t.email, t.phone];
   const contactIcons = [TelegramIcon, EmailIcon, PhoneIcon];
 
   return (
@@ -27,18 +27,18 @@ export function ContactsPage({ locale }: { locale: Locale }) {
       <section className="contacts-hero container">
         <div>
           <span className="privacy-eyebrow mono">LEGAL</span>
-          <h1>{text.title}</h1>
-          <p>{text.intro}</p>
+          <h1>{t.title}</h1>
+          <p>{t.intro}</p>
         </div>
         <div className="response-badge mono">
           <i />
-          {text.response}
+          {t.response}
         </div>
       </section>
 
       <section className="contacts-main container">
         <div className="direct-contacts">
-          <h2 className="contact-label mono">{text.direct}</h2>
+          <h2 className="contact-label mono">{t.direct}</h2>
           <div className="contact-cards">
             {cards.map((card, index) => {
               const Icon = contactIcons[index];
@@ -63,13 +63,13 @@ export function ContactsPage({ locale }: { locale: Locale }) {
           </div>
 
           <div className="location-block">
-            <h2 className="contact-label mono">{text.location}</h2>
+            <h2 className="contact-label mono">{t.location}</h2>
             <div className="location-map">
               <span aria-hidden="true">📍</span>
-              <b className="mono">{text.city}</b>
+              <b className="mono">{t.city}</b>
             </div>
             <dl>
-              {text.details.map(([term, value]) => (
+              {t.details.map(([term, value]) => (
                 <div key={term}>
                   <dt className="mono">{term}</dt>
                   <dd>{value}</dd>
@@ -80,23 +80,23 @@ export function ContactsPage({ locale }: { locale: Locale }) {
         </div>
 
         <form className="contacts-form">
-          <h2 className="contact-label mono">{text.form}</h2>
+          <h2 className="contact-label mono">{t.form}</h2>
           <div className="contacts-form-row">
-            <input aria-label={text.name} placeholder={text.name} required />
+            <input aria-label={t.name} placeholder={t.name} required />
             <input aria-label="Phone" inputMode="tel" placeholder="+38 0__" />
           </div>
           <input aria-label="Email" type="email" placeholder="Email" required />
-          <input aria-label={text.topic} placeholder={text.topic} required />
-          <textarea aria-label={text.message} placeholder={text.message} required />
+          <input aria-label={t.topic} placeholder={t.topic} required />
+          <textarea aria-label={t.message} placeholder={t.message} required />
           <button className="btn btn-primary" type="submit">
-            {text.submit}
+            {t.submit}
           </button>
-          <p className="mono">{text.consent}</p>
+          <p className="mono">{t.consent}</p>
         </form>
       </section>
 
       <section className="contacts-social container">
-        <h2 className="contact-label mono">{text.social}</h2>
+        <h2 className="contact-label mono">{t.social}</h2>
         <div>
           {socials.map(({ name, handle, Icon }) => (
             <Link href="#" key={name}>

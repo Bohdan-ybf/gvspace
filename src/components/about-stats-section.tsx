@@ -1,13 +1,13 @@
 import type { Locale } from "@/i18n";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function AboutStatsSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["about-stats-section"];
-  const stats = copy.copy1;
+  const t = getTranslations("about", locale).stats;
+  const stats = t.items;
 
   return (
     <section className="about-stats section container">
-      <h2>{copy.copy2}</h2>
+      <h2>{t.title}</h2>
       <div className="about-stats-grid">
         {stats.map(([value, title, description]) => (
           <article key={value}>

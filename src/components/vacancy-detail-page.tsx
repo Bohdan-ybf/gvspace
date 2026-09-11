@@ -5,17 +5,17 @@ import type { Locale } from "@/i18n";
 import { getVacancyBySlug } from "./wordpress-vacancies";
 import { VacancyApplicationForm } from "./vacancy-application-form";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
   const vacancy = await getVacancyBySlug(slug, locale);
   if (!vacancy) notFound();
-  const copy = componentCopy[locale]["vacancy-detail-page"];
+  const t = getTranslations("vacancies", locale).detail;
   const sectionTitles = {
-    role: copy.copy1,
-    tasks: copy.copy2,
-    requirements: copy.copy3,
-    tools: copy.copy4,
-    benefits: copy.copy5,
+    role: t.roleTitle,
+    tasks: t.tasksTitle,
+    requirements: t.requirementsTitle,
+    tools: t.toolsTitle,
+    benefits: t.benefitsTitle,
   };
 
   return (
@@ -23,14 +23,14 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
       <section className="vacancy-detail-hero">
         <Image src={vacancy.heroImage} alt="" fill priority sizes="100vw" />
         <div className="container vacancy-detail-hero-content">
-          <nav className="vacancy-breadcrumbs mono" aria-label={copy.copy6}>
-            <Link href={`/${locale}/careers`}>{copy.copy7}</Link>
+          <nav className="vacancy-breadcrumbs mono" aria-label={t.breadcrumbLabel}>
+            <Link href={`/${locale}/careers`}>{t.careersLabel}</Link>
             <span aria-hidden="true">/</span>
             <span aria-current="page">{vacancy.title[locale]}</span>
           </nav>
           <div className="vacancy-title-row">
             <h1>{vacancy.title[locale]}</h1>
-            {vacancy.hot && <span className="mono">{copy.copy8}</span>}
+            {vacancy.hot && <span className="mono">{t.hotLabel}</span>}
           </div>
           <div className="vacancy-detail-tags mono">
             {vacancy.tags.map((tag) => (

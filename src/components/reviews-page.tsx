@@ -1,14 +1,14 @@
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ContactSection } from "./contact-section";
 import { ReviewsCatalog } from "./reviews-catalog";
 import { getClientReviews } from "./wordpress-reviews";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function ReviewsPage({ locale }: { locale: Locale }) {
   const reviews = await getClientReviews(locale);
-  const text = getDictionary(locale);
-  const copy = componentCopy[locale]["reviews-page"];
+  const text = getTranslations("global", locale);
+  const t = getTranslations("reviews", locale).page;
   const companies = [...new Set(reviews.map((review) => review.company).filter(Boolean))].slice(
     0,
     6,
@@ -20,32 +20,32 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
         <div className="container reviews-hero-content">
           <span className="mono">CLIENTS &amp; REVIEWS</span>
           <div className="reviews-hero-heading">
-            <h1>{copy.copy1}</h1>
-            <p>{copy.copy2}</p>
+            <h1>{t.heroTitle}</h1>
+            <p>{t.heroDescription}</p>
           </div>
           <dl>
             <div>
               <dd>50+</dd>
-              <dt>{copy.copy3}</dt>
+              <dt>{t.projectsLabel}</dt>
             </div>
             <div>
               <dd>$10M+</dd>
-              <dt>{copy.copy4}</dt>
+              <dt>{t.capitalizationLabel}</dt>
             </div>
             <div>
               <dd>4</dd>
-              <dt>{copy.copy5}</dt>
+              <dt>{t.directionsLabel}</dt>
             </div>
             <div>
               <dd>87%</dd>
-              <dt>{copy.copy6}</dt>
+              <dt>{t.recommendationLabel}</dt>
             </div>
           </dl>
         </div>
       </section>
 
       <section className="container review-clients">
-        <span className="mono">{copy.copy7}</span>
+        <span className="mono">{t.clientsEyebrow}</span>
         <div>
           {(companies.length
             ? companies
@@ -61,8 +61,8 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
       <ContactSection
         text={{
           ...text.contact,
-          title: copy.copy8,
-          titleSecond: copy.copy9,
+          title: t.contactTitle,
+          titleSecond: t.contactTitleSecond,
         }}
       />
     </main>

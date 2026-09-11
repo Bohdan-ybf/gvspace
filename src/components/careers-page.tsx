@@ -5,9 +5,9 @@ import { OpenApplicationBanner } from "./open-application-banner";
 import { VacancyCard } from "./vacancy-card";
 import { getVacancies } from "./wordpress-vacancies";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function CareersPage({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["careers-page"];
+  const t = getTranslations("careers", locale).page;
   const vacancies = await getVacancies(locale);
 
   return (
@@ -16,19 +16,19 @@ export async function CareersPage({ locale }: { locale: Locale }) {
         <Image src="/images/careers/hero.webp" alt="" fill priority sizes="100vw" />
         <div className="container careers-hero-content">
           <span className="mono">CAREERS</span>
-          <h1>{copy.copy1}</h1>
-          <p>{copy.copy2}</p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroDescription}</p>
         </div>
       </section>
 
       <section className="careers-content container">
         <div className="careers-intro">
-          <span className="mono">{copy.copy3}</span>
-          <p>{copy.copy4}</p>
+          <span className="mono">{t.workEyebrow}</span>
+          <p>{t.workDescription}</p>
         </div>
 
         <section className="vacancies-section">
-          <span className="mono">{copy.copy5}</span>
+          <span className="mono">{t.vacanciesEyebrow}</span>
           <div className="vacancies-grid">
             {vacancies.map((vacancy) => (
               <VacancyCard key={vacancy.slug} locale={locale} vacancy={vacancy} />

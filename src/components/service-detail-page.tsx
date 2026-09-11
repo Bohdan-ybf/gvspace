@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { getServiceOffering } from "./wordpress-services";
 import { SystemTransitionSection } from "./system-transition-section";
@@ -10,33 +10,33 @@ import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ReviewsSection } from "./reviews-section";
 import { ContactSection } from "./contact-section";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slugs: string[] }) {
   const result = await getServiceOffering(locale, slugs);
   if (!result) notFound();
   const { item, children } = result;
-  const copy = componentCopy[locale]["service-detail-page"];
+  const t = getTranslations("services", locale).detail;
   const isDirection = slugs.length === 1;
   const steps = item.steps.length
     ? item.steps
     : [
         {
           title: "Clarity Session",
-          duration: copy.copy1,
-          description: copy.copy2,
+          duration: t.clarityDuration,
+          description: t.clarityDescription,
         },
         {
-          title: copy.copy3,
+          title: t.auditTitle,
           duration: "14 days",
-          description: copy.copy4,
+          description: t.auditDescription,
         },
         {
-          title: copy.copy5,
-          duration: copy.copy6,
-          description: copy.copy7,
+          title: t.roadmapTitle,
+          duration: t.roadmapDuration,
+          description: t.roadmapDescription,
         },
       ];
-  const dictionary = getDictionary(locale);
+  const dictionary = getTranslations("global", locale);
 
   return (
     <main className="service-detail-page">
@@ -58,7 +58,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             <h1>{item.headline}</h1>
             <p>{item.description}</p>
             <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-              {copy.copy8}
+              {t.heroAction}
               <ArrowRight />
             </Link>
           </div>
@@ -67,7 +67,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
 
       {(children.length > 0 || item.includes.length > 0) && (
         <section className="section container service-includes">
-          <span className="mono">{copy.copy9}</span>
+          <span className="mono">{t.includesEyebrow}</span>
           <div>
             {(children.length
               ? children.map((child) => ({
@@ -93,8 +93,8 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
 
       <section className={`section service-steps${isDirection ? " container" : " is-process"}`}>
         <div className={isDirection ? "" : "container"}>
-          <span className="mono">{copy.copy10}</span>
-          <h2>{isDirection ? copy.copy11 : copy.copy12}</h2>
+          <span className="mono">{t.processEyebrow}</span>
+          <h2>{isDirection ? t.directionProcessTitle : t.serviceProcessTitle}</h2>
           <div>
             {steps.map((step, index) => (
               <article key={`${step.title}-${index}`}>
@@ -112,7 +112,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
       {isDirection && <SystemTransitionSection locale={locale} />}
       {!isDirection && item.metrics.length > 0 && (
         <section className="section container service-results">
-          <span className="mono">{copy.copy13}</span>
+          <span className="mono">{t.resultsEyebrow}</span>
           <div>
             {item.metrics.map((metric) => (
               <b key={metric}>{metric}</b>
@@ -121,13 +121,13 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         </section>
       )}
       <TechnologyShowcaseSection locale={locale} />
-      <CasesShowcaseSection locale={locale} eyebrow={copy.copy14} />
+      <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
       <ReviewsSection locale={locale} />
       {item.faq.length > 0 && (
         <section className="section container service-faq">
           <div>
-            <h2>{copy.copy15}</h2>
-            <p>{copy.copy16}</p>
+            <h2>{t.faqTitle}</h2>
+            <p>{t.faqDescription}</p>
           </div>
           <div>
             {item.faq.map((faq) => (

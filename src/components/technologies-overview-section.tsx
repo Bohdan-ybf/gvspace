@@ -1,15 +1,15 @@
 import type { Locale } from "@/i18n";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export function TechnologiesOverviewSection({ locale }: { locale: Locale }) {
-  const copy = componentCopy[locale]["technologies-overview-section"];
-  const stats = copy.copy1;
+  const t = getTranslations("technologies", locale).overview;
+  const stats = t.stats;
 
   return (
     <section className="technologies-overview section container">
       <div className="technologies-philosophy">
-        <span className="mono">{copy.copy2}</span>
-        <p>{copy.copy3}</p>
+        <span className="mono">{t.eyebrow}</span>
+        <p>{t.description}</p>
       </div>
       <div className="technologies-stats">
         {stats.map(([value, label]) => (

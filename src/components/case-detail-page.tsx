@@ -1,18 +1,18 @@
 import { notFound } from "next/navigation";
-import { getDictionary, type Locale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { ContactSection } from "./contact-section";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { getCaseStudy } from "./wordpress-cases";
 
-import { componentCopy } from "@/i18n/component-copy";
+import { getTranslations } from "@/i18n/pages";
 export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
   const data = await getCaseStudy(slug, locale);
   if (!data) notFound();
-  const copy = componentCopy[locale]["case-detail-page"];
+  const t = getTranslations("cases", locale).detail;
   const contact = {
-    ...getDictionary(locale).contact,
-    title: copy.copy1,
-    titleSecond: copy.copy2,
+    ...getTranslations("global", locale).contact,
+    title: t.contactTitle,
+    titleSecond: t.contactTitleSecond,
   };
   return (
     <main className="case-detail-page">
@@ -44,11 +44,11 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         <div className="case-two-columns">
           <div>
             <span className="mono">БРИФ</span>
-            <h2>{copy.copy3}</h2>
+            <h2>{t.challengeTitle}</h2>
             <p>{data.challenge}</p>
           </div>
           <div>
-            <h3>{copy.copy4}</h3>
+            <h3>{t.problemsTitle}</h3>
             <ul>
               {data.problems.map((problem) => (
                 <li key={problem}>— {problem}</li>
@@ -59,16 +59,16 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         <div className="case-two-columns case-discovery">
           <div>
             <span className="mono">ПРОЦЕС</span>
-            <h2>{copy.copy5}</h2>
+            <h2>{t.discoveryTitle}</h2>
             <p>{data.discovery}</p>
           </div>
           <div>
-            <h3>{copy.copy6}</h3>
+            <h3>{t.discoveryResultTitle}</h3>
             <p>{data.discoveryResult}</p>
           </div>
         </div>
         <div className="case-architecture">
-          <h2>{copy.copy7}</h2>
+          <h2>{t.architectureTitle}</h2>
           <div>
             {data.architecture.map((vector) => (
               <article key={vector.title}>
@@ -130,7 +130,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
       <section className="case-testimonial">
         <div className="container">
           <span className="mono">ВІДГУК</span>
-          <h2>{copy.copy8}</h2>
+          <h2>{t.testimonialTitle}</h2>
           <blockquote>
             {data.testimonial}
             <b>{data.testimonialAuthor}</b>
@@ -141,8 +141,8 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         locale={locale}
         excludeSlug={data.slug}
         allowExcludedFallback
-        eyebrow={copy.copy9}
-        title={copy.copy10}
+        eyebrow={t.relatedEyebrow}
+        title={t.relatedTitle}
       />
       <ContactSection text={contact} />
     </main>
