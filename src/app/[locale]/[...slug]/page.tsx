@@ -16,11 +16,7 @@ import { ReviewsPage } from "@/components/reviews-page";
 import { isLocale } from "@/i18n";
 import { locales, type Locale } from "@/i18n";
 import { buildSeoMetadata, normalizeSeoData } from "@/seo";
-import {
-  getDynamicSeo,
-  getPublishedSeoLocales,
-  type DynamicSeoKind,
-} from "@/wordpress-seo";
+import { getDynamicSeo, getPublishedSeoLocales, type DynamicSeoKind } from "@/wordpress-seo";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 const routeSeo = {
@@ -49,8 +45,7 @@ const routeSeo = {
 function getDynamicRoute(slug: string[]): { kind: DynamicSeoKind; publicSlug: string } | undefined {
   if (slug[0] === "blog" && slug.length === 2) return { kind: "blog", publicSlug: slug[1] };
   if (slug[0] === "cases" && slug.length === 2) return { kind: "case", publicSlug: slug[1] };
-  if (slug[0] === "careers" && slug.length === 2)
-    return { kind: "vacancy", publicSlug: slug[1] };
+  if (slug[0] === "careers" && slug.length === 2) return { kind: "vacancy", publicSlug: slug[1] };
   if (slug[0] === "services" && slug.length >= 2)
     return { kind: "service", publicSlug: slug.at(-1) ?? "" };
   return undefined;
@@ -96,7 +91,10 @@ export default async function RoutedPage({
   const { locale, slug } = await params;
   const section = (key: keyof (typeof routeSeo)[Locale], content: React.ReactNode) => (
     <>
-      <Breadcrumbs locale={locale as Locale} items={[{ label: routeSeo[locale as Locale][key][0] }]} />
+      <Breadcrumbs
+        locale={locale as Locale}
+        items={[{ label: routeSeo[locale as Locale][key][0] }]}
+      />
       {content}
     </>
   );
@@ -141,10 +139,7 @@ export default async function RoutedPage({
       <>
         <Breadcrumbs
           locale={locale}
-          items={[
-            { label: routeSeo[locale].blog[0], pathname: "/blog" },
-            { label: slug[2] },
-          ]}
+          items={[{ label: routeSeo[locale].blog[0], pathname: "/blog" }, { label: slug[2] }]}
         />
         <BlogAuthorPage locale={locale} slug={slug[2]} />
       </>

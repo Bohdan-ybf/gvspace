@@ -72,111 +72,111 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
       <StructuredData data={faqSchema ? [serviceSchema, faqSchema] : serviceSchema} />
       <Breadcrumbs locale={locale} items={serviceBreadcrumbs} />
       <main className="service-detail-page">
-      <section className={`service-detail-hero${isDirection ? " is-direction" : ""}`}>
-        <div className="container service-detail-hero-grid">
-          {isDirection && (
-            <div className="service-detail-icon">
-              {item.image ? (
-                <Image src={item.image} alt={item.title} fill sizes="220px" unoptimized />
-              ) : (
-                <Image
-                  src={`/images/services/icons/${item.slug}.webp`}
-                  alt={item.title}
-                  fill
-                  sizes="220px"
-                />
+        <section className={`service-detail-hero${isDirection ? " is-direction" : ""}`}>
+          <div className="container service-detail-hero-grid">
+            {isDirection && (
+              <div className="service-detail-icon">
+                {item.image ? (
+                  <Image src={item.image} alt={item.title} fill sizes="220px" unoptimized />
+                ) : (
+                  <Image
+                    src={`/images/services/icons/${item.slug}.webp`}
+                    alt={item.title}
+                    fill
+                    sizes="220px"
+                  />
+                )}
+              </div>
+            )}
+            <div>
+              <h1>{seo?.h1 || item.headline}</h1>
+              <p>{item.description}</p>
+              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+                {t.heroAction}
+                <ArrowRight />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {(children.length > 0 || item.includes.length > 0) && (
+          <section className="section container service-includes">
+            <span className="mono">{t.includesEyebrow}</span>
+            <div>
+              {(children.length
+                ? children.map((child) => ({
+                    label: child.title,
+                    href: `/${locale}/services/${item.slug}/${child.slug}`,
+                  }))
+                : item.includes.map((label) => ({ label, href: "" }))
+              ).map((entry) =>
+                entry.href ? (
+                  <Link href={entry.href} key={entry.label}>
+                    <span>{entry.label}</span>
+                    <ArrowRight />
+                  </Link>
+                ) : (
+                  <div key={entry.label}>
+                    <span>✓ {entry.label}</span>
+                  </div>
+                ),
               )}
             </div>
-          )}
-          <div>
-            <h1>{seo?.h1 || item.headline}</h1>
-            <p>{item.description}</p>
-            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-              {t.heroAction}
-              <ArrowRight />
-            </Link>
-          </div>
-        </div>
-      </section>
+          </section>
+        )}
 
-      {(children.length > 0 || item.includes.length > 0) && (
-        <section className="section container service-includes">
-          <span className="mono">{t.includesEyebrow}</span>
-          <div>
-            {(children.length
-              ? children.map((child) => ({
-                  label: child.title,
-                  href: `/${locale}/services/${item.slug}/${child.slug}`,
-                }))
-              : item.includes.map((label) => ({ label, href: "" }))
-            ).map((entry) =>
-              entry.href ? (
-                <Link href={entry.href} key={entry.label}>
-                  <span>{entry.label}</span>
-                  <ArrowRight />
-                </Link>
-              ) : (
-                <div key={entry.label}>
-                  <span>✓ {entry.label}</span>
-                </div>
-              ),
-            )}
+        <section className={`section service-steps${isDirection ? " container" : " is-process"}`}>
+          <div className={isDirection ? "" : "container"}>
+            <span className="mono">{t.processEyebrow}</span>
+            <h2>{isDirection ? t.directionProcessTitle : t.serviceProcessTitle}</h2>
+            <div>
+              {steps.map((step, index) => (
+                <article key={`${step.title}-${index}`}>
+                  <small className="mono">
+                    [ 0{index + 1} ]　 {step.duration}
+                  </small>
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
-      )}
 
-      <section className={`section service-steps${isDirection ? " container" : " is-process"}`}>
-        <div className={isDirection ? "" : "container"}>
-          <span className="mono">{t.processEyebrow}</span>
-          <h2>{isDirection ? t.directionProcessTitle : t.serviceProcessTitle}</h2>
-          <div>
-            {steps.map((step, index) => (
-              <article key={`${step.title}-${index}`}>
-                <small className="mono">
-                  [ 0{index + 1} ]　 {step.duration}
-                </small>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {isDirection && <SystemTransitionSection locale={locale} />}
-      {!isDirection && item.metrics.length > 0 && (
-        <section className="section container service-results">
-          <span className="mono">{t.resultsEyebrow}</span>
-          <div>
-            {item.metrics.map((metric) => (
-              <b key={metric}>{metric}</b>
-            ))}
-          </div>
-        </section>
-      )}
-      <TechnologyShowcaseSection locale={locale} />
-      <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
-      <ReviewsSection locale={locale} />
-      {item.faq.length > 0 && (
-        <section className="section container service-faq">
-          <div>
-            <h2>{t.faqTitle}</h2>
-            <p>{t.faqDescription}</p>
-          </div>
-          <div>
-            {item.faq.map((faq) => (
-              <details key={faq.question}>
-                <summary>
-                  {faq.question}
-                  <span>+</span>
-                </summary>
-                <p>{faq.answer}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-      )}
-      <ContactSection text={dictionary.contact} />
+        {isDirection && <SystemTransitionSection locale={locale} />}
+        {!isDirection && item.metrics.length > 0 && (
+          <section className="section container service-results">
+            <span className="mono">{t.resultsEyebrow}</span>
+            <div>
+              {item.metrics.map((metric) => (
+                <b key={metric}>{metric}</b>
+              ))}
+            </div>
+          </section>
+        )}
+        <TechnologyShowcaseSection locale={locale} />
+        <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
+        <ReviewsSection locale={locale} />
+        {item.faq.length > 0 && (
+          <section className="section container service-faq">
+            <div>
+              <h2>{t.faqTitle}</h2>
+              <p>{t.faqDescription}</p>
+            </div>
+            <div>
+              {item.faq.map((faq) => (
+                <details key={faq.question}>
+                  <summary>
+                    {faq.question}
+                    <span>+</span>
+                  </summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+        <ContactSection text={dictionary.contact} />
       </main>
     </>
   );

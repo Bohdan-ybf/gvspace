@@ -18,7 +18,10 @@ export async function generateMetadata({
   return buildSeoMetadata({
     locale,
     pathname: "/contacts",
-    seo: normalizeSeoData(undefined, { title: content[locale][0], description: content[locale][1] }),
+    seo: normalizeSeoData(undefined, {
+      title: content[locale][0],
+      description: content[locale][1],
+    }),
     alternateLocales: locales,
   });
 }

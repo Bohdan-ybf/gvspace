@@ -53,99 +53,102 @@ export async function BlogArticlePage({ locale, slug }: { locale: Locale; slug: 
       <StructuredData data={articleSchema} />
       <Breadcrumbs
         locale={locale}
-        items={[{ label: locale === "uk" ? "Блог" : "Blog", pathname: "/blog" }, { label: seo?.h1 || post.title }]}
+        items={[
+          { label: locale === "uk" ? "Блог" : "Blog", pathname: "/blog" },
+          { label: seo?.h1 || post.title },
+        ]}
       />
       <main className="article-page">
-      <header className="article-hero">
-        <div className="container">
-          <span className="mono">{post.category}</span>
-          <small className="mono">
-            {post.publishedAt} · {post.readingTime} {text.read}
-          </small>
-          <h1>{seo?.h1 || post.title}</h1>
-          <p>{post.excerpt}</p>
-          <div className="article-author">
-            <i
-              style={
-                post.author.avatar ? { backgroundImage: `url(${post.author.avatar})` } : undefined
-              }
-            />
-            <div>
-              <b>{post.author.name}</b>
-              <small>{post.author.role}</small>
+        <header className="article-hero">
+          <div className="container">
+            <span className="mono">{post.category}</span>
+            <small className="mono">
+              {post.publishedAt} · {post.readingTime} {text.read}
+            </small>
+            <h1>{seo?.h1 || post.title}</h1>
+            <p>{post.excerpt}</p>
+            <div className="article-author">
+              <i
+                style={
+                  post.author.avatar ? { backgroundImage: `url(${post.author.avatar})` } : undefined
+                }
+              />
+              <div>
+                <b>{post.author.name}</b>
+                <small>{post.author.role}</small>
+              </div>
             </div>
           </div>
+        </header>
+        <div className={`container article-layout${headings.length ? "" : " without-toc"}`}>
+          {headings.length > 0 && (
+            <aside className="article-toc">
+              <span className="mono">{text.contents}</span>
+              {headings.map((heading) => (
+                <a key={heading.id} href={`#${heading.id}`}>
+                  {heading.label}
+                </a>
+              ))}
+            </aside>
+          )}
+          <article className="article-content" dangerouslySetInnerHTML={{ __html: html }} />
+          <div className="article-meta">
+            <div>
+              {post.tags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+            <button type="button">↗ {text.share}</button>
+          </div>
+          <section className="article-author-card">
+            <div className="article-author">
+              <i
+                style={
+                  post.author.avatar ? { backgroundImage: `url(${post.author.avatar})` } : undefined
+                }
+              />
+              <div>
+                <b>{post.author.name}</b>
+                <small>{post.author.role}</small>
+                <p>
+                  Засновник GVSPACE. 8+ років у digital-маркетингу та побудові систем зростання для
+                  бізнесів.
+                </p>
+              </div>
+            </div>
+            <Link href={`/${locale}/blog/author/${post.author.slug}`}>{text.author} →</Link>
+          </section>
         </div>
-      </header>
-      <div className={`container article-layout${headings.length ? "" : " without-toc"}`}>
-        {headings.length > 0 && (
-          <aside className="article-toc">
-            <span className="mono">{text.contents}</span>
-            {headings.map((heading) => (
-              <a key={heading.id} href={`#${heading.id}`}>
-                {heading.label}
-              </a>
-            ))}
-          </aside>
+        {related.length > 0 && (
+          <section className="container article-related">
+            <span className="mono">{text.related}</span>
+            <div>
+              {related.map((item) => (
+                <article key={item.slug}>
+                  <div
+                    style={
+                      item.image
+                        ? {
+                            backgroundImage: `url(${item.image})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }
+                        : undefined
+                    }
+                  >
+                    <b>{item.category}</b>
+                  </div>
+                  <small className="mono">
+                    {item.publishedAt} · {item.readingTime} хв
+                  </small>
+                  <h3>{item.title}</h3>
+                  <Link href={`/${locale}/blog/${item.slug}`}>{t.readMore} →</Link>
+                </article>
+              ))}
+            </div>
+          </section>
         )}
-        <article className="article-content" dangerouslySetInnerHTML={{ __html: html }} />
-        <div className="article-meta">
-          <div>
-            {post.tags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
-          </div>
-          <button type="button">↗ {text.share}</button>
-        </div>
-        <section className="article-author-card">
-          <div className="article-author">
-            <i
-              style={
-                post.author.avatar ? { backgroundImage: `url(${post.author.avatar})` } : undefined
-              }
-            />
-            <div>
-              <b>{post.author.name}</b>
-              <small>{post.author.role}</small>
-              <p>
-                Засновник GVSPACE. 8+ років у digital-маркетингу та побудові систем зростання для
-                бізнесів.
-              </p>
-            </div>
-          </div>
-          <Link href={`/${locale}/blog/author/${post.author.slug}`}>{text.author} →</Link>
-        </section>
-      </div>
-      {related.length > 0 && (
-        <section className="container article-related">
-          <span className="mono">{text.related}</span>
-          <div>
-            {related.map((item) => (
-              <article key={item.slug}>
-                <div
-                  style={
-                    item.image
-                      ? {
-                          backgroundImage: `url(${item.image})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }
-                      : undefined
-                  }
-                >
-                  <b>{item.category}</b>
-                </div>
-                <small className="mono">
-                  {item.publishedAt} · {item.readingTime} хв
-                </small>
-                <h3>{item.title}</h3>
-                <Link href={`/${locale}/blog/${item.slug}`}>{t.readMore} →</Link>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-      <ContactSection text={getTranslations("global", locale).contact} />
+        <ContactSection text={getTranslations("global", locale).contact} />
       </main>
     </>
   );

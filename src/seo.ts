@@ -75,10 +75,7 @@ export function buildSeoMetadata({
       canonical,
       languages: {
         ...languages,
-        "x-default": getLocalizedUrl(
-          "en",
-          alternateLocales.includes("en") ? pathname : "/",
-        ),
+        "x-default": getLocalizedUrl("en", alternateLocales.includes("en") ? pathname : "/"),
       },
     },
     openGraph: {

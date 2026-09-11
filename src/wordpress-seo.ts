@@ -69,7 +69,11 @@ export async function getDynamicSeo(
 
     return normalizeSeoData(node.gvspaceSeo, {
       title: node.title,
-      description: node.excerpt?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "",
+      description:
+        node.excerpt
+          ?.replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim() || "",
     });
   } catch {
     return undefined;

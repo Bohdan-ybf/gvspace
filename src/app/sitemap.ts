@@ -68,14 +68,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const pathsByLocale = new Map(
     await Promise.all(
-      enabledMarkets.map(async (market) => [
-        market.routeLocale,
-        new Map((await getLocalePaths(market.routeLocale)).map((entry) => [entry.pathname, entry])),
-      ] as const),
+      enabledMarkets.map(
+        async (market) =>
+          [
+            market.routeLocale,
+            new Map(
+              (await getLocalePaths(market.routeLocale)).map((entry) => [entry.pathname, entry]),
+            ),
+          ] as const,
+      ),
     ),
   );
 
-  const currentPaths = pathsByLocale.get(currentMarket.routeLocale) ?? new Map<string, SitemapEntry>();
+  const currentPaths =
+    pathsByLocale.get(currentMarket.routeLocale) ?? new Map<string, SitemapEntry>();
   return [...currentPaths.values()].map(({ pathname, lastModified }) => ({
     url: `${currentMarket.origin}${pathname === "/" ? "" : pathname}`,
     ...(lastModified ? { lastModified } : {}),

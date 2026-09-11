@@ -39,58 +39,61 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
       />
       <Breadcrumbs
         locale={locale}
-        items={[{ label: t.careersLabel, pathname: "/careers" }, { label: seo?.h1 || vacancy.title[locale] }]}
+        items={[
+          { label: t.careersLabel, pathname: "/careers" },
+          { label: seo?.h1 || vacancy.title[locale] },
+        ]}
       />
       <main className="vacancy-detail-page">
-      <section className="vacancy-detail-hero">
-        <Image src={vacancy.heroImage} alt="" fill priority sizes="100vw" />
-        <div className="container vacancy-detail-hero-content">
-          <div className="vacancy-title-row">
-            <h1>{seo?.h1 || vacancy.title[locale]}</h1>
-            {vacancy.hot && <span className="mono">{t.hotLabel}</span>}
-          </div>
-          <div className="vacancy-detail-tags mono">
-            {vacancy.tags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
-          </div>
-          <b>{vacancy.salary}</b>
-        </div>
-      </section>
-
-      <div className="vacancy-detail-layout container">
-        <div className="vacancy-description">
-          <VacancyTextSection
-            title={sectionTitles.role}
-            paragraphs={vacancy.role.map((item) => item[locale])}
-          />
-          <VacancyListSection
-            title={sectionTitles.tasks}
-            items={vacancy.tasks.map((item) => item[locale])}
-            marker="—"
-          />
-          <VacancyListSection
-            title={sectionTitles.requirements}
-            items={vacancy.requirements.map((item) => item[locale])}
-            marker="✓"
-          />
-          <section className="vacancy-content-section">
-            <h2 className="mono">{sectionTitles.tools}</h2>
-            <div className="vacancy-tools mono">
-              {vacancy.tools.map((tool) => (
-                <span key={tool}>{tool}</span>
+        <section className="vacancy-detail-hero">
+          <Image src={vacancy.heroImage} alt="" fill priority sizes="100vw" />
+          <div className="container vacancy-detail-hero-content">
+            <div className="vacancy-title-row">
+              <h1>{seo?.h1 || vacancy.title[locale]}</h1>
+              {vacancy.hot && <span className="mono">{t.hotLabel}</span>}
+            </div>
+            <div className="vacancy-detail-tags mono">
+              {vacancy.tags.map((tag) => (
+                <span key={tag}>{tag}</span>
               ))}
             </div>
-          </section>
-          <VacancyListSection
-            title={sectionTitles.benefits}
-            items={vacancy.benefits.map((item) => item[locale])}
-            marker="+"
-            accent
-          />
+            <b>{vacancy.salary}</b>
+          </div>
+        </section>
+
+        <div className="vacancy-detail-layout container">
+          <div className="vacancy-description">
+            <VacancyTextSection
+              title={sectionTitles.role}
+              paragraphs={vacancy.role.map((item) => item[locale])}
+            />
+            <VacancyListSection
+              title={sectionTitles.tasks}
+              items={vacancy.tasks.map((item) => item[locale])}
+              marker="—"
+            />
+            <VacancyListSection
+              title={sectionTitles.requirements}
+              items={vacancy.requirements.map((item) => item[locale])}
+              marker="✓"
+            />
+            <section className="vacancy-content-section">
+              <h2 className="mono">{sectionTitles.tools}</h2>
+              <div className="vacancy-tools mono">
+                {vacancy.tools.map((tool) => (
+                  <span key={tool}>{tool}</span>
+                ))}
+              </div>
+            </section>
+            <VacancyListSection
+              title={sectionTitles.benefits}
+              items={vacancy.benefits.map((item) => item[locale])}
+              marker="+"
+              accent
+            />
+          </div>
+          <VacancyApplicationForm locale={locale} />
         </div>
-        <VacancyApplicationForm locale={locale} />
-      </div>
       </main>
     </>
   );

@@ -55,66 +55,70 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
         }))}
       />
       <main className="services-page">
-      <section className="services-hero">
-        <Image src="/images/services/hero.webp" alt="" fill priority sizes="100vw" />
-        <div className="container services-hero-copy">
-          <span className="mono">SERVICES & SOLUTIONS</span>
-          <h1>{t.heroTitle}</h1>
-          <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {t.heroAction}
-            <ArrowRight />
-          </Link>
-        </div>
-      </section>
-      <ServicesNavigation items={directions} />
-      <section className="service-directions">
-        {directions.map((direction, index) => (
-          <article className="service-direction container" id={direction.slug} key={direction.slug}>
-            <div className="service-direction-copy">
-              <div className="service-symbol" aria-hidden="true">
-                <Image
-                  src={direction.image || `/images/services/icons/${direction.slug}.webp`}
-                  alt=""
-                  fill
-                  sizes="92px"
-                />
+        <section className="services-hero">
+          <Image src="/images/services/hero.webp" alt="" fill priority sizes="100vw" />
+          <div className="container services-hero-copy">
+            <span className="mono">SERVICES & SOLUTIONS</span>
+            <h1>{t.heroTitle}</h1>
+            <p>{t.heroDescription}</p>
+            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+              {t.heroAction}
+              <ArrowRight />
+            </Link>
+          </div>
+        </section>
+        <ServicesNavigation items={directions} />
+        <section className="service-directions">
+          {directions.map((direction, index) => (
+            <article
+              className="service-direction container"
+              id={direction.slug}
+              key={direction.slug}
+            >
+              <div className="service-direction-copy">
+                <div className="service-symbol" aria-hidden="true">
+                  <Image
+                    src={direction.image || `/images/services/icons/${direction.slug}.webp`}
+                    alt=""
+                    fill
+                    sizes="92px"
+                  />
+                </div>
+                <div>
+                  <span className="mono service-number">[0{index + 1}]</span>
+                  <h2>{direction.title}</h2>
+                  <Link className="btn" href={`/${locale}/services/${direction.slug}`}>
+                    {t.detailsAction}
+                    <ArrowRight />
+                  </Link>
+                </div>
+                <p>{direction.description}</p>
               </div>
-              <div>
-                <span className="mono service-number">[0{index + 1}]</span>
-                <h2>{direction.title}</h2>
-                <Link className="btn" href={`/${locale}/services/${direction.slug}`}>
-                  {t.detailsAction}
-                  <ArrowRight />
-                </Link>
-              </div>
-              <p>{direction.description}</p>
-            </div>
-            <ul>
-              {direction.services.map((service) => (
-                <li key={service.id || service.title}>
-                  {service.slug ? (
-                    <Link href={`/${locale}/services/${direction.slug}/${service.slug}`}>
-                      <span>{service.title}</span>
-                      <ArrowRight />
-                    </Link>
-                  ) : (
-                    <>
-                      <span>{service.title}</span>
-                      <ArrowRight />
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </section>
-      <SystemTransitionSection locale={locale} />
-      <TechnologyShowcaseSection locale={locale} />
-      <CasesSection locale={locale} text={text.cases} />
-      <ReviewsSection locale={locale} />
-      <ContactSection text={text.contact} />
+              <ul>
+                {direction.services.map((service) => (
+                  <li key={service.id || service.title}>
+                    {service.slug ? (
+                      <Link href={`/${locale}/services/${direction.slug}/${service.slug}`}>
+                        <span>{service.title}</span>
+                        <ArrowRight />
+                      </Link>
+                    ) : (
+                      <>
+                        <span>{service.title}</span>
+                        <ArrowRight />
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </section>
+        <SystemTransitionSection locale={locale} />
+        <TechnologyShowcaseSection locale={locale} />
+        <CasesSection locale={locale} text={text.cases} />
+        <ReviewsSection locale={locale} />
+        <ContactSection text={text.contact} />
       </main>
     </>
   );

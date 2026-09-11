@@ -30,22 +30,22 @@ export async function CasesPage({ locale }: { locale: Locale }) {
         }))}
       />
       <main className="cases-page">
-      <section className="cases-hero">
-        <Image src="/images/cases/cases.webp" alt="" fill priority sizes="100vw" />
-        <div className="container cases-hero-content">
-          <span className="mono">CASES</span>
-          <h1>{t.heroTitle}</h1>
-          <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {t.heroAction}
-            <ArrowRight />
-          </Link>
-        </div>
-      </section>
+        <section className="cases-hero">
+          <Image src="/images/cases/cases.webp" alt="" fill priority sizes="100vw" />
+          <div className="container cases-hero-content">
+            <span className="mono">CASES</span>
+            <h1>{t.heroTitle}</h1>
+            <p>{t.heroDescription}</p>
+            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+              {t.heroAction}
+              <ArrowRight />
+            </Link>
+          </div>
+        </section>
 
-      <CasesCatalog locale={locale} projects={projects} />
-      <TechnologyShowcaseSection locale={locale} />
-      <ContactSection text={contactText} />
+        <CasesCatalog locale={locale} projects={projects} />
+        <TechnologyShowcaseSection locale={locale} />
+        <ContactSection text={contactText} />
       </main>
     </>
   );
