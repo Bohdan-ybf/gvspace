@@ -28,7 +28,6 @@ Format the entire project with Prettier:
 ```bash
 npm run format
 ```
-chore: format code and document formatting command
 
 Then run all quality checks:
 
