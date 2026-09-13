@@ -9,6 +9,7 @@ export default {
     ),
     heroDescription:
       "We do not collect logos. We build systems — and ask clients to speak about the results.",
+    heroAction: "Leave a review",
     projectsLabel: "PROJECTS COMPLETED",
     capitalizationLabel: "BUDGETS MANAGED",
     directionsLabel: "SERVICE DIRECTIONS",

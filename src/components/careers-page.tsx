@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Locale } from "@/i18n";
 import { CareersValuesSection } from "./careers-values-section";
+import { Breadcrumbs } from "./breadcrumbs";
 import { OpenApplicationBanner } from "./open-application-banner";
 import { VacancyCard } from "./vacancy-card";
 import { getVacancies } from "./wordpress-vacancies";
@@ -23,7 +24,23 @@ export async function CareersPage({ locale }: { locale: Locale }) {
       />
       <main className="careers-page">
         <section className="careers-hero">
-          <Image src="/images/careers/hero.webp" alt="" fill priority sizes="100vw" />
+          <Image
+            className="careers-hero-background"
+            src="/images/careers/careers-bg.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="careers-hero-object"
+            src="/images/careers/careers-object.png"
+            alt=""
+            width={531}
+            height={508}
+            priority
+            sizes="(max-width: 600px) 350px, (max-width: 900px) 420px, 531px"
+          />
           <div className="container careers-hero-content">
             <span className="mono">CAREERS</span>
             <h1>{t.heroTitle}</h1>
@@ -49,6 +66,12 @@ export async function CareersPage({ locale }: { locale: Locale }) {
 
         <CareersValuesSection locale={locale} />
         <OpenApplicationBanner locale={locale} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Вакансії" : "Careers" }]}
+          visible
+        />
+
       </main>
     </>
   );

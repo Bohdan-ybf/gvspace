@@ -18,7 +18,23 @@ export async function TeamPage({ locale }: { locale: Locale }) {
   return (
     <main className="team-page">
       <section className="team-hero">
-        <Image src="/images/team/hero.webp" alt="" fill priority sizes="100vw" />
+        <Image
+          className="team-hero-background"
+          src="/images/team/team-bg.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+        />
+        <Image
+          className="team-hero-object"
+          src="/images/team/team-object.png"
+          alt=""
+          width={563}
+          height={535}
+          priority
+          sizes="(max-width: 600px) 360px, (max-width: 900px) 440px, 563px"
+        />
         <div className="container team-hero-content">
           <span className="mono">TEAM</span>
           <h1>{t.heroTitle}</h1>

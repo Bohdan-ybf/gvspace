@@ -57,7 +57,23 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
       />
       <main className="services-page">
         <section className="services-hero">
-          <Image src="/images/services/hero.webp" alt="" fill priority sizes="100vw" />
+          <Image
+            className="services-hero-background"
+            src="/images/services/services-bg.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="services-hero-object"
+            src="/images/services/services-object.png"
+            alt=""
+            width={521}
+            height={490}
+            priority
+            sizes="(max-width: 600px) 360px, (max-width: 900px) 420px, 521px"
+          />
           <div className="container services-hero-copy">
             <span className="mono">SERVICES & SOLUTIONS</span>
             <h1>{t.heroTitle}</h1>

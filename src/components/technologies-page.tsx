@@ -20,7 +20,23 @@ export function TechnologiesPage({ locale }: { locale: Locale }) {
   return (
     <main className="technologies-page">
       <section className="technologies-hero">
-        <Image src="/images/technologies/hero.webp" alt="" fill priority sizes="100vw" />
+        <Image
+          className="technologies-hero-background"
+          src="/images/technologies/technologies-bg.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+        />
+        <Image
+          className="technologies-hero-object"
+          src="/images/technologies/technologies-object.png"
+          alt=""
+          width={488}
+          height={459}
+          priority
+          sizes="(max-width: 600px) 340px, (max-width: 900px) 400px, 488px"
+        />
         <div className="container technologies-hero-content">
           <span className="mono">TECHNOLOGIES</span>
           <h1>{t.heroTitle}</h1>

@@ -9,6 +9,7 @@ export default {
     ),
     heroDescription:
       "Ми не збираємо логотипи. Ми будуємо системи — і просимо клієнтів говорити про результат.",
+    heroAction: "Залишити відгук",
     projectsLabel: "ПРОЄКТІВ ЗАВЕРШЕНО",
     capitalizationLabel: "БЮДЖЕТІВ ПІД УПРАВЛІННЯМ",
     directionsLabel: "НАПРЯМКИ ПОСЛУГ",

@@ -37,13 +37,6 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
           ...(seo?.datePublished ? { datePosted: seo.datePublished } : {}),
         }}
       />
-      <Breadcrumbs
-        locale={locale}
-        items={[
-          { label: t.careersLabel, pathname: "/careers" },
-          { label: seo?.h1 || vacancy.title[locale] },
-        ]}
-      />
       <main className="vacancy-detail-page">
         <section className="vacancy-detail-hero">
           <Image src={vacancy.heroImage} alt="" fill priority sizes="100vw" />
@@ -94,6 +87,14 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
           </div>
           <VacancyApplicationForm locale={locale} />
         </div>
+        <Breadcrumbs
+          locale={locale}
+          items={[
+            { label: t.careersLabel, pathname: "/careers" },
+            { label: seo?.h1 || vacancy.title[locale] },
+          ]}
+          visible
+        />
       </main>
     </>
   );

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
+import { Breadcrumbs } from "./breadcrumbs";
 import { CasesCatalog } from "./cases-catalog";
 import { ContactSection } from "./contact-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
@@ -31,7 +32,23 @@ export async function CasesPage({ locale }: { locale: Locale }) {
       />
       <main className="cases-page">
         <section className="cases-hero">
-          <Image src="/images/cases/cases.webp" alt="" fill priority sizes="100vw" />
+          <Image
+            className="cases-hero-background"
+            src="/images/cases/cases-bg.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="cases-hero-object"
+            src="/images/cases/cases-object.png"
+            alt=""
+            width={497}
+            height={474}
+            priority
+            sizes="(max-width: 600px) 340px, (max-width: 900px) 410px, 497px"
+          />
           <div className="container cases-hero-content">
             <span className="mono">CASES</span>
             <h1>{t.heroTitle}</h1>
@@ -45,6 +62,11 @@ export async function CasesPage({ locale }: { locale: Locale }) {
 
         <CasesCatalog locale={locale} projects={projects} />
         <TechnologyShowcaseSection locale={locale} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Кейси" : "Cases" }]}
+          visible
+        />
         <ContactSection text={contactText} />
       </main>
     </>

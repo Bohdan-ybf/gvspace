@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import type { BlogPostSummary } from "./wordpress-posts";
@@ -106,7 +107,23 @@ export function BlogPage({ locale, posts = [] }: { locale: Locale; posts?: BlogP
   return (
     <main className="blog-page">
       <section className="blog-hero">
-        <div className="blog-hero-art" aria-hidden="true" />
+        <Image
+          className="blog-hero-background"
+          src="/images/blog/blog-bg.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+        />
+        <Image
+          className="blog-hero-object"
+          src="/images/blog/blog-object.png"
+          alt=""
+          width={450}
+          height={429}
+          priority
+          sizes="(max-width: 600px) 320px, (max-width: 900px) 380px, 450px"
+        />
         <div className="container blog-hero-content">
           <div>
             <span className="mono">{text.eyebrow}</span>

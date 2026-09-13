@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ContactSection } from "./contact-section";
@@ -27,11 +29,41 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
       />
       <main className="reviews-page">
         <section className="reviews-hero">
+          <Image
+            className="reviews-hero-background"
+            src="/images/reviews/reviews-bg.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="reviews-hero-object"
+            src="/images/reviews/reviews-object.png"
+            alt=""
+            width={259}
+            height={245}
+            priority
+            sizes="(max-width: 600px) 190px, (max-width: 900px) 220px, 259px"
+          />
           <div className="container reviews-hero-content">
             <span className="mono">CLIENTS &amp; REVIEWS</span>
             <div className="reviews-hero-heading">
-              <h1>{t.heroTitle}</h1>
-              <p>{t.heroDescription}</p>
+              <div>
+                <h1>{t.heroTitle}</h1>
+                <p>{t.heroDescription}</p>
+              </div>
+              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+                {t.heroAction}
+                <svg width="12" height="13" viewBox="0 0 12 13" fill="none" aria-hidden="true">
+                  <path
+                    d="M6 1V12M1.5 7.5L6 12L10.5 7.5"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
             </div>
             <dl>
               <div>

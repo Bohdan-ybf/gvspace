@@ -17,13 +17,28 @@ export function AboutPage({ locale }: { locale: Locale }) {
   return (
     <main className="about-page">
       <section className="about-hero">
-        <Image src="/images/about/hero.webp" alt="" fill priority sizes="100vw" />
+        <Image
+          className="about-hero-background"
+          src="/images/about/about-bg.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+        />
+        <Image
+          className="about-hero-pattern"
+          src="/images/about/about-object.svg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          unoptimized
+        />
         <div className="container about-hero-content">
           <span className="mono">ABOUT US</span>
           <h1>
-            GVSPACE
-            <br />
-            {t.heroTitle}
+            <span className="about-hero-brand">GVSPACE</span>
+            <span>{t.heroTitle}</span>
           </h1>
           <p>{t.heroDescription}</p>
           <Link className="btn btn-primary" href={`/${locale}/contacts`}>
