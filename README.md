@@ -23,6 +23,15 @@ The site is available at `http://localhost:3000`. Ukrainian is the default local
 
 ## Quality checks
 
+Format the entire project with Prettier:
+
+```bash
+npm run format
+```
+chore: format code and document formatting command
+
+Then run all quality checks:
+
 ```bash
 npm run check
 npm run build

@@ -71,7 +71,6 @@ export async function CareersPage({ locale }: { locale: Locale }) {
           items={[{ label: locale === "uk" ? "Вакансії" : "Careers" }]}
           visible
         />
-
       </main>
     </>
   );
