@@ -549,6 +549,7 @@ add_action('init', function (): void {
 function gvspace_seed_home_faqs(): void
 {
     if (get_option('gvspace_home_faq_seed_version') === '1') return;
+    if (!add_option('gvspace_home_faq_seed_lock', time(), '', false)) return;
 
     $answer_uk = 'Працюємо з B2C та B2B бізнесами з digital-залежною моделлю росту: eCommerce, EdTech, IT/SaaS, сервісні бізнеси з середнім і високим чеком.';
     $answer_en = 'We work with B2C and B2B companies with digital-led growth models: eCommerce, EdTech, IT/SaaS, and service businesses with medium and high average order values.';
@@ -587,12 +588,14 @@ function gvspace_seed_home_faqs(): void
     }
 
     update_option('gvspace_home_faq_seed_version', '1', false);
+    delete_option('gvspace_home_faq_seed_lock');
 }
 add_action('init', 'gvspace_seed_home_faqs', 20);
 
 function gvspace_seed_home_seo_texts(): void
 {
     if (get_option('gvspace_home_seo_text_seed_version') === '1') return;
+    if (!add_option('gvspace_home_seo_text_seed_lock', time(), '', false)) return;
 
     $items = [
         [
@@ -626,12 +629,14 @@ function gvspace_seed_home_seo_texts(): void
     }
 
     update_option('gvspace_home_seo_text_seed_version', '1', false);
+    delete_option('gvspace_home_seo_text_seed_lock');
 }
 add_action('init', 'gvspace_seed_home_seo_texts', 20);
 
 function gvspace_seed_demo_partners(): void
 {
     if (get_option('gvspace_demo_partners_seed_version') === '1') return;
+    if (!add_option('gvspace_demo_partners_seed_lock', time(), '', false)) return;
 
     $existing = get_posts([
         'post_type' => 'gv_partner',
@@ -670,8 +675,55 @@ function gvspace_seed_demo_partners(): void
     }
 
     update_option('gvspace_demo_partners_seed_version', '1', false);
+    delete_option('gvspace_demo_partners_seed_lock');
 }
 add_action('init', 'gvspace_seed_demo_partners', 20);
+
+/**
+ * Remove duplicate demo records that could be created when several requests ran
+ * the first content seed concurrently. Only records carrying our seed metadata
+ * are touched; manually created CMS content is left intact.
+ */
+function gvspace_cleanup_duplicate_home_seed_content(): void
+{
+    if (get_option('gvspace_home_seed_dedup_version') === '1') return;
+    if (!add_option('gvspace_home_seed_dedup_lock', time(), '', false)) return;
+
+    $groups = [];
+    $seeded_posts = get_posts([
+        'post_type' => ['gv_faq', 'gv_home_seo_text', 'gv_partner'],
+        'post_status' => 'any',
+        'numberposts' => -1,
+        'orderby' => 'ID',
+        'order' => 'ASC',
+        'meta_query' => [[
+            'key' => '_gvspace_translation_group',
+            'compare' => 'EXISTS',
+        ]],
+    ]);
+
+    foreach ($seeded_posts as $post) {
+        $translation_group = (string) get_post_meta($post->ID, '_gvspace_translation_group', true);
+        $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true);
+        $is_seed_record = str_starts_with($translation_group, 'home-faq-')
+            || $translation_group === 'home-seo-text'
+            || preg_match('/^demo-partner-[0-9]+$/', $translation_group);
+        if (!$is_seed_record) continue;
+
+        $key = $post->post_type . '|' . $translation_group . '|' . $locale;
+        if (!isset($groups[$key])) {
+            $groups[$key] = $post->ID;
+            continue;
+        }
+
+        // Trash instead of permanently deleting so an administrator can recover it.
+        wp_trash_post($post->ID);
+    }
+
+    update_option('gvspace_home_seed_dedup_version', '1', false);
+    delete_option('gvspace_home_seed_dedup_lock');
+}
+add_action('init', 'gvspace_cleanup_duplicate_home_seed_content', 21);
 
 function gvspace_migrate_partner_directions(): void
 {
