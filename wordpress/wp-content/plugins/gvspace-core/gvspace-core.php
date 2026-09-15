@@ -2,7 +2,7 @@
 /**
  * Plugin Name: GVSPACE Core
  * Description: Content types and GraphQL fields used by the GVSPACE frontend.
- * Version: 0.5.0
+ * Version: 1.0.0
  * Author: GVSPACE
  * Text Domain: gvspace-core
  */
@@ -67,6 +67,15 @@ const GVSPACE_TEAM_MEMBER_FIELDS = [
     'tags' => ['label' => 'Компетенції (кожна з нового рядка)', 'type' => 'textarea'],
 ];
 
+const GVSPACE_PARTNER_FIELDS = [
+    'direction_uk' => ['label' => 'Напрямок українською (наприклад, IT-РОЗРОБКА)', 'type' => 'text'],
+    'direction_en' => ['label' => 'Напрямок англійською (наприклад, IT DEVELOPMENT)', 'type' => 'text'],
+];
+
+const GVSPACE_FAQ_FIELDS = [
+    'placement' => ['label' => 'Розміщення', 'type' => 'text'],
+];
+
 // New localized records contain exactly one language. Legacy field sets above
 // remain available while existing UK + EN records are being migrated.
 const GVSPACE_LOCALIZED_VACANCY_FIELDS = [
@@ -123,6 +132,8 @@ const GVSPACE_LOCALIZED_POST_TYPES = [
     'gv_review',
     'gv_technology',
     'gv_team_member',
+    'gv_faq',
+    'gv_home_seo_text',
 ];
 
 const GVSPACE_CONTENT_LOCALES = [
@@ -207,6 +218,21 @@ function gvspace_save_author_fields(int $user_id): void
 }
 
 add_action('init', function (): void {
+    register_taxonomy('gv_media_folder', ['attachment'], [
+        'labels' => [
+            'name' => 'Папки медіа', 'singular_name' => 'Папка медіа',
+            'menu_name' => 'Папки', 'all_items' => 'Усі папки',
+            'edit_item' => 'Редагувати папку', 'add_new_item' => 'Додати папку',
+            'new_item_name' => 'Назва нової папки', 'search_items' => 'Шукати папки',
+        ],
+        'public' => false,
+        'hierarchical' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'show_in_rest' => true,
+        'rewrite' => false,
+    ]);
+
     register_post_type('gv_vacancy', [
         'labels' => [
             'name' => 'Вакансії',
@@ -298,6 +324,48 @@ add_action('init', function (): void {
         'menu_icon' => 'dashicons-groups',
         'supports' => ['title', 'thumbnail', 'page-attributes'],
         'taxonomies' => ['gv_team_member_category'],
+    ]);
+
+    register_post_type('gv_partner', [
+        'labels' => [
+            'name' => 'Партнери', 'singular_name' => 'Партнер', 'menu_name' => 'Партнери',
+            'add_new_item' => 'Додати партнера', 'edit_item' => 'Редагувати партнера',
+            'new_item' => 'Новий партнер', 'all_items' => 'Усі партнери',
+            'not_found' => 'Партнерів не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'partner', 'graphql_plural_name' => 'partners',
+        'show_in_menu' => 'gvspace-home',
+        'supports' => ['title', 'thumbnail', 'page-attributes'],
+    ]);
+
+    register_post_type('gv_faq', [
+        'labels' => [
+            'name' => 'Часті запитання', 'singular_name' => 'Запитання', 'menu_name' => 'FAQ',
+            'add_new_item' => 'Додати запитання', 'edit_item' => 'Редагувати запитання',
+            'new_item' => 'Нове запитання', 'all_items' => 'FAQ',
+            'not_found' => 'Запитань не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'faqItem', 'graphql_plural_name' => 'faqItems',
+        'show_in_menu' => 'gvspace-home',
+        'supports' => ['title', 'editor', 'page-attributes'],
+    ]);
+
+    register_post_type('gv_home_seo_text', [
+        'labels' => [
+            'name' => 'SEO-тексти', 'singular_name' => 'SEO-текст', 'menu_name' => 'SEO-текст',
+            'add_new_item' => 'Додати SEO-текст', 'edit_item' => 'Редагувати SEO-текст',
+            'new_item' => 'Новий SEO-текст', 'all_items' => 'SEO-тексти',
+            'not_found' => 'SEO-текстів не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'homeSeoText', 'graphql_plural_name' => 'homeSeoTexts',
+        'show_in_menu' => 'gvspace-home',
+        'supports' => ['title', 'editor'],
     ]);
 
     register_taxonomy('gv_technology_category', ['gv_technology'], [
@@ -455,6 +523,20 @@ add_action('init', function (): void {
         ]);
     }
 
+    foreach (array_keys(GVSPACE_PARTNER_FIELDS) as $field) {
+        register_post_meta('gv_partner', '_gvspace_partner_' . $field, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
+    register_post_meta('gv_faq', '_gvspace_faq_placement', [
+        'type' => 'string', 'single' => true, 'show_in_rest' => true,
+        'sanitize_callback' => 'sanitize_key',
+        'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+    ]);
+
     register_post_meta('gv_vacancy', '_gvspace_hot', [
         'type' => 'boolean',
         'single' => true,
@@ -462,6 +544,353 @@ add_action('init', function (): void {
         'sanitize_callback' => 'rest_sanitize_boolean',
         'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
     ]);
+});
+
+function gvspace_seed_home_faqs(): void
+{
+    if (get_option('gvspace_home_faq_seed_version') === '1') return;
+
+    $answer_uk = 'Працюємо з B2C та B2B бізнесами з digital-залежною моделлю росту: eCommerce, EdTech, IT/SaaS, сервісні бізнеси з середнім і високим чеком.';
+    $answer_en = 'We work with B2C and B2B companies with digital-led growth models: eCommerce, EdTech, IT/SaaS, and service businesses with medium and high average order values.';
+    $items = [
+        ['home-faq-implementation-time', 'uk', 'Скільки часу займає впровадження системи?', $answer_uk],
+        ['home-faq-industry', 'uk', 'Чи працюєте ви з моєю нішею?', $answer_uk],
+        ['home-faq-guarantees', 'uk', 'Які гарантії результату?', $answer_uk],
+        ['home-faq-agency', 'uk', 'Чому не фриланс або інша агенція?', $answer_uk],
+        ['home-faq-implementation-time', 'en', 'How long does system implementation take?', $answer_en],
+        ['home-faq-industry', 'en', 'Do you work with my industry?', $answer_en],
+        ['home-faq-guarantees', 'en', 'What results do you guarantee?', $answer_en],
+        ['home-faq-agency', 'en', 'Why not a freelancer or another agency?', $answer_en],
+    ];
+
+    foreach ($items as $index => [$group, $locale, $question, $answer]) {
+        $existing = get_posts([
+            'post_type' => 'gv_faq', 'post_status' => 'any', 'numberposts' => 1,
+            'meta_query' => [
+                ['key' => '_gvspace_translation_group', 'value' => $group],
+                ['key' => '_gvspace_content_locale', 'value' => $locale],
+            ],
+        ]);
+        if ($existing) continue;
+
+        $post_id = wp_insert_post([
+            'post_type' => 'gv_faq', 'post_status' => 'publish',
+            'post_title' => $question, 'post_content' => $answer,
+            'menu_order' => $index % 4,
+        ]);
+        if (is_wp_error($post_id) || !$post_id) continue;
+
+        update_post_meta($post_id, '_gvspace_faq_placement', 'home');
+        update_post_meta($post_id, '_gvspace_content_locale', $locale);
+        update_post_meta($post_id, '_gvspace_translation_group', $group);
+        update_post_meta($post_id, '_gvspace_translation_status', 'published');
+    }
+
+    update_option('gvspace_home_faq_seed_version', '1', false);
+}
+add_action('init', 'gvspace_seed_home_faqs', 20);
+
+function gvspace_seed_home_seo_texts(): void
+{
+    if (get_option('gvspace_home_seo_text_seed_version') === '1') return;
+
+    $items = [
+        [
+            'uk',
+            'Ми віримо, що український бізнес заслуговує на простір для росту без хаосу.',
+            'Наша місія — дати CEO інструменти керування, а не просто звіти. Ми допомагаємо побудувати прозору систему, у якій маркетинг, технології та стратегія працюють узгоджено. Це дає керівникам контроль над процесами, зрозумілі показники та основу для передбачуваного масштабування бізнесу.',
+        ],
+        [
+            'en',
+            'We believe Ukrainian businesses deserve room to grow without chaos.',
+            'Our mission is to give CEOs management tools, not just reports. We help build a transparent system where marketing, technology, and strategy work together. This gives leaders control over processes, clear metrics, and a foundation for predictable business growth.',
+        ],
+    ];
+
+    foreach ($items as [$locale, $title, $content]) {
+        $existing = get_posts([
+            'post_type' => 'gv_home_seo_text', 'post_status' => 'any', 'numberposts' => 1,
+            'meta_query' => [['key' => '_gvspace_content_locale', 'value' => $locale]],
+        ]);
+        if ($existing) continue;
+
+        $post_id = wp_insert_post([
+            'post_type' => 'gv_home_seo_text', 'post_status' => 'publish',
+            'post_title' => $title, 'post_content' => $content,
+        ]);
+        if (is_wp_error($post_id) || !$post_id) continue;
+
+        update_post_meta($post_id, '_gvspace_content_locale', $locale);
+        update_post_meta($post_id, '_gvspace_translation_group', 'home-seo-text');
+        update_post_meta($post_id, '_gvspace_translation_status', 'published');
+    }
+
+    update_option('gvspace_home_seo_text_seed_version', '1', false);
+}
+add_action('init', 'gvspace_seed_home_seo_texts', 20);
+
+function gvspace_seed_demo_partners(): void
+{
+    if (get_option('gvspace_demo_partners_seed_version') === '1') return;
+
+    $existing = get_posts([
+        'post_type' => 'gv_partner',
+        'post_status' => 'publish',
+        'numberposts' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC',
+    ]);
+    $source_thumbnail_id = $existing ? get_post_thumbnail_id($existing[0]->ID) : 0;
+    $names = ['NovaWorks', 'BrightLab', 'PixelCraft', 'GrowthPoint', 'DataNest', 'ScaleHub', 'DigitalForge', 'North Studio', 'PrimeFlow', 'Orbit Media'];
+    $directions = ['IT-РОЗРОБКА', 'ПРОДАКШН', 'SEO & GEO', 'МАРКЕТИНГ'];
+    $needed = max(0, 10 - count($existing));
+
+    for ($index = 0; $index < $needed; $index++) {
+        $position = count($existing) + $index;
+        $name = $names[$position] ?? ('Partner ' . ($position + 1));
+        $post_id = wp_insert_post([
+            'post_type' => 'gv_partner',
+            'post_status' => 'publish',
+            'post_title' => $name,
+            'menu_order' => $position,
+        ]);
+        if (is_wp_error($post_id) || !$post_id) continue;
+
+        $direction_uk = $directions[$position % count($directions)];
+        $direction_en_map = [
+            'IT-РОЗРОБКА' => 'IT DEVELOPMENT', 'ПРОДАКШН' => 'PRODUCTION',
+            'SEO & GEO' => 'SEO & GEO', 'МАРКЕТИНГ' => 'MARKETING',
+        ];
+        update_post_meta($post_id, '_gvspace_partner_direction_uk', $direction_uk);
+        update_post_meta($post_id, '_gvspace_partner_direction_en', $direction_en_map[$direction_uk] ?? $direction_uk);
+        update_post_meta($post_id, '_gvspace_content_locale', 'uk');
+        update_post_meta($post_id, '_gvspace_translation_group', 'demo-partner-' . ($position + 1));
+        update_post_meta($post_id, '_gvspace_translation_status', 'published');
+        if ($source_thumbnail_id) set_post_thumbnail($post_id, $source_thumbnail_id);
+    }
+
+    update_option('gvspace_demo_partners_seed_version', '1', false);
+}
+add_action('init', 'gvspace_seed_demo_partners', 20);
+
+function gvspace_migrate_partner_directions(): void
+{
+    if (get_option('gvspace_partner_direction_migration_version') === '1') return;
+    $translations = [
+        'IT-РОЗРОБКА' => 'IT DEVELOPMENT', 'ПРОДАКШН' => 'PRODUCTION',
+        'Продакшн' => 'PRODUCTION', 'SEO & GEO' => 'SEO & GEO', 'МАРКЕТИНГ' => 'MARKETING',
+    ];
+    $partners = get_posts(['post_type' => 'gv_partner', 'post_status' => 'any', 'numberposts' => -1]);
+    foreach ($partners as $partner) {
+        $legacy = trim((string) get_post_meta($partner->ID, '_gvspace_partner_direction', true));
+        $direction_uk = trim((string) get_post_meta($partner->ID, '_gvspace_partner_direction_uk', true));
+        $direction_en = trim((string) get_post_meta($partner->ID, '_gvspace_partner_direction_en', true));
+        if ($direction_uk === '' && $legacy !== '') {
+            $direction_uk = $legacy;
+            update_post_meta($partner->ID, '_gvspace_partner_direction_uk', $direction_uk);
+        }
+        if ($direction_en === '' && $direction_uk !== '') {
+            update_post_meta($partner->ID, '_gvspace_partner_direction_en', $translations[$direction_uk] ?? $direction_uk);
+        }
+    }
+    update_option('gvspace_partner_direction_migration_version', '1', false);
+}
+add_action('init', 'gvspace_migrate_partner_directions', 21);
+
+function gvspace_seed_media_folders(): void
+{
+    if (get_option('gvspace_media_folder_seed_version') === '1') return;
+    $folders = [
+        'partner-logos' => 'Логотипи партнерів',
+        'technologies' => 'Технології',
+        'cases' => 'Кейси',
+        'team' => 'Команда',
+        'reviews' => 'Відгуки',
+        'blog' => 'Блог',
+        'backgrounds' => 'Фони та банери',
+    ];
+    foreach ($folders as $slug => $name) {
+        if (!term_exists($slug, 'gv_media_folder')) {
+            wp_insert_term($name, 'gv_media_folder', ['slug' => $slug]);
+        }
+    }
+    update_option('gvspace_media_folder_seed_version', '1', false);
+}
+add_action('init', 'gvspace_seed_media_folders', 22);
+
+function gvspace_sort_existing_media_into_folders(): void
+{
+    if (get_option('gvspace_media_sort_version') === '1') return;
+    $post_type_folders = [
+        'gv_partner' => 'partner-logos', 'gv_technology' => 'technologies',
+        'gv_case' => 'cases', 'gv_team_member' => 'team',
+        'gv_review' => 'reviews', 'post' => 'blog',
+    ];
+    foreach ($post_type_folders as $post_type => $folder_slug) {
+        $term = get_term_by('slug', $folder_slug, 'gv_media_folder');
+        if (!$term) continue;
+        $posts = get_posts(['post_type' => $post_type, 'post_status' => 'any', 'numberposts' => -1]);
+        foreach ($posts as $post) {
+            $thumbnail_id = get_post_thumbnail_id($post->ID);
+            if ($thumbnail_id) wp_set_object_terms($thumbnail_id, [$term->term_id], 'gv_media_folder', true);
+        }
+    }
+    $background_term = get_term_by('slug', 'backgrounds', 'gv_media_folder');
+    if ($background_term) {
+        $attachments = get_posts(['post_type' => 'attachment', 'post_status' => 'inherit', 'numberposts' => -1]);
+        foreach ($attachments as $attachment) {
+            $filename = strtolower((string) get_attached_file($attachment->ID));
+            if (str_contains($filename, 'hero') || str_contains($filename, 'background') || str_contains($filename, '-bg')) {
+                wp_set_object_terms($attachment->ID, [$background_term->term_id], 'gv_media_folder', true);
+            }
+        }
+    }
+    update_option('gvspace_media_sort_version', '1', false);
+}
+add_action('init', 'gvspace_sort_existing_media_into_folders', 23);
+
+add_filter('attachment_fields_to_edit', function (array $fields, WP_Post $post): array {
+    $selected = wp_get_object_terms($post->ID, 'gv_media_folder', ['fields' => 'ids']);
+    $fields['gv_media_folder'] = [
+        'label' => 'Папка',
+        'input' => 'html',
+        'html' => wp_dropdown_categories([
+            'taxonomy' => 'gv_media_folder', 'name' => "attachments[{$post->ID}][gv_media_folder]",
+            'id' => "attachments-{$post->ID}-gv-media-folder", 'show_option_none' => 'Без папки',
+            'option_none_value' => '0', 'hide_empty' => false,
+            'hierarchical' => true, 'selected' => $selected[0] ?? 0, 'echo' => false,
+        ]),
+        'helps' => 'Використовується лише для впорядкування медіабібліотеки. URL файлу не змінюється.',
+    ];
+    return $fields;
+}, 10, 2);
+
+add_filter('attachment_fields_to_save', function (array $post, array $attachment): array {
+    if (!current_user_can('upload_files')) return $post;
+    $term_id = isset($attachment['gv_media_folder']) ? absint($attachment['gv_media_folder']) : 0;
+    wp_set_object_terms((int) $post['ID'], $term_id ? [$term_id] : [], 'gv_media_folder', false);
+    return $post;
+}, 10, 2);
+
+add_action('restrict_manage_posts', function (string $post_type): void {
+    if ($post_type !== 'attachment') return;
+    $selected = isset($_GET['gv_media_folder']) ? absint($_GET['gv_media_folder']) : 0;
+    wp_dropdown_categories([
+        'taxonomy' => 'gv_media_folder', 'name' => 'gv_media_folder',
+        'show_option_all' => 'Усі папки', 'hide_empty' => false,
+        'hierarchical' => true, 'selected' => $selected, 'value_field' => 'term_id',
+    ]);
+});
+
+add_action('pre_get_posts', function (WP_Query $query): void {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'attachment') return;
+    $term_id = isset($_GET['gv_media_folder']) ? absint($_GET['gv_media_folder']) : 0;
+    if ($term_id) {
+        $query->set('tax_query', [[
+            'taxonomy' => 'gv_media_folder', 'field' => 'term_id', 'terms' => [$term_id],
+        ]]);
+    }
+});
+
+add_filter('ajax_query_attachments_args', function (array $query): array {
+    $request_query = isset($_REQUEST['query']) && is_array($_REQUEST['query'])
+        ? wp_unslash($_REQUEST['query'])
+        : [];
+    $term_id = isset($query['gv_media_folder'])
+        ? absint($query['gv_media_folder'])
+        : (isset($request_query['gv_media_folder']) ? absint($request_query['gv_media_folder']) : 0);
+    unset($query['gv_media_folder']);
+    if ($term_id) {
+        $query['tax_query'] = array_merge($query['tax_query'] ?? [], [[
+            'taxonomy' => 'gv_media_folder', 'field' => 'term_id', 'terms' => [$term_id],
+        ]]);
+    }
+    return $query;
+});
+
+add_action('admin_enqueue_scripts', function (string $hook): void {
+    if ($hook !== 'upload.php') return;
+    $terms = get_terms(['taxonomy' => 'gv_media_folder', 'hide_empty' => false]);
+    if (is_wp_error($terms)) return;
+    $folders = array_map(static fn (WP_Term $term): array => [
+        'id' => $term->term_id, 'name' => $term->name,
+    ], $terms);
+    wp_enqueue_media();
+    wp_add_inline_script('media-views', 'window.gvspaceMediaFolders = ' . wp_json_encode($folders) . ';', 'before');
+    wp_add_inline_script('media-views', <<<'JS'
+(function ($, wp) {
+    if (!wp || !wp.media || !wp.media.view || !Array.isArray(window.gvspaceMediaFolders)) return;
+    var FolderFilter = wp.media.view.AttachmentFilters.extend({
+        id: 'gvspace-media-folder-filter',
+        createFilters: function () {
+            var filters = { all: { text: 'Усі папки', props: { gv_media_folder: null }, priority: 10 } };
+            window.gvspaceMediaFolders.forEach(function (folder, index) {
+                filters['folder-' + folder.id] = {
+                    text: folder.name,
+                    props: { gv_media_folder: folder.id },
+                    priority: 20 + index
+                };
+            });
+            this.filters = filters;
+        }
+    });
+    var originalCreateToolbar = wp.media.view.AttachmentsBrowser.prototype.createToolbar;
+    wp.media.view.AttachmentsBrowser.prototype.createToolbar = function () {
+        originalCreateToolbar.apply(this, arguments);
+        this.toolbar.set('gvspaceMediaFolder', new FolderFilter({
+            controller: this.controller,
+            model: this.collection.props,
+            priority: -75
+        }).render());
+    };
+})(jQuery, window.wp);
+JS
+    );
+});
+
+add_action('admin_menu', function (): void {
+    add_menu_page(
+        'Головна сторінка',
+        'Головна сторінка',
+        'edit_posts',
+        'gvspace-home',
+        'gvspace_render_home_admin_page',
+        'dashicons-admin-home',
+        22
+    );
+});
+
+add_action('admin_menu', function (): void {
+    remove_submenu_page('gvspace-home', 'gvspace-home');
+}, 99);
+
+function gvspace_render_home_admin_page(): void
+{
+    if (!current_user_can('edit_posts')) return;
+    ?>
+    <div class="wrap">
+        <h1>Головна сторінка</h1>
+        <p>Тут згруповані динамічні блоки, які відображаються на головній сторінці сайту.</p>
+        <p>
+            <a class="button button-primary" href="<?php echo esc_url(admin_url('edit.php?post_type=gv_faq')); ?>">Редагувати FAQ</a>
+            <a class="button" href="<?php echo esc_url(admin_url('edit.php?post_type=gv_home_seo_text')); ?>">Редагувати SEO-текст</a>
+            <a class="button" href="<?php echo esc_url(admin_url('edit.php?post_type=gv_partner')); ?>">Редагувати партнерів</a>
+        </p>
+    </div>
+    <?php
+}
+
+add_filter('manage_gv_faq_posts_columns', function (array $columns): array {
+    $result = [];
+    foreach ($columns as $key => $label) {
+        $result[$key] = $label;
+        if ($key === 'title') $result['gvspace_faq_page'] = 'Сторінка';
+    }
+    return $result;
+});
+
+add_action('manage_gv_faq_posts_custom_column', function (string $column): void {
+    if ($column === 'gvspace_faq_page') echo 'Головна';
 });
 
 function gvspace_sanitize_content_locale(string $value): string
@@ -701,6 +1130,51 @@ add_action('add_meta_boxes', function (): void {
     add_meta_box('gvspace-case-details', 'Дані кейсу', 'gvspace_render_case_fields', 'gv_case', 'normal', 'high');
     add_meta_box('gvspace-technology-details', 'Налаштування технології', 'gvspace_render_technology_fields', 'gv_technology', 'normal', 'high');
     add_meta_box('gvspace-team-member-details', 'Дані учасника команди', 'gvspace_render_team_member_fields', 'gv_team_member', 'normal', 'high');
+    add_meta_box('gvspace-partner-details', 'Дані партнера', 'gvspace_render_partner_fields', 'gv_partner', 'normal', 'high');
+    add_meta_box('gvspace-faq-details', 'Розміщення FAQ', 'gvspace_render_faq_fields', 'gv_faq', 'side', 'default');
+});
+
+function gvspace_render_faq_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_faq', 'gvspace_faq_nonce');
+    $placement = (string) get_post_meta($post->ID, '_gvspace_faq_placement', true) ?: 'home';
+    ?>
+    <p><label for="gvspace_faq_placement"><strong>Показувати на сторінці</strong></label></p>
+    <select id="gvspace_faq_placement" name="gvspace_faq_placement" style="width:100%">
+        <option value="home" <?php selected($placement, 'home'); ?>>Головна сторінка</option>
+    </select>
+    <p class="description">Питання задається в заголовку, відповідь — у редакторі. Порядок — у блоці «Атрибути».</p>
+    <?php
+}
+
+add_action('save_post_gv_faq', function (int $post_id): void {
+    if (
+        !isset($_POST['gvspace_faq_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_faq_nonce'])), 'gvspace_save_faq')
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || !current_user_can('edit_post', $post_id)
+    ) return;
+    $placement = isset($_POST['gvspace_faq_placement'])
+        ? sanitize_key(wp_unslash($_POST['gvspace_faq_placement']))
+        : 'home';
+    update_post_meta($post_id, '_gvspace_faq_placement', $placement === 'home' ? 'home' : 'home');
+});
+
+function gvspace_render_partner_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_partner', 'gvspace_partner_nonce');
+    echo '<p class="description">Назву компанії вкажіть у заголовку, логотип завантажте як «Головне зображення», позицію у слайдері задайте в полі «Порядок».</p>';
+    gvspace_render_field_set($post, GVSPACE_PARTNER_FIELDS, 'gvspace_partner_', '_gvspace_partner_');
+}
+
+add_action('save_post_gv_partner', function (int $post_id): void {
+    if (
+        !isset($_POST['gvspace_partner_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_partner_nonce'])), 'gvspace_save_partner')
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || !current_user_can('edit_post', $post_id)
+    ) return;
+    gvspace_save_field_set($post_id, GVSPACE_PARTNER_FIELDS, 'gvspace_partner_', '_gvspace_partner_');
 });
 
 function gvspace_render_team_member_fields(WP_Post $post): void
@@ -914,7 +1388,7 @@ add_action('graphql_register_types', function (): void {
         ],
     ]);
 
-    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember'] as $graphql_type) {
+    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember', 'FaqItem', 'HomeSeoText'] as $graphql_type) {
         register_graphql_field($graphql_type, 'gvspaceLocalization', [
             'type' => 'GvspaceLocalization',
             'resolve' => static function ($source): array {
@@ -993,6 +1467,32 @@ add_action('graphql_register_types', function (): void {
                 'role' => $role,
                 'tags' => array_values(array_filter(array_map('trim', preg_split('/\R/', $tags) ?: []))),
             ];
+        },
+    ]);
+
+    register_graphql_object_type('GvspacePartnerDetails', [
+        'description' => 'Editable fields displayed on a GVSPACE partner card.',
+        'fields' => [
+            'directionUk' => ['type' => 'String'],
+            'directionEn' => ['type' => 'String'],
+        ],
+    ]);
+    register_graphql_field('Partner', 'partnerDetails', [
+        'type' => 'GvspacePartnerDetails',
+        'resolve' => static function ($source): array {
+            return [
+                'directionUk' => (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction_uk', true)
+                    ?: (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction', true),
+                'directionEn' => (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction_en', true)
+                    ?: (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction', true),
+            ];
+        },
+    ]);
+
+    register_graphql_field('FaqItem', 'faqPlacement', [
+        'type' => 'String',
+        'resolve' => static function ($source): string {
+            return (string) get_post_meta((int) $source->databaseId, '_gvspace_faq_placement', true) ?: 'home';
         },
     ]);
 
@@ -1318,7 +1818,7 @@ add_action('init', function (): void {
 add_filter('comments_open', '__return_false', 100);
 add_filter('pings_open', '__return_false', 100);
 
-const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology', 'gv_team_member'];
+const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology', 'gv_team_member', 'gv_partner', 'gv_faq'];
 
 function gvspace_prepare_localized_duplicate(int $source_id, int $duplicate_id, string $target_locale): void
 {

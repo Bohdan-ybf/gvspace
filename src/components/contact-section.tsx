@@ -20,11 +20,19 @@ export function ContactSection({ text }: ContactSectionProps) {
       <form>
         <div>
           <input aria-label={text.name} placeholder={text.name} required />
+          <input aria-label={text.company} placeholder={text.company} required />
+        </div>
+        <div>
+          <input type="email" aria-label="Email" placeholder="Email" required />
           <input aria-label={text.phone} placeholder="+38 0..." />
         </div>
-        <input type="email" aria-label="Email" placeholder="Email" required />
-        <input aria-label={text.topic} placeholder={text.topic} required />
+        <input aria-label={text.source} placeholder={text.source} />
         <textarea aria-label={text.description} placeholder={text.description} required />
+        <label className="contact-file mono">
+          <input type="file" />
+          <span aria-hidden="true">↥</span>
+          {text.attachment}
+        </label>
         <button className="btn btn-primary">{text.submit}</button>
         <p className="contact-consent mono">{text.consent}</p>
       </form>

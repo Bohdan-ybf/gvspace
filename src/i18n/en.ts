@@ -89,12 +89,20 @@ export const en: Messages = {
   },
   people: {
     title: "The people and numbers behind the results",
-    intro:
-      "The central character is your system. Our team is the coordinated mechanism that powers it.",
+    quote: "Clarity first.\nThen — managed and systematic growth.",
+    position: "CEO & FOUNDER",
+    name: "Vasyl Horaichuk",
+    teamAction: "More about the team",
     capitalization: "Client capitalization after transitioning to systematic marketing.",
     ecosystems: "Ecosystems built.",
     days: "30 days",
     results: "Average time to first results.",
+    experts: "Experts across 4 directions, without outsourcing.",
+  },
+  partners: {
+    title: "Partners",
+    description:
+      "For niche tasks, we engage trusted contractors under our team's supervision, without sacrificing quality or accountability.",
   },
   reviews: {
     title: "Reviews",
@@ -132,9 +140,11 @@ export const en: Messages = {
     titleSecond: "into predictability?",
     intro: "Start with a free 30-minute Clarity Session.",
     name: "Name",
+    company: "Company",
     phone: "Phone",
-    topic: "What are you interested in?",
+    source: "How did you hear about us?",
     description: "Tell us about your project or challenge",
+    attachment: "ATTACH FILE (1 document up to ???MB)",
     submit: "Send request",
     consent: "By clicking the button, you consent to the processing of your personal data",
   },

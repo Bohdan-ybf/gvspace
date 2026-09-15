@@ -25,7 +25,7 @@ export default {
   },
   summary: {
     eyebrow: "REVIEWS",
-    title: "Are our clients satisfied?",
+    title: "Reviews",
     allReviews: "All reviews",
     readMore: "Read in full",
   },

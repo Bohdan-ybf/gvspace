@@ -73,6 +73,20 @@ export function Footer({ locale }: { locale: Locale }) {
       </div>
       <div className="footer-mobile-wordmark" aria-hidden="true">
         <Logo variant="footer" />
+        <nav className="social" aria-label={t.socialNavigationLabel}>
+          <a href="#" aria-label="Facebook">
+            <FacebookIcon />
+          </a>
+          <a href="#" aria-label="Instagram">
+            <InstagramIcon />
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <LinkedinIcon />
+          </a>
+          <a href="#" aria-label="Clutch">
+            <ClutchIcon />
+          </a>
+        </nav>
       </div>
     </footer>
   );

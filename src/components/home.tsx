@@ -10,6 +10,10 @@ import { TechnologySection } from "./technology-section";
 import { getBlogPosts, type BlogPostSummary } from "./wordpress-posts";
 import { ReviewsSection } from "./reviews-section";
 import { getServiceOfferings } from "./wordpress-services";
+import { PartnersSlider } from "./partners-slider";
+import { getPartners } from "./wordpress-partners";
+import { getHomeFaqs, type FaqItem } from "./wordpress-faqs";
+import { getHomeSeoText } from "./wordpress-home-seo-text";
 
 import { getTranslations } from "@/i18n/pages";
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
@@ -17,11 +21,14 @@ const approachIcons = ["clarity", "system", "scale"] as const;
 
 export async function Home({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
-  const [blogPostsResult, services] = await Promise.all([
+  const [blogPostsResult, services, partners, faqs, homeSeoText] = await Promise.all([
     getBlogPosts(locale),
     getServiceOfferings(locale),
+    getPartners(locale),
+    getHomeFaqs(locale),
+    getHomeSeoText(locale),
   ]);
-  const blogPosts = blogPostsResult.slice(0, 5);
+  const blogPosts = blogPostsResult.slice(0, 4);
 
   return (
     <>
@@ -39,8 +46,7 @@ export async function Home({ locale }: { locale: Locale }) {
           <span className="tag mono">{text.hero.eyebrow}</span>
           <h1>
             {text.hero.title}
-            <br />
-            {text.hero.titleSecond}
+            <br /> {text.hero.titleSecond}
           </h1>
         </div>
         <p className="hero-note">{text.hero.description}</p>
@@ -61,13 +67,18 @@ export async function Home({ locale }: { locale: Locale }) {
         <MobileClarity text={text} locale={locale} />
         <TechnologySection locale={locale} title={text.technology.title} />
         <CasesSection text={text.cases} locale={locale} />
-        <People text={text} />
+        <People text={text} locale={locale} />
+        <PartnersSlider
+          title={text.partners.title}
+          description={text.partners.description}
+          partners={partners}
+        />
         <ReviewsSection locale={locale} />
         <Blog text={text} locale={locale} posts={blogPosts} />
-        <Faq text={text} locale={locale} />
+        <Faq text={text} locale={locale} items={faqs} />
         <section className="mission container">
-          <b>{text.mission.statement}</b>
-          <p>{text.mission.description}</p>
+          <b>{homeSeoText?.title ?? text.mission.statement}</b>
+          <p>{homeSeoText?.content ?? text.mission.description}</p>
         </section>
         <ContactSection text={text.contact} />
       </main>
@@ -148,16 +159,31 @@ function MobileClarity({ text, locale }: { text: Messages; locale: Locale }) {
   );
 }
 
-function People({ text }: { text: Messages }) {
+function People({ text, locale }: { text: Messages; locale: Locale }) {
   return (
     <section className="section container people">
-      <div>
+      <div className="people-profile">
         <h2>{text.people.title}</h2>
-        <p className="muted">{text.people.intro}</p>
+        <div className="people-profile-grid">
+          <div className="people-founder">
+            <div className="people-founder-photo" role="img" aria-label={text.people.name} />
+            <Link className="btn btn-primary people-team-link" href={`/${locale}/team`}>
+              <span>{text.people.teamAction}</span>
+              <ArrowRight />
+            </Link>
+          </div>
+          <div className="people-founder-copy">
+            <blockquote>{text.people.quote}</blockquote>
+            <p className="mono">{text.people.position}</p>
+            <strong>{text.people.name}</strong>
+          </div>
+        </div>
       </div>
       <div className="stats">
-        <strong>$10M+</strong>
-        <b>{text.people.capitalization}</b>
+        <div className="stats-main">
+          <strong>$10M+</strong>
+          <b>{text.people.capitalization}</b>
+        </div>
         <div>
           <strong>50+</strong>
           <b>{text.people.ecosystems}</b>
@@ -165,6 +191,10 @@ function People({ text }: { text: Messages }) {
         <div>
           <strong>{text.people.days}</strong>
           <b>{text.people.results}</b>
+        </div>
+        <div className="stats-experts">
+          <strong>32</strong>
+          <b>{text.people.experts}</b>
         </div>
       </div>
     </section>
@@ -211,26 +241,23 @@ function Blog({
             />
             <div className="home-blog-body">
               <div className="home-blog-meta mono">
+                <span className="home-blog-category">{post.category}</span>
                 <span>{post.publishedAt}</span>
-                <span aria-hidden="true">·</span>
-                <span>
-                  {post.readingTime} {t.minutesLabel}
-                </span>
                 {index === 0 && (
-                  <span className="home-blog-author">
-                    {t.authorLabel}: {post.authorName}
-                  </span>
+                  <>
+                    <span aria-hidden="true">•</span>
+                    <span>
+                      {post.readingTime} {t.minutesLabel}
+                    </span>
+                  </>
                 )}
               </div>
               <h3>
                 <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
               </h3>
-              <p>{post.excerpt}</p>
-              {index !== 0 && (
-                <small className="home-blog-card-author mono">
-                  {t.cardAuthorLabel}: {post.authorName}
-                </small>
-              )}
+              <small className="home-blog-card-author mono">
+                {t.cardAuthorLabel}: {post.authorName}
+              </small>
             </div>
           </article>
         ))}
@@ -239,7 +266,7 @@ function Blog({
   );
 }
 
-function Faq({ text, locale }: { text: Messages; locale: Locale }) {
+function Faq({ text, locale, items }: { text: Messages; locale: Locale; items: FaqItem[] }) {
   return (
     <section className="section container faq">
       <div className="faq-intro">
@@ -250,13 +277,13 @@ function Faq({ text, locale }: { text: Messages; locale: Locale }) {
         </Link>
       </div>
       <div className="faq-list">
-        {text.faq.questions.map((question, index) => (
-          <details key={question} open={index === 1}>
+        {items.map((item, index) => (
+          <details key={item.id} open={index === 1}>
             <summary>
-              {question}
+              {item.question}
               <span>+</span>
             </summary>
-            <p>{text.faq.answer}</p>
+            <p>{item.answer}</p>
           </details>
         ))}
       </div>
