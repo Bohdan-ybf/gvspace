@@ -28,6 +28,19 @@ For single-language records, the **Translation group** is also the stable public
 
 The fields are available through WPGraphQL as `gvspaceLocalization { locale translationGroup status }`. New localized vacancy, service and review records expose neutral GraphQL fields (`excerpt`, `headline`, `position`, etc.); legacy bilingual fields remain available during migration.
 
+## Послуги
+
+Увесь каталог редагується в одному розділі **Послуги → Структура послуг**:
+
+1. Запис верхнього рівня без батьківського елемента — це напрямок (L2), наприклад «Маркетинг».
+2. Дочірній запис — окрема послуга (L3). Її напрямок обирається у блоці **Атрибути → Батьківський елемент**.
+3. Один запис містить усі мовні версії. У блоці **Контент сторінки послуги** виберіть мову в селекті та введіть переклад.
+4. Селект у SEO-блоці синхронізований із селектом контенту: перемикання мови показує відповідний контент і SEO без створення дублікатів запису.
+5. Порядок напрямків і послуг задається у **Атрибути → Порядок**. Менше число відображається раніше.
+6. Головне зображення напрямку використовується як його іконка.
+
+Назви та структура з цього каталогу використовуються на загальній сторінці послуг, на головній і в меню. Актуальна міграція видаляє старі дубльовані UK/EN записи та створює 25 централізованих записів нового формату.
+
 ## SEO fields
 
 Every localized content type has a **GVSPACE: SEO та соцмережі** panel with SEO Title, Meta Description, H1 and Open Graph fields. New records have one field set in the selected language; Legacy records have separate Ukrainian and English sets.

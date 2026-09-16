@@ -51,7 +51,7 @@ export async function getDynamicSeo(
         }`,
         variables: { locale },
       }),
-      next: { revalidate: 60 },
+      next: { revalidate: 10 },
     });
     if (!response.ok) return undefined;
     const result = (await response.json()) as {

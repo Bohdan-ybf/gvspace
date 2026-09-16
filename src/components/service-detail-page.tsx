@@ -41,9 +41,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         },
       ];
   const dictionary = getTranslations("global", locale);
-  const faqs = item.faq.length
-    ? item.faq
-    : dictionary.faq.questions.map((question) => ({ question, answer: dictionary.faq.answer }));
+  const faqs = item.faq;
   const serviceBreadcrumbs: BreadcrumbItem[] = [
     { label: locale === "uk" ? "Послуги" : "Services", pathname: "/services" },
     ...(item.parentSlug
@@ -73,24 +71,28 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
   return (
     <>
       <StructuredData data={faqSchema ? [serviceSchema, faqSchema] : serviceSchema} />
-      <main className="service-detail-page">
+      <main className={`service-detail-page${isDirection ? " is-direction-page" : ""}`}>
         <section className={`service-detail-hero${isDirection ? " is-direction" : ""}`}>
+          {isDirection && (
+            <Image
+              className="service-detail-hero-background"
+              src="/images/services/l2-hero-bg.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+            />
+          )}
           <div className="container service-detail-hero-grid">
             {isDirection && (
               <div className="service-detail-icon">
-                {item.image ? (
+                {item.image && (
                   <Image src={item.image} alt={item.title} fill sizes="220px" unoptimized />
-                ) : (
-                  <Image
-                    src={`/images/services/icons/${item.slug}.webp`}
-                    alt={item.title}
-                    fill
-                    sizes="220px"
-                  />
                 )}
               </div>
             )}
-            <div>
+            <div className="service-detail-copy">
+              {isDirection && <span className="mono service-detail-eyebrow">{item.title}</span>}
               <h1>{seo?.h1 || item.headline}</h1>
               <p>{item.description}</p>
               <Link className="btn btn-primary" href={`/${locale}/contacts`}>
@@ -159,26 +161,28 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         <TechnologyShowcaseSection locale={locale} />
         <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
         <ReviewsSection locale={locale} />
-        <section className="section container service-faq">
-          <div>
-            <h2>{t.faqTitle}</h2>
-            <p>{t.faqDescription}</p>
-            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-              {dictionary.faq.action}
-            </Link>
-          </div>
-          <div>
-            {faqs.map((faq) => (
-              <details key={faq.question}>
-                <summary>
-                  {faq.question}
-                  <span>+</span>
-                </summary>
-                <p>{faq.answer}</p>
-              </details>
-            ))}
-          </div>
-        </section>
+        {faqs.length > 0 && (
+          <section className="section container service-faq">
+            <div>
+              <h2>{t.faqTitle}</h2>
+              <p>{t.faqDescription}</p>
+              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+                {dictionary.faq.action}
+              </Link>
+            </div>
+            <div>
+              {faqs.map((faq) => (
+                <details key={faq.question}>
+                  <summary>
+                    {faq.question}
+                    <span>+</span>
+                  </summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
         <Breadcrumbs locale={locale} items={serviceBreadcrumbs} visible />
         <ContactSection text={dictionary.contact} />
       </main>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/i18n";
 import { SiteShell } from "@/components/site-shell";
+import { getServiceOfferings } from "@/components/wordpress-services";
 import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
 
@@ -56,11 +57,14 @@ export default async function LocaleLayout({
 }>) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const services = await getServiceOfferings(locale);
 
   return (
     <html lang={locale}>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SiteShell locale={locale}>{children}</SiteShell>
+        <SiteShell locale={locale} services={services}>
+          {children}
+        </SiteShell>
       </body>
     </html>
   );

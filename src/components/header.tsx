@@ -8,40 +8,10 @@ import { getLocalizedUrl } from "@/markets";
 import { ChevronDown } from "./icons/chevron-down";
 import { ClutchIcon, FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 import { Logo } from "./logo";
+import type { ServiceOffering } from "./wordpress-services";
 
 import { getTranslations } from "@/i18n/pages";
 const routes = ["services", "cases", "expertise", "about", "blog", "contacts"];
-const serviceSlugs = {
-  strategy: [
-    "strategic-audit",
-    "digital-audit",
-    "market-analysis",
-    "clarity-session",
-    "growth-roadmap",
-    "marketing-process-audit",
-  ],
-  marketing: [
-    "performance-marketing",
-    "analytics-dashboards",
-    "smm-strategy",
-    "seo",
-    "retention-crm",
-  ],
-  development: [
-    "corporate-websites",
-    "business-systems",
-    "technical-support",
-    "ecommerce",
-    "product-discovery",
-  ],
-  content: [
-    "brand-design",
-    "photo-production",
-    "creative-concepts",
-    "video-production",
-    "copywriting",
-  ],
-} as const;
 
 function MenuArrowIcon() {
   return (
@@ -83,7 +53,15 @@ function MobileMenuArrowIcon() {
   );
 }
 
-export function Header({ locale, forceSolid = false }: { locale: Locale; forceSolid?: boolean }) {
+export function Header({
+  locale,
+  forceSolid = false,
+  services,
+}: {
+  locale: Locale;
+  forceSolid?: boolean;
+  services: ServiceOffering[];
+}) {
   const t = getTranslations("common", locale).header;
   const text = getTranslations("global", locale);
   const pathname = usePathname();
@@ -95,8 +73,24 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [areDesktopMenusDismissed, setAreDesktopMenusDismissed] = useState(false);
   const [openMobileSection, setOpenMobileSection] = useState<number | null>(null);
-  const serviceDirections = t.serviceDirections;
-  const serviceMenuDirections = getTranslations("services", locale).directions;
+  const staticServiceDirections = getTranslations("services", locale).directions;
+  const cmsServiceDirections = services
+    .filter((service) => !service.parentSlug)
+    .map((direction) => ({
+      slug: direction.slug,
+      title: direction.title,
+      services: services
+        .filter((service) => service.parentSlug === direction.slug)
+        .map((service) => ({ slug: service.slug, title: service.title })),
+    }));
+  const serviceMenuDirections = cmsServiceDirections.some((direction) => direction.services.length)
+    ? cmsServiceDirections
+    : staticServiceDirections.map((direction) => ({
+        slug: direction.slug,
+        title: direction.title,
+        services: direction.services.map((title) => ({ slug: "", title })),
+      }));
+  const serviceDirections = serviceMenuDirections.map(({ slug, title }) => ({ slug, title }));
   const companyLinks = t.companyLinks;
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
 
@@ -168,12 +162,16 @@ export function Header({ locale, forceSolid = false }: { locale: Locale; forceSo
                         {direction.title}
                       </Link>
                       <ul>
-                        {direction.services.map((service, serviceIndex) => (
-                          <li key={service}>
+                        {direction.services.map((service) => (
+                          <li key={service.slug || service.title}>
                             <Link
-                              href={`/${locale}/services/${direction.slug}/${serviceSlugs[direction.slug][serviceIndex]}`}
+                              href={
+                                service.slug
+                                  ? `/${locale}/services/${direction.slug}/${service.slug}`
+                                  : `/${locale}/services/${direction.slug}`
+                              }
                             >
-                              {service}
+                              {service.title}
                             </Link>
                           </li>
                         ))}

@@ -79,6 +79,8 @@ type Node = {
   };
   featuredImage?: { node?: { sourceUrl?: string } };
   serviceDetails?: {
+    title?: string;
+    order?: number;
     headline?: string;
     description?: string;
     includes?: string[];
@@ -116,7 +118,8 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Services { serviceOfferings(first: 100) { nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails { headline description includes steps { title duration description } faq { question answer } titleEn headlineUk headlineEn descriptionUk descriptionEn includesUk includesEn stepsUk { title duration description } stepsEn { title duration description } metrics faqUk { question answer } faqEn { question answer } } } } }`,
+        query: `query Services($locale: String!) { serviceOfferings(first: 100) { nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails(locale: $locale) { title headline description order includes steps { title duration description } faq { question answer } metrics } } } }`,
+        variables: { locale },
       }),
       next: { revalidate: 10 },
     });
@@ -127,7 +130,11 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
     const nodes = json.data?.serviceOfferings?.nodes ?? [];
     if (!nodes.length) return fallback;
     return filterPublishedForLocale(nodes, locale)
-      .sort((a, b) => (a.menuOrder ?? 0) - (b.menuOrder ?? 0))
+      .sort(
+        (a, b) =>
+          (a.serviceDetails?.order ?? a.menuOrder ?? 0) -
+          (b.serviceDetails?.order ?? b.menuOrder ?? 0),
+      )
       .map((node) => {
         const d = node.serviceDetails ?? {};
         const en = locale === "en";
@@ -140,18 +147,23 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
           parentSlug: node.parent?.node?.slug
             ? getPublicContentSlug(node.parent.node.slug, node.parent.node.gvspaceLocalization)
             : undefined,
-          title: localized ? node.title : en && d.titleEn ? d.titleEn : node.title,
-          headline: localized
-            ? (d.headline ?? node.title)
-            : (en ? d.headlineEn : d.headlineUk) || (en && d.titleEn ? d.titleEn : node.title),
-          description: localized
-            ? (d.description ?? "")
-            : ((en ? d.descriptionEn : d.descriptionUk) ?? ""),
+          title: d.title || (localized ? node.title : en && d.titleEn ? d.titleEn : node.title),
+          headline:
+            d.headline ||
+            (localized
+              ? node.title
+              : (en ? d.headlineEn : d.headlineUk) || (en && d.titleEn ? d.titleEn : node.title)),
+          description:
+            d.description || (localized ? "" : ((en ? d.descriptionEn : d.descriptionUk) ?? "")),
           image: node.featuredImage?.node?.sourceUrl,
-          includes: localized ? (d.includes ?? []) : ((en ? d.includesEn : d.includesUk) ?? []),
-          steps: localized ? (d.steps ?? []) : ((en ? d.stepsEn : d.stepsUk) ?? []),
+          includes:
+            d.includes?.length || localized
+              ? (d.includes ?? [])
+              : ((en ? d.includesEn : d.includesUk) ?? []),
+          steps:
+            d.steps?.length || localized ? (d.steps ?? []) : ((en ? d.stepsEn : d.stepsUk) ?? []),
           metrics: d.metrics ?? [],
-          faq: localized ? (d.faq ?? []) : ((en ? d.faqEn : d.faqUk) ?? []),
+          faq: d.faq?.length || localized ? (d.faq ?? []) : ((en ? d.faqEn : d.faqUk) ?? []),
           modifiedAt: node.modified,
         };
       });
