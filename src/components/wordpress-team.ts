@@ -25,7 +25,7 @@ type TeamNode = {
   title: string;
   menuOrder?: number;
   featuredImage?: { node?: { sourceUrl?: string; altText?: string } };
-  teamMemberDetails?: { role?: string; tags?: string[] };
+  teamMemberDetails?: { name?: string; role?: string; tags?: string[] };
   teamMemberCategories?: { nodes?: TeamCategory[] };
   gvspaceLocalization?: ContentLocalization | null;
 };
@@ -53,7 +53,7 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
         teamMembers(first: 100) { nodes {
           databaseId title menuOrder gvspaceLocalization { locale translationGroup status }
           featuredImage { node { sourceUrl altText } }
-          teamMemberDetails { role tags }
+          teamMemberDetails(locale: "${locale}") { name role tags }
           teamMemberCategories { nodes { name slug } }
         } }
       }`,
@@ -72,12 +72,12 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
     const members = filterPublishedForLocale(result.data?.teamMembers?.nodes ?? [], locale)
       .map((node): TeamMember => ({
         id: node.databaseId,
-        name: node.title,
+        name: node.teamMemberDetails?.name || node.title,
         role: node.teamMemberDetails?.role ?? "",
         tags: node.teamMemberDetails?.tags ?? [],
         categorySlugs: node.teamMemberCategories?.nodes?.map(({ slug }) => slug) ?? [],
         image: node.featuredImage?.node?.sourceUrl,
-        imageAlt: node.featuredImage?.node?.altText || node.title,
+        imageAlt: node.featuredImage?.node?.altText || node.teamMemberDetails?.name || node.title,
         order: node.menuOrder ?? 0,
       }))
       .sort((a, b) => a.order - b.order || a.id - b.id);

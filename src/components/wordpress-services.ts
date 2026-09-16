@@ -6,6 +6,7 @@ import {
 } from "@/content-localization";
 
 export type ServiceStep = { title: string; duration: string; description: string };
+export type ServiceFitCard = { label: string; title: string; description: string };
 export type ServiceOffering = {
   id: number;
   slug: string;
@@ -14,6 +15,7 @@ export type ServiceOffering = {
   headline: string;
   description: string;
   image?: string;
+  fitCards: ServiceFitCard[];
   includes: string[];
   steps: ServiceStep[];
   metrics: string[];
@@ -59,6 +61,7 @@ const fallback: ServiceOffering[] = [
       title: row[1],
       headline: row[3],
       description: "",
+      fitCards: [],
       includes: [],
       steps: [],
       metrics: [],
@@ -83,6 +86,7 @@ type Node = {
     order?: number;
     headline?: string;
     description?: string;
+    fitCards?: ServiceFitCard[];
     includes?: string[];
     steps?: ServiceStep[];
     faq?: ServiceOffering["faq"];
@@ -118,7 +122,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Services($locale: String!) { serviceOfferings(first: 100) { nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails(locale: $locale) { title headline description order includes steps { title duration description } faq { question answer } metrics } } } }`,
+        query: `query Services($locale: String!) { serviceOfferings(first: 100) { nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails(locale: $locale) { title headline description order fitCards { label title description } includes steps { title duration description } faq { question answer } metrics } } } }`,
         variables: { locale },
       }),
       next: { revalidate: 10 },
@@ -156,6 +160,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
           description:
             d.description || (localized ? "" : ((en ? d.descriptionEn : d.descriptionUk) ?? "")),
           image: node.featuredImage?.node?.sourceUrl,
+          fitCards: d.fitCards ?? [],
           includes:
             d.includes?.length || localized
               ? (d.includes ?? [])

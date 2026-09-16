@@ -92,6 +92,36 @@ export function Header({
       }));
   const serviceDirections = serviceMenuDirections.map(({ slug, title }) => ({ slug, title }));
   const companyLinks = t.companyLinks;
+  const expertiseLinks =
+    locale === "uk"
+      ? [
+          {
+            href: "/technologies",
+            title: "Технології",
+            description:
+              "Ми не використовуємо один стек для всього. Кожен інструмент у нашому арсеналі вирішує конкретну задачу — і тільки її.",
+          },
+          {
+            href: "/cases",
+            title: "Індустрії",
+            description:
+              "Кожна індустрія має власну економіку, цикл рішення і больові точки. Ми не переносимо шаблон з однієї ніші в іншу.",
+          },
+        ]
+      : [
+          {
+            href: "/technologies",
+            title: "Technologies",
+            description:
+              "We do not use one stack for everything. Every tool in our arsenal solves a specific task — and only that task.",
+          },
+          {
+            href: "/cases",
+            title: "Industries",
+            description:
+              "Every industry has its own economics, decision cycle, and pain points. We do not transfer one niche's template to another.",
+          },
+        ];
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -177,6 +207,26 @@ export function Header({
                         ))}
                       </ul>
                     </section>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : index === 2 ? (
+            <div className="expertise-menu" key="expertise">
+              <Link href={`/${locale}/technologies`}>
+                {label.toUpperCase()}
+                <ChevronDown className="chevron" />
+              </Link>
+              <div className="expertise-dropdown">
+                <div className="expertise-dropdown-grid">
+                  {expertiseLinks.map((item) => (
+                    <Link href={`/${locale}${item.href}`} key={item.title}>
+                      <strong>
+                        <MenuArrowIcon />
+                        {item.title}
+                      </strong>
+                      <span>{item.description}</span>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -295,12 +345,7 @@ export function Header({
                     label: item.title,
                   }))
                 : index === 2
-                  ? [
-                      {
-                        href: "/technologies",
-                        label: locale === "uk" ? "Технології" : "Technologies",
-                      },
-                    ]
+                  ? expertiseLinks.map((item) => ({ href: item.href, label: item.title }))
                   : index === 3
                     ? companyLinks.map((item) => ({ href: item.href, label: item.title }))
                     : [];

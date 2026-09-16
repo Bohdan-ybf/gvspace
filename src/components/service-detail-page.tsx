@@ -3,11 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
+import { CheckMark } from "./icons/check-mark";
 import { getServiceOffering } from "./wordpress-services";
 import { SystemTransitionSection } from "./system-transition-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ReviewsSection } from "./reviews-section";
+import { ServiceInsightsSection } from "./service-insights-section";
 import { ContactSection } from "./contact-section";
 
 import { getTranslations } from "@/i18n/pages";
@@ -71,28 +73,26 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
   return (
     <>
       <StructuredData data={faqSchema ? [serviceSchema, faqSchema] : serviceSchema} />
-      <main className={`service-detail-page${isDirection ? " is-direction-page" : ""}`}>
-        <section className={`service-detail-hero${isDirection ? " is-direction" : ""}`}>
-          {isDirection && (
-            <Image
-              className="service-detail-hero-background"
-              src="/images/services/l2-hero-bg.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-            />
-          )}
+      <main
+        className={`service-detail-page${isDirection ? " is-direction-page" : " is-service-page"}`}
+      >
+        <section className={`service-detail-hero${isDirection ? " is-direction" : " is-service"}`}>
+          <Image
+            className="service-detail-hero-background"
+            src="/images/services/l2-hero-bg.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
           <div className="container service-detail-hero-grid">
-            {isDirection && (
-              <div className="service-detail-icon">
-                {item.image && (
-                  <Image src={item.image} alt={item.title} fill sizes="220px" unoptimized />
-                )}
-              </div>
-            )}
+            <div className="service-detail-icon">
+              {item.image && (
+                <Image src={item.image} alt={item.title} fill sizes="520px" unoptimized />
+              )}
+            </div>
             <div className="service-detail-copy">
-              {isDirection && <span className="mono service-detail-eyebrow">{item.title}</span>}
+              <span className="mono service-detail-eyebrow">{item.title}</span>
               <h1>{seo?.h1 || item.headline}</h1>
               <p>{item.description}</p>
               <Link className="btn btn-primary" href={`/${locale}/contacts`}>
@@ -103,9 +103,26 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
           </div>
         </section>
 
+        {!isDirection && item.fitCards.length > 0 && (
+          <section className="section container service-fit">
+            <span className="mono">{t.fitEyebrow}</span>
+            <div>
+              {item.fitCards.map((card) => (
+                <article key={`${card.label}-${card.title}`}>
+                  <small className="mono">{card.label}</small>
+                  <h2>{card.title}</h2>
+                  <p>{card.description}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         {(children.length > 0 || item.includes.length > 0) && (
           <section className="section container service-includes">
-            <span className="mono">{t.includesEyebrow}</span>
+            <span className="mono">
+              {isDirection ? t.includesEyebrow : t.serviceIncludesEyebrow}
+            </span>
             <div>
               {(children.length
                 ? children.map((child) => ({
@@ -121,7 +138,8 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
                   </Link>
                 ) : (
                   <div key={entry.label}>
-                    <span>✓ {entry.label}</span>
+                    <CheckMark />
+                    <span>{entry.label}</span>
                   </div>
                 ),
               )}
@@ -137,7 +155,8 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
               {steps.map((step, index) => (
                 <article key={`${step.title}-${index}`}>
                   <small className="mono">
-                    [ 0{index + 1} ]　 {step.duration}
+                    <span>[ 0{index + 1} ]</span>
+                    <span>{step.duration}</span>
                   </small>
                   <h3>{step.title}</h3>
                   <p>{step.description}</p>
@@ -158,9 +177,19 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             </div>
           </section>
         )}
-        <TechnologyShowcaseSection locale={locale} />
-        <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
+        {isDirection ? (
+          <>
+            <TechnologyShowcaseSection locale={locale} />
+            <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
+          </>
+        ) : (
+          <>
+            <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
+            <TechnologyShowcaseSection locale={locale} />
+          </>
+        )}
         <ReviewsSection locale={locale} />
+        {!isDirection && <ServiceInsightsSection locale={locale} />}
         {faqs.length > 0 && (
           <section className="section container service-faq">
             <div>
@@ -171,8 +200,8 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
               </Link>
             </div>
             <div>
-              {faqs.map((faq) => (
-                <details key={faq.question}>
+              {faqs.map((faq, index) => (
+                <details key={faq.question} open={index === 1}>
                   <summary>
                     {faq.question}
                     <span>+</span>

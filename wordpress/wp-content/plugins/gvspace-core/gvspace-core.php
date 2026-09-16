@@ -67,6 +67,11 @@ const GVSPACE_TEAM_MEMBER_FIELDS = [
     'tags' => ['label' => 'Компетенції (кожна з нового рядка)', 'type' => 'textarea'],
 ];
 
+const GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS = [
+    'role' => ['label' => 'Посада / роль', 'type' => 'text'],
+    'tags' => ['label' => 'Компетенції (кожна з нового рядка)', 'type' => 'textarea'],
+];
+
 const GVSPACE_PARTNER_FIELDS = [
     'direction_uk' => ['label' => 'Напрямок українською (наприклад, IT-РОЗРОБКА)', 'type' => 'text'],
     'direction_en' => ['label' => 'Напрямок англійською (наприклад, IT DEVELOPMENT)', 'type' => 'text'],
@@ -101,6 +106,7 @@ const GVSPACE_LOCALIZED_REVIEW_FIELDS = [
 const GVSPACE_LOCALIZED_SERVICE_FIELDS = [
     'headline' => ['label' => 'Заголовок першого екрана (H1)', 'type' => 'text'],
     'description' => ['label' => 'Опис під заголовком', 'type' => 'textarea'],
+    'fit_cards' => ['label' => 'Кому і коли підходить — етап | заголовок | опис', 'type' => 'textarea'],
     'includes' => ['label' => 'Що входить у послугу — один пункт у рядку', 'type' => 'textarea'],
     'steps' => ['label' => 'Етапи роботи — назва | термін | опис', 'type' => 'textarea'],
     'metrics' => ['label' => 'Результати / показники — один пункт у рядку', 'type' => 'textarea'],
@@ -526,6 +532,21 @@ add_action('init', function (): void {
             'sanitize_callback' => 'sanitize_textarea_field',
             'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
         ]);
+    }
+
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        register_post_meta('gv_team_member', '_gvspace_team_member_title_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        foreach (array_keys(GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS) as $field) {
+            register_post_meta('gv_team_member', '_gvspace_team_member_' . $field . '_' . $locale, [
+                'type' => 'string', 'single' => true, 'show_in_rest' => true,
+                'sanitize_callback' => 'sanitize_textarea_field',
+                'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+            ]);
+        }
     }
 
     foreach (array_keys(GVSPACE_PARTNER_FIELDS) as $field) {
@@ -1021,7 +1042,7 @@ function gvspace_sanitize_translation_status(string $value): string
 
 add_action('add_meta_boxes', function (): void {
     foreach (GVSPACE_LOCALIZED_POST_TYPES as $post_type) {
-        if ($post_type === 'gv_service') continue;
+        if (in_array($post_type, ['gv_service', 'gv_team_member'], true)) continue;
         add_meta_box(
             'gvspace-localization',
             'GVSPACE: локалізація',
@@ -1160,18 +1181,20 @@ function gvspace_render_seo_fields(WP_Post $post): void
     $locale = gvspace_get_content_locale($post);
     echo '<p class="description"><strong>SEO Title і Meta Description не є текстом сторінки.</strong> Вони відображаються у коді сторінки, вкладці браузера та пошуковій видачі. Для видимого заголовка заповніть «H1 сторінки». Зміни на сайті можуть з’явитися із затримкою до 60 секунд через кеш.</p>';
 
-    if ($post->post_type === 'gv_service') {
+    if (in_array($post->post_type, ['gv_service', 'gv_team_member'], true)) {
+        $language_group = $post->post_type === 'gv_service' ? 'service-language' : 'team-member-language';
+        $active_locale = $locale !== 'legacy' && array_key_exists($locale, GVSPACE_CONTENT_LOCALES) ? $locale : 'uk';
         echo '<p><label for="gvspace-seo-language"><strong>Мова SEO</strong></label> ';
-        echo '<select id="gvspace-seo-language" data-gvspace-language-select="service-language">';
-        foreach (GVSPACE_CONTENT_LOCALES as $service_locale => $label) {
-            echo '<option value="' . esc_attr($service_locale) . '">' . esc_html($label) . '</option>';
+        echo '<select id="gvspace-seo-language" data-gvspace-language-select="' . esc_attr($language_group) . '">';
+        foreach (GVSPACE_CONTENT_LOCALES as $content_locale => $label) {
+            echo '<option value="' . esc_attr($content_locale) . '"' . selected($active_locale, $content_locale, false) . '>' . esc_html($label) . '</option>';
         }
         echo '</select></p>';
-        foreach (GVSPACE_CONTENT_LOCALES as $service_locale => $label) {
-            echo '<div data-gvspace-language-panel="service-language" data-locale="' . esc_attr($service_locale) . '"' . ($service_locale === 'uk' ? '' : ' hidden') . '>';
+        foreach (GVSPACE_CONTENT_LOCALES as $content_locale => $label) {
+            echo '<div data-gvspace-language-panel="' . esc_attr($language_group) . '" data-locale="' . esc_attr($content_locale) . '"' . ($content_locale === $active_locale ? '' : ' hidden') . '>';
             echo '<hr><h3>' . esc_html($label) . '</h3>';
             foreach (GVSPACE_SEO_FIELDS as $key => $config) {
-                gvspace_render_seo_field($post, $key, $config, '_' . $service_locale);
+                gvspace_render_seo_field($post, $key, $config, '_' . $content_locale);
             }
             echo '</div>';
         }
@@ -1205,8 +1228,8 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
     }
 
     $locale = gvspace_get_content_locale($post);
-    $suffixes = $post->post_type === 'gv_service'
-        ? array_map(static fn (string $service_locale): string => '_' . $service_locale, array_keys(GVSPACE_CONTENT_LOCALES))
+    $suffixes = in_array($post->post_type, ['gv_service', 'gv_team_member'], true)
+        ? array_map(static fn (string $content_locale): string => '_' . $content_locale, array_keys(GVSPACE_CONTENT_LOCALES))
         : ($locale === 'legacy' ? ['_uk', '_en'] : ['']);
     foreach ($suffixes as $locale_suffix) {
         foreach (array_keys(GVSPACE_SEO_FIELDS) as $key) {
@@ -1220,7 +1243,7 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
 }, 10, 2);
 
 foreach (GVSPACE_LOCALIZED_POST_TYPES as $gvspace_localized_post_type) {
-    if ($gvspace_localized_post_type === 'gv_service') continue;
+    if (in_array($gvspace_localized_post_type, ['gv_service', 'gv_team_member'], true)) continue;
     add_filter("manage_{$gvspace_localized_post_type}_posts_columns", function (array $columns): array {
         $columns['gvspace_locale'] = 'Мова';
         $columns['gvspace_translation_status'] = 'Переклад';
@@ -1293,18 +1316,63 @@ add_action('save_post_gv_partner', function (int $post_id): void {
 function gvspace_render_team_member_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_team_member', 'gvspace_team_member_nonce');
-    echo '<p class="description">Ім’я вкажіть у заголовку, фото — у «Головному зображенні», таби — у блоці «Таби команди», позицію картки — у полі «Порядок».</p>';
-    gvspace_render_field_set($post, GVSPACE_TEAM_MEMBER_FIELDS, 'gvspace_team_member_', '_gvspace_team_member_');
+    $stored_locale = gvspace_get_content_locale($post);
+    $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+    echo '<p class="description"><strong>Один учасник — один запис.</strong> Оберіть мову та заповніть її переклад. Фото, таби команди й порядок картки є спільними для всіх мов.</p>';
+    echo '<p><label for="gvspace-team-member-language"><strong>Редагувати мовну версію</strong></label> ';
+    echo '<select id="gvspace-team-member-language" data-gvspace-language-select="team-member-language">';
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active_locale, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select></p>';
+
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $title = (string) get_post_meta($post->ID, '_gvspace_team_member_title_' . $locale, true);
+        if ($locale === 'uk' && $title === '') $title = $post->post_title;
+        echo '<div data-gvspace-language-panel="team-member-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h3>' . esc_html($label) . '</h3>';
+        echo '<p><label for="gvspace_team_member_title_' . esc_attr($locale) . '"><strong>Ім’я учасника</strong></label><br>';
+        echo '<input type="text" id="gvspace_team_member_title_' . esc_attr($locale) . '" name="gvspace_team_member_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
+        gvspace_render_field_set($post, GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS, 'gvspace_team_member_' . $locale . '_', '_gvspace_team_member_', '_' . $locale);
+        echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
 }
 
 add_action('save_post_gv_team_member', function (int $post_id): void {
+    static $saving_title = false;
+    if ($saving_title) return;
     if (
         !isset($_POST['gvspace_team_member_nonce'])
         || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_team_member_nonce'])), 'gvspace_save_team_member')
         || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
         || !current_user_can('edit_post', $post_id)
     ) return;
-    gvspace_save_field_set($post_id, GVSPACE_TEAM_MEMBER_FIELDS, 'gvspace_team_member_', '_gvspace_team_member_');
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $title_field = 'gvspace_team_member_title_' . $locale;
+        if (isset($_POST[$title_field])) {
+            update_post_meta($post_id, '_gvspace_team_member_title_' . $locale, sanitize_text_field(wp_unslash($_POST[$title_field])));
+        }
+        foreach (array_keys(GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS) as $field) {
+            $field_name = 'gvspace_team_member_' . $locale . '_' . $field;
+            if (!isset($_POST[$field_name])) continue;
+            update_post_meta($post_id, '_gvspace_team_member_' . $field . '_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$field_name])));
+        }
+    }
+
+    update_post_meta($post_id, '_gvspace_content_locale', 'legacy');
+    update_post_meta($post_id, '_gvspace_translation_status', 'published');
+    if ((string) get_post_meta($post_id, '_gvspace_translation_group', true) === '') {
+        $default_group = sanitize_title((string) get_post_field('post_name', $post_id) ?: (string) get_post_field('post_title', $post_id));
+        update_post_meta($post_id, '_gvspace_translation_group', $default_group ?: 'team-member-' . $post_id);
+    }
+
+    $uk_title = (string) get_post_meta($post_id, '_gvspace_team_member_title_uk', true);
+    if ($uk_title !== '' && get_post_field('post_title', $post_id) !== $uk_title) {
+        $saving_title = true;
+        wp_update_post(['ID' => $post_id, 'post_title' => $uk_title]);
+        $saving_title = false;
+    }
 });
 
 function gvspace_render_technology_fields(WP_Post $post): void
@@ -1403,12 +1471,12 @@ add_action('add_meta_boxes', function (): void {
 function gvspace_render_service_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_service', 'gvspace_service_nonce');
-    echo '<p class="description"><strong>Одна послуга — один запис.</strong> Оберіть мову та заповніть її переклад. Перемикання мови не перезавантажує сторінку й не видаляє введений текст. Запис без батьківського елемента — напрямок (L2), дочірній — послуга (L3).</p>';
-    if ((int) $post->post_parent === 0) {
-        echo '<div class="notice notice-info inline"><p><strong>Банер L2:</strong> фон є спільним і зберігається на сайті. Завантажте прозору 3D-іконку напрямку в блоці «3D-іконка банера» праворуч. Рекомендований формат — WebP або PNG із прозорістю, приблизно 1000 × 800 px.</p></div>';
-    } else {
-        echo '<p class="description">Це сторінка L3. Окрема 3D-іконка банера для неї не використовується.</p>';
+    if ((string) get_post_meta($post->ID, '_gvspace_service_reference_template', true) === '1') {
+        echo '<div class="notice notice-success inline"><p><strong>Еталонна L3-послуга.</strong> Використовуйте структуру та рівень деталізації цього запису як приклад для заповнення інших послуг.</p></div>';
     }
+    echo '<p class="description"><strong>Одна послуга — один запис.</strong> Оберіть мову та заповніть її переклад. Перемикання мови не перезавантажує сторінку й не видаляє введений текст. Запис без батьківського елемента — напрямок (L2), дочірній — послуга (L3).</p>';
+    $service_level = (int) $post->post_parent === 0 ? 'L2' : 'L3';
+    echo '<div class="notice notice-info inline"><p><strong>Банер ' . esc_html($service_level) . ':</strong> фон є спільним і зберігається на сайті. Завантажте прозору 3D-іконку цієї сторінки в блоці «3D-іконка банера» праворуч. Рекомендований формат — WebP або PNG із прозорістю, приблизно 1000 × 800 px.</p></div>';
     echo '<p><label for="gvspace-service-language"><strong>Редагувати мовну версію</strong></label> ';
     echo '<select id="gvspace-service-language" data-gvspace-language-select="service-language">';
     foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
@@ -1453,10 +1521,9 @@ add_action('save_post_gv_service', function (int $post_id): void {
 add_filter('admin_post_thumbnail_html', function (string $content, int $post_id): string {
     if (get_post_type($post_id) !== 'gv_service') return $content;
     $post = get_post($post_id);
-    if (!$post || (int) $post->post_parent !== 0) {
-        return $content . '<p class="description">Для дочірньої послуги L3 це зображення у банері не використовується.</p>';
-    }
-    return $content . '<p class="description"><strong>3D-іконка напрямку L2.</strong><br>WebP або PNG із прозорим фоном, рекомендовано близько 1000 × 800 px. Фон банера додається сайтом автоматично.</p>';
+    if (!$post) return $content;
+    $service_level = (int) $post->post_parent === 0 ? 'L2' : 'L3';
+    return $content . '<p class="description"><strong>3D-іконка банера ' . esc_html($service_level) . '.</strong><br>WebP або PNG із прозорим фоном, рекомендовано близько 1000 × 800 px. Фон банера додається сайтом автоматично.</p>';
 }, 10, 2);
 
 add_action('add_meta_boxes', function (): void {
@@ -1612,17 +1679,26 @@ add_action('graphql_register_types', function (): void {
     register_graphql_object_type('GvspaceTeamMemberDetails', [
         'description' => 'Editable fields displayed on a GVSPACE team card.',
         'fields' => [
+            'name' => ['type' => 'String'],
             'role' => ['type' => 'String'],
             'tags' => ['type' => ['list_of' => 'String']],
         ],
     ]);
     register_graphql_field('TeamMember', 'teamMemberDetails', [
         'type' => 'GvspaceTeamMemberDetails',
-        'resolve' => static function ($source): array {
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): array {
             $post_id = (int) $source->databaseId;
-            $role = (string) get_post_meta($post_id, '_gvspace_team_member_role', true);
-            $tags = (string) get_post_meta($post_id, '_gvspace_team_member_tags', true);
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
+            $name = (string) get_post_meta($post_id, '_gvspace_team_member_title_' . $locale, true);
+            $role = (string) get_post_meta($post_id, '_gvspace_team_member_role_' . $locale, true);
+            $tags = (string) get_post_meta($post_id, '_gvspace_team_member_tags_' . $locale, true);
+            if ($name === '') $name = (string) get_the_title($post_id);
+            if ($role === '') $role = (string) get_post_meta($post_id, '_gvspace_team_member_role', true);
+            if ($tags === '') $tags = (string) get_post_meta($post_id, '_gvspace_team_member_tags', true);
             return [
+                'name' => $name,
                 'role' => $role,
                 'tags' => array_values(array_filter(array_map('trim', preg_split('/\R/', $tags) ?: []))),
             ];
@@ -1800,10 +1876,11 @@ add_action('graphql_register_types', function (): void {
         ],
     ]);
     register_graphql_object_type('GvspaceServiceStep', ['fields' => ['title' => ['type' => 'String'], 'duration' => ['type' => 'String'], 'description' => ['type' => 'String']]]);
+    register_graphql_object_type('GvspaceServiceFitCard', ['fields' => ['label' => ['type' => 'String'], 'title' => ['type' => 'String'], 'description' => ['type' => 'String']]]);
     register_graphql_object_type('GvspaceServiceFaq', ['fields' => ['question' => ['type' => 'String'], 'answer' => ['type' => 'String']]]);
     register_graphql_object_type('GvspaceServiceDetails', ['fields' => [
         'title' => ['type' => 'String'], 'headline' => ['type' => 'String'], 'description' => ['type' => 'String'],
-        'order' => ['type' => 'Int'],
+        'order' => ['type' => 'Int'], 'fitCards' => ['type' => ['list_of' => 'GvspaceServiceFitCard']],
         'includes' => ['type' => ['list_of' => 'String']], 'steps' => ['type' => ['list_of' => 'GvspaceServiceStep']],
         'faq' => ['type' => ['list_of' => 'GvspaceServiceFaq']],
         'titleEn' => ['type' => 'String'], 'headlineUk' => ['type' => 'String'], 'headlineEn' => ['type' => 'String'],
@@ -1821,14 +1898,15 @@ add_action('graphql_register_types', function (): void {
         $service_locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
         $value = static fn (string $key): string => (string) get_post_meta($id, '_gvspace_service_' . $key, true);
         $localizedValue = static fn (string $key): string => (string) get_post_meta($id, '_gvspace_service_' . $key . '_' . $service_locale, true);
-        $lines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/', $value($key)) ?: [])));
-        $localizedLines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/', $localizedValue($key)) ?: [])));
+        $lines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/u', $value($key)) ?: [])));
+        $localizedLines = static fn (string $key): array => array_values(array_filter(array_map('trim', preg_split('/\R/u', $localizedValue($key)) ?: [])));
         $steps = static fn (string $key): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 3)); return ['title' => $p[0] ?? '', 'duration' => $p[1] ?? '', 'description' => $p[2] ?? '']; }, $lines($key));
         $localizedSteps = static fn (): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 3)); return ['title' => $p[0] ?? '', 'duration' => $p[1] ?? '', 'description' => $p[2] ?? '']; }, $localizedLines('steps'));
+        $localizedFitCards = static fn (): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 3)); return ['label' => $p[0] ?? '', 'title' => $p[1] ?? '', 'description' => $p[2] ?? '']; }, $localizedLines('fit_cards'));
         $faq = static fn (string $key): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 2)); return ['question' => $p[0] ?? '', 'answer' => $p[1] ?? '']; }, $lines($key));
         $localizedFaq = static fn (): array => array_map(static function ($line): array { $p = array_map('trim', explode('|', $line, 2)); return ['question' => $p[0] ?? '', 'answer' => $p[1] ?? '']; }, $localizedLines('faq'));
         $title = (string) get_post_meta($id, '_gvspace_service_title_' . $service_locale, true);
-        return ['title' => $title ?: (string) get_the_title($id), 'headline' => $localizedValue('headline'), 'description' => $localizedValue('description'), 'order' => (int) get_post_field('menu_order', $id), 'includes' => $localizedLines('includes'), 'steps' => $localizedSteps(), 'faq' => $localizedFaq(), 'titleEn' => $value('title_en'), 'headlineUk' => $value('headline_uk'), 'headlineEn' => $value('headline_en'), 'descriptionUk' => $value('description_uk'), 'descriptionEn' => $value('description_en'), 'includesUk' => $lines('includes_uk'), 'includesEn' => $lines('includes_en'), 'stepsUk' => $steps('steps_uk'), 'stepsEn' => $steps('steps_en'), 'metrics' => $localizedLines('metrics'), 'faqUk' => $faq('faq_uk'), 'faqEn' => $faq('faq_en')];
+        return ['title' => $title ?: (string) get_the_title($id), 'headline' => $localizedValue('headline'), 'description' => $localizedValue('description'), 'order' => (int) get_post_field('menu_order', $id), 'fitCards' => $localizedFitCards(), 'includes' => $localizedLines('includes'), 'steps' => $localizedSteps(), 'faq' => $localizedFaq(), 'titleEn' => $value('title_en'), 'headlineUk' => $value('headline_uk'), 'headlineEn' => $value('headline_en'), 'descriptionUk' => $value('description_uk'), 'descriptionEn' => $value('description_en'), 'includesUk' => $lines('includes_uk'), 'includesEn' => $lines('includes_en'), 'stepsUk' => $steps('steps_uk'), 'stepsEn' => $steps('steps_en'), 'metrics' => $localizedLines('metrics'), 'faqUk' => $faq('faq_uk'), 'faqEn' => $faq('faq_en')];
     }]);
     register_graphql_field('ClientReview', 'reviewDetails', [
         'type' => 'GvspaceReviewDetails',
@@ -1875,6 +1953,93 @@ function gvspace_seed_team_tabs(): void
     }
 }
 add_action('admin_init', 'gvspace_seed_team_tabs');
+
+function gvspace_migrate_team_member_language_fields(): void
+{
+    if (get_option('gvspace_team_member_languages_v1') === '1') return;
+    $member_ids = get_posts([
+        'post_type' => 'gv_team_member',
+        'post_status' => 'any',
+        'numberposts' => -1,
+        'fields' => 'ids',
+    ]);
+    foreach ($member_ids as $member_id) {
+        $stored_locale = (string) get_post_meta((int) $member_id, '_gvspace_content_locale', true);
+        $locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+        $title_key = '_gvspace_team_member_title_' . $locale;
+        if ((string) get_post_meta((int) $member_id, $title_key, true) === '') {
+            update_post_meta((int) $member_id, $title_key, (string) get_post_field('post_title', (int) $member_id));
+        }
+        foreach (array_keys(GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS) as $field) {
+            $localized_key = '_gvspace_team_member_' . $field . '_' . $locale;
+            if ((string) get_post_meta((int) $member_id, $localized_key, true) !== '') continue;
+            $legacy_value = (string) get_post_meta((int) $member_id, '_gvspace_team_member_' . $field, true);
+            if ($legacy_value !== '') update_post_meta((int) $member_id, $localized_key, $legacy_value);
+        }
+    }
+    update_option('gvspace_team_member_languages_v1', '1', false);
+}
+add_action('admin_init', 'gvspace_migrate_team_member_language_fields');
+
+function gvspace_consolidate_vasyl_team_translation(): void
+{
+    if (get_option('gvspace_team_vasyl_consolidated_v1') === '1') return;
+    $members = get_posts([
+        'post_type' => 'gv_team_member',
+        'post_status' => ['publish', 'draft', 'pending', 'private', 'trash'],
+        'numberposts' => -1,
+        'meta_key' => '_gvspace_translation_group',
+        'meta_value' => 'team-vasyl-horaichuk',
+    ]);
+    if (!$members) return;
+
+    $primary = null;
+    $english_duplicate = null;
+    foreach ($members as $member) {
+        $locale = (string) get_post_meta($member->ID, '_gvspace_content_locale', true);
+        if ($locale === 'en') $english_duplicate = $member;
+        if ($locale === 'uk' || $locale === 'legacy') $primary = $member;
+    }
+    if (!$primary) return;
+
+    $primary_id = (int) $primary->ID;
+    $english_id = $english_duplicate ? (int) $english_duplicate->ID : 0;
+    $uk_role = (string) get_post_meta($primary_id, '_gvspace_team_member_role', true);
+    $uk_tags = (string) get_post_meta($primary_id, '_gvspace_team_member_tags', true);
+    $en_role = $english_id ? (string) get_post_meta($english_id, '_gvspace_team_member_role', true) : $uk_role;
+    $en_tags = $english_id ? (string) get_post_meta($english_id, '_gvspace_team_member_tags', true) : $uk_tags;
+
+    update_post_meta($primary_id, '_gvspace_team_member_title_uk', 'Василь Горайчук');
+    update_post_meta($primary_id, '_gvspace_team_member_role_uk', $uk_role);
+    update_post_meta($primary_id, '_gvspace_team_member_tags_uk', $uk_tags);
+    update_post_meta($primary_id, '_gvspace_team_member_title_en', 'Vasyl Horaichuk');
+    update_post_meta($primary_id, '_gvspace_team_member_role_en', $en_role);
+    update_post_meta($primary_id, '_gvspace_team_member_tags_en', $en_tags);
+    foreach (array_keys(GVSPACE_SEO_FIELDS) as $seo_field) {
+        $uk_target = '_gvspace_seo_' . $seo_field . '_uk';
+        $en_target = '_gvspace_seo_' . $seo_field . '_en';
+        $uk_value = (string) get_post_meta($primary_id, $uk_target, true)
+            ?: (string) get_post_meta($primary_id, '_gvspace_seo_' . $seo_field, true);
+        $en_value = (string) get_post_meta($primary_id, $en_target, true);
+        if ($en_value === '' && $english_id) {
+            $en_value = (string) get_post_meta($english_id, '_gvspace_seo_' . $seo_field . '_en', true)
+                ?: (string) get_post_meta($english_id, '_gvspace_seo_' . $seo_field, true);
+        }
+        if ($uk_value !== '') update_post_meta($primary_id, $uk_target, $uk_value);
+        if ($en_value !== '') update_post_meta($primary_id, $en_target, $en_value);
+    }
+    update_post_meta($primary_id, '_gvspace_content_locale', 'legacy');
+    update_post_meta($primary_id, '_gvspace_translation_status', 'published');
+
+    if ($english_id && $english_id !== $primary_id && get_post_status($english_id) !== 'trash') {
+        wp_trash_post($english_id);
+        if (get_post_status($english_id) !== 'trash') {
+            wp_update_post(['ID' => $english_id, 'post_status' => 'trash']);
+        }
+    }
+    update_option('gvspace_team_vasyl_consolidated_v1', '1', false);
+}
+add_action('admin_init', 'gvspace_consolidate_vasyl_team_translation');
 
 add_filter('manage_gv_team_member_posts_columns', function (array $columns): array {
     $columns['menu_order'] = 'Порядок';
@@ -2188,6 +2353,76 @@ function gvspace_repair_centralized_service_order(): void
     update_option('gvspace_services_seeded_v7', '1', false);
 }
 add_action('init', 'gvspace_repair_centralized_service_order', 26);
+
+function gvspace_seed_reference_l3_service(): void
+{
+    if (get_option('gvspace_services_seeded_v10') === '1') return;
+
+    $service_ids = get_posts([
+        'post_type' => 'gv_service', 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids',
+        'meta_key' => '_gvspace_service_catalog_slug', 'meta_value' => 'performance-marketing',
+    ]);
+    if (!$service_ids) {
+        $service = get_page_by_path('performance-marketing', OBJECT, 'gv_service');
+        if ($service) $service_ids = [$service->ID];
+    }
+    if (!$service_ids) return;
+
+    $service_id = (int) $service_ids[0];
+    $content = [
+        'uk' => [
+            'title' => 'Performance Marketing (Meta & Google Ads)',
+            'headline' => 'Реклама, яка повертає більше, ніж витрачає',
+            'description' => 'Будуємо рекламні системи, де кожен долар має траєкторію повернення. Від аудиту рекламних кабінетів до наскрізної аналітики — ми контролюємо весь шлях клієнта.',
+            'fit_cards' => "EARLY STAGE | Clarity Session | Бізнес шукає перший стабільний потік лідів. Немає чіткої системи залучення клієнтів.\nGROWTH STAGE | Архітектура системи | Є кілька каналів, але CPL зростає разом із бюджетом. Потрібна система масштабування без зливу.\nSCALE STAGE | Запуск і оптимізація | Кілька каналів і складна воронка. Потрібен контроль та прогноз по кожному каналу й сегменту.",
+            'includes' => "Аудит рекламних кабінетів (Meta, Google)\nМедіаплан і розподіл бюджету по каналах\nНалаштування та оптимізація кампаній\nНаскрізна аналітика (GA4 + GTM + Pixel)\nЩотижневі звіти без жаргону\nЩомісячна стратегічна оптимізація",
+            'steps' => "Clarity Session | безкоштовно · 30 хв | Розбираємо вашу поточну ситуацію та визначаємо точки росту. Тільки факти, цифри й потенціал.\nСтратегія та медіаплан | 14 днів | Ви отримуєте повний план дій: канали, бюджет, KPI та точки контролю.\nЗапуск і перші результати | від 30 днів | Перші вимірювані результати за місяць. Далі — оптимізація та масштабування без пропорційного зростання бюджету.\nМасштабування системи | постійно | На основі даних масштабуємо те, що працює. Ріст бюджету не дорівнює росту хаосу.",
+            'metrics' => "+140% ROAS\n-30% CPL\n+210% органічний трафік",
+            'faq' => "Скільки часу займає запуск рекламної системи? | Перший аудит і медіаплан готуємо до 14 днів. Запуск та накопичення даних для перших обґрунтованих висновків зазвичай займають від 30 днів.\nЧи працюєте ви з моєю нішею? | Перед стартом ми аналізуємо продукт, економіку та рекламні обмеження ніші. Якщо не бачимо реалістичного потенціалу, чесно повідомляємо про це до початку робіт.\nЯкі гарантії результату? | Ми не гарантуємо наперед конкретну цифру продажів, але гарантуємо прозору аналітику, контроль KPI, системну оптимізацію та зрозумілу звітність.\nЧому не фриланс або інша агенція? | Над проєктом працює команда зі стратегії, реклами й аналітики. Ви отримуєте керовану систему, а не лише налаштування рекламного кабінету.",
+            'seo' => [
+                'title' => 'Performance Marketing у Meta та Google',
+                'description' => 'Системний Performance Marketing: аудит, медіаплан, Meta та Google Ads, наскрізна аналітика й оптимізація рекламного бюджету.',
+                'h1' => 'Реклама, яка повертає більше, ніж витрачає',
+                'og_title' => 'Performance Marketing у Meta та Google | GVSPACE',
+                'og_description' => 'Будуємо керовану рекламну систему з прозорою аналітикою та прогнозованим масштабуванням.',
+            ],
+        ],
+        'en' => [
+            'title' => 'Performance Marketing (Meta & Google Ads)',
+            'headline' => 'Advertising that returns more than it spends',
+            'description' => 'We build advertising systems where every dollar has a measurable return path. From account audits to end-to-end analytics, we control the entire customer journey.',
+            'fit_cards' => "EARLY STAGE | Clarity Session | The business needs its first stable flow of leads and does not yet have a clear customer acquisition system.\nGROWTH STAGE | System architecture | Several channels are active, but CPL rises with the budget. The business needs a scalable system without wasted spend.\nSCALE STAGE | Launch and optimization | Multiple channels and a complex funnel require control and forecasting for every channel and segment.",
+            'includes' => "Advertising account audit (Meta, Google)\nMedia plan and channel budget allocation\nCampaign setup and optimization\nEnd-to-end analytics (GA4 + GTM + Pixel)\nWeekly reports without jargon\nMonthly strategic optimization",
+            'steps' => "Clarity Session | free · 30 min | We review the current situation, identify growth points, and focus on facts, numbers, and potential.\nStrategy and media plan | 14 days | You receive a complete action plan with channels, budget, KPIs, and control points.\nLaunch and first results | from 30 days | We collect measurable results in the first month, then optimize and scale without proportional budget growth.\nSystem scaling | ongoing | We use data to scale what works. A larger budget does not have to create more chaos.",
+            'metrics' => "+140% ROAS\n-30% CPL\n+210% organic traffic",
+            'faq' => "How long does it take to launch the advertising system? | We prepare the initial audit and media plan within 14 days. Launch and data collection for the first reliable conclusions usually take at least 30 days.\nDo you work with my industry? | Before starting, we assess the product, unit economics, and advertising restrictions. If we do not see realistic potential, we say so before the engagement begins.\nWhat results do you guarantee? | We cannot promise a specific sales figure in advance, but we guarantee transparent analytics, KPI control, systematic optimization, and clear reporting.\nWhy not hire a freelancer or another agency? | Your project is handled by strategy, advertising, and analytics specialists. You receive a managed system, not merely configured ad accounts.",
+            'seo' => [
+                'title' => 'Performance Marketing for Meta & Google',
+                'description' => 'Systematic Performance Marketing: audits, media planning, Meta and Google Ads, end-to-end analytics, and budget optimization.',
+                'h1' => 'Advertising that returns more than it spends',
+                'og_title' => 'Performance Marketing for Meta & Google | GVSPACE',
+                'og_description' => 'We build a manageable advertising system with transparent analytics and predictable scaling.',
+            ],
+        ],
+    ];
+
+    foreach ($content as $locale => $fields) {
+        update_post_meta($service_id, '_gvspace_service_title_' . $locale, $fields['title']);
+        foreach (['headline', 'description', 'fit_cards', 'includes', 'steps', 'metrics', 'faq'] as $field) {
+            $meta_key = '_gvspace_service_' . $field . '_' . $locale;
+            update_post_meta($service_id, $meta_key, $fields[$field]);
+        }
+        foreach ($fields['seo'] as $field => $value) {
+            $meta_key = '_gvspace_seo_' . $field . '_' . $locale;
+            update_post_meta($service_id, $meta_key, $value);
+        }
+    }
+
+    update_post_meta($service_id, '_gvspace_service_reference_template', '1');
+    update_option('gvspace_services_seeded_v10', '1', false);
+    clean_post_cache($service_id);
+}
+add_action('init', 'gvspace_seed_reference_l3_service', 27);
 
 add_filter('manage_gv_service_posts_columns', function (array $columns): array {
     $result = [];

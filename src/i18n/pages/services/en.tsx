@@ -1,14 +1,19 @@
 export default {
   detail: {
+    fitEyebrow: "WHO IT IS FOR",
     clarityDuration: "free · 30 min",
-    clarityDescription: "We assess the current situation and identify growth points.",
+    clarityDescription:
+      "We review the current situation to find bottlenecks, understand where the budget goes, and identify what prevents growth. No sales pitch — only analysis.",
     auditTitle: "System architecture",
-    auditDescription: "We create the plan, analytics and required tools.",
+    auditDescription:
+      "Strategy, media planning, and tool setup. You see the complete plan before launch and approve every step.",
     roadmapTitle: "Launch and optimization",
     roadmapDuration: "from 30 days",
-    roadmapDescription: "We launch, measure and improve the result.",
+    roadmapDescription:
+      "The first measurable results arrive within a month. Then we optimize and scale without proportional budget growth.",
     heroAction: "Discuss your project",
     includesEyebrow: "WHAT IS INCLUDED",
+    serviceIncludesEyebrow: "WHAT IS INCLUDED",
     processEyebrow: "OUR APPROACH",
     directionProcessTitle: "Three steps to managed growth",
     serviceProcessTitle: "From request to result",

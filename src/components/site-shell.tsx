@@ -21,11 +21,11 @@ export function SiteShell({
     : `/${locale}${pathname === "/" ? "" : pathname}`;
   const pathSegments = localizedPathname.split("/").filter(Boolean);
   const isHomePage = localizedPathname === `/${locale}` || localizedPathname === `/${locale}/`;
-  const isServiceDirection = pathSegments[1] === "services" && pathSegments.length === 3;
+  const isServiceDetail = pathSegments[1] === "services" && pathSegments.length >= 3;
   const hasDarkHero =
     isHomePage ||
     localizedPathname === `/${locale}/services` ||
-    isServiceDirection ||
+    isServiceDetail ||
     localizedPathname === `/${locale}/cases` ||
     localizedPathname === `/${locale}/reviews` ||
     localizedPathname.startsWith(`/${locale}/cases/`) ||
