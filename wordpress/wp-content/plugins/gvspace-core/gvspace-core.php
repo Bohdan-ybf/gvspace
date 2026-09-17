@@ -140,6 +140,8 @@ const GVSPACE_LOCALIZED_POST_TYPES = [
     'gv_team_member',
     'gv_faq',
     'gv_home_seo_text',
+    'gv_privacy_policy',
+    'gv_terms_of_use',
 ];
 
 const GVSPACE_CONTENT_LOCALES = [
@@ -157,6 +159,7 @@ const GVSPACE_CONTENT_LOCALES = [
     'en-GB' => 'English (United Kingdom)',
 ];
 const GVSPACE_TRANSLATION_STATUSES = ['missing', 'draft', 'published'];
+const GVSPACE_CENTRALIZED_POST_TYPES = ['gv_service', 'gv_team_member', 'gv_faq', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use'];
 
 const GVSPACE_SEO_FIELDS = [
     'title' => ['label' => 'SEO Title', 'type' => 'text', 'limit' => 60],
@@ -361,7 +364,7 @@ add_action('init', function (): void {
         'show_in_rest' => true, 'show_in_graphql' => true,
         'graphql_single_name' => 'faqItem', 'graphql_plural_name' => 'faqItems',
         'show_in_menu' => 'gvspace-home',
-        'supports' => ['title', 'editor', 'page-attributes'],
+        'supports' => ['title', 'page-attributes'],
     ]);
 
     register_post_type('gv_home_seo_text', [
@@ -375,7 +378,43 @@ add_action('init', function (): void {
         'show_in_rest' => true, 'show_in_graphql' => true,
         'graphql_single_name' => 'homeSeoText', 'graphql_plural_name' => 'homeSeoTexts',
         'show_in_menu' => 'gvspace-home',
-        'supports' => ['title', 'editor'],
+        'supports' => ['title'],
+    ]);
+
+    register_post_type('gv_privacy_policy', [
+        'labels' => [
+            'name' => 'Політика конфіденційності',
+            'singular_name' => 'Політика конфіденційності',
+            'menu_name' => 'Політика конфіденційності',
+            'add_new_item' => 'Додати політику',
+            'edit_item' => 'Редагувати політику',
+            'new_item' => 'Нова політика',
+            'all_items' => 'Політика конфіденційності',
+            'not_found' => 'Політику не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'privacyPolicy', 'graphql_plural_name' => 'privacyPolicies',
+        'menu_icon' => 'dashicons-privacy',
+        'supports' => ['title'],
+    ]);
+
+    register_post_type('gv_terms_of_use', [
+        'labels' => [
+            'name' => 'Правила використання',
+            'singular_name' => 'Правила використання',
+            'menu_name' => 'Правила використання',
+            'add_new_item' => 'Додати правила',
+            'edit_item' => 'Редагувати правила',
+            'new_item' => 'Нові правила',
+            'all_items' => 'Правила використання',
+            'not_found' => 'Правила не знайдено',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'termsOfUse', 'graphql_plural_name' => 'termsOfUses',
+        'menu_icon' => 'dashicons-media-text',
+        'supports' => ['title'],
     ]);
 
     register_taxonomy('gv_technology_category', ['gv_technology'], [
@@ -563,6 +602,29 @@ add_action('init', function (): void {
         'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
     ]);
 
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        register_post_meta('gv_faq', '_gvspace_faq_question_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        register_post_meta('gv_faq', '_gvspace_faq_answer_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        register_post_meta('gv_home_seo_text', '_gvspace_home_seo_title_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        register_post_meta('gv_home_seo_text', '_gvspace_home_seo_content_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+    }
+
     register_post_meta('gv_vacancy', '_gvspace_hot', [
         'type' => 'boolean',
         'single' => true,
@@ -618,6 +680,82 @@ function gvspace_seed_home_faqs(): void
 }
 add_action('init', 'gvspace_seed_home_faqs', 20);
 
+function gvspace_centralize_home_faqs(): void
+{
+    if (get_option('gvspace_faq_centralized_v1') === '1') return;
+    $lock_time = (int) get_option('gvspace_faq_centralized_v1_lock', 0);
+    if ($lock_time) delete_option('gvspace_faq_centralized_v1_lock');
+    if (!add_option('gvspace_faq_centralized_v1_lock', time(), '', false)) return;
+
+    $posts = get_posts([
+        'post_type' => 'gv_faq',
+        'post_status' => ['publish', 'draft', 'pending', 'private'],
+        'numberposts' => -1,
+        'orderby' => 'ID',
+        'order' => 'ASC',
+    ]);
+
+    $groups = [];
+    foreach ($posts as $post) {
+        $group = (string) get_post_meta($post->ID, '_gvspace_translation_group', true);
+        $groups[$group !== '' ? $group : 'faq-single-' . $post->ID][] = $post;
+    }
+
+    foreach ($groups as $group => $group_posts) {
+        $keeper = null;
+        foreach ($group_posts as $post) {
+            $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true) ?: 'legacy';
+            if ($locale === 'uk' || $locale === 'legacy') {
+                $keeper = $post;
+                break;
+            }
+        }
+        if (!$keeper) $keeper = $group_posts[0];
+
+        foreach ($group_posts as $post) {
+            $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true) ?: 'uk';
+            if ($locale === 'legacy' || !array_key_exists($locale, GVSPACE_CONTENT_LOCALES)) $locale = 'uk';
+            if ((string) get_post_meta($keeper->ID, '_gvspace_faq_question_' . $locale, true) === '') {
+                update_post_meta($keeper->ID, '_gvspace_faq_question_' . $locale, $post->post_title);
+            }
+            if ((string) get_post_meta($keeper->ID, '_gvspace_faq_answer_' . $locale, true) === '') {
+                update_post_meta($keeper->ID, '_gvspace_faq_answer_' . $locale, wp_strip_all_tags((string) $post->post_content));
+            }
+            foreach (array_keys(GVSPACE_SEO_FIELDS) as $key) {
+                $from = (string) get_post_meta($post->ID, '_gvspace_seo_' . $key . '_' . $locale, true);
+                if ($from === '') $from = (string) get_post_meta($post->ID, '_gvspace_seo_' . $key, true);
+                if ($from !== '' && (string) get_post_meta($keeper->ID, '_gvspace_seo_' . $key . '_' . $locale, true) === '') {
+                    update_post_meta($keeper->ID, '_gvspace_seo_' . $key . '_' . $locale, $from);
+                }
+            }
+        }
+
+        $uk_title = (string) get_post_meta($keeper->ID, '_gvspace_faq_question_uk', true) ?: $keeper->post_title;
+        wp_update_post([
+            'ID' => $keeper->ID,
+            'post_title' => $uk_title,
+            'post_content' => (string) get_post_meta($keeper->ID, '_gvspace_faq_answer_uk', true),
+        ]);
+        update_post_meta($keeper->ID, '_gvspace_faq_placement', (string) get_post_meta($keeper->ID, '_gvspace_faq_placement', true) ?: 'home');
+        update_post_meta($keeper->ID, '_gvspace_content_locale', 'legacy');
+        update_post_meta($keeper->ID, '_gvspace_translation_status', 'published');
+        $public_group = str_starts_with($group, 'faq-single-')
+            ? (sanitize_title($uk_title) ?: 'faq-' . $keeper->ID)
+            : $group;
+        update_post_meta($keeper->ID, '_gvspace_translation_group', $public_group);
+        update_post_meta($keeper->ID, '_gvspace_faq_centralized', '1');
+
+        foreach ($group_posts as $post) {
+            if ((int) $post->ID === (int) $keeper->ID) continue;
+            wp_delete_post($post->ID, true);
+        }
+    }
+
+    update_option('gvspace_faq_centralized_v1', '1', false);
+    delete_option('gvspace_faq_centralized_v1_lock');
+}
+add_action('init', 'gvspace_centralize_home_faqs', 21);
+
 function gvspace_seed_home_seo_texts(): void
 {
     if (get_option('gvspace_home_seo_text_seed_version') === '1') return;
@@ -658,6 +796,70 @@ function gvspace_seed_home_seo_texts(): void
     delete_option('gvspace_home_seo_text_seed_lock');
 }
 add_action('init', 'gvspace_seed_home_seo_texts', 20);
+
+function gvspace_centralize_home_seo_texts(): void
+{
+    if (get_option('gvspace_home_seo_text_centralized_v1') === '1') return;
+    $lock_time = (int) get_option('gvspace_home_seo_text_centralized_v1_lock', 0);
+    if ($lock_time) delete_option('gvspace_home_seo_text_centralized_v1_lock');
+    if (!add_option('gvspace_home_seo_text_centralized_v1_lock', time(), '', false)) return;
+
+    $posts = get_posts([
+        'post_type' => 'gv_home_seo_text',
+        'post_status' => ['publish', 'draft', 'pending', 'private'],
+        'numberposts' => -1,
+        'orderby' => 'ID',
+        'order' => 'ASC',
+    ]);
+
+    $groups = [];
+    foreach ($posts as $post) {
+        $group = (string) get_post_meta($post->ID, '_gvspace_translation_group', true);
+        $groups[$group !== '' ? $group : 'home-seo-single-' . $post->ID][] = $post;
+    }
+
+    foreach ($groups as $group => $group_posts) {
+        $keeper = null;
+        foreach ($group_posts as $post) {
+            $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true) ?: 'legacy';
+            if ($locale === 'uk' || $locale === 'legacy') {
+                $keeper = $post;
+                break;
+            }
+        }
+        if (!$keeper) $keeper = $group_posts[0];
+
+        foreach ($group_posts as $post) {
+            $locale = (string) get_post_meta($post->ID, '_gvspace_content_locale', true) ?: 'uk';
+            if ($locale === 'legacy' || !array_key_exists($locale, GVSPACE_CONTENT_LOCALES)) $locale = 'uk';
+            if ((string) get_post_meta($keeper->ID, '_gvspace_home_seo_title_' . $locale, true) === '') {
+                update_post_meta($keeper->ID, '_gvspace_home_seo_title_' . $locale, $post->post_title);
+            }
+            if ((string) get_post_meta($keeper->ID, '_gvspace_home_seo_content_' . $locale, true) === '') {
+                update_post_meta($keeper->ID, '_gvspace_home_seo_content_' . $locale, wp_strip_all_tags((string) $post->post_content));
+            }
+        }
+
+        $uk_title = (string) get_post_meta($keeper->ID, '_gvspace_home_seo_title_uk', true) ?: $keeper->post_title;
+        wp_update_post([
+            'ID' => $keeper->ID,
+            'post_title' => $uk_title,
+            'post_content' => (string) get_post_meta($keeper->ID, '_gvspace_home_seo_content_uk', true),
+        ]);
+        update_post_meta($keeper->ID, '_gvspace_content_locale', 'legacy');
+        update_post_meta($keeper->ID, '_gvspace_translation_status', 'published');
+        update_post_meta($keeper->ID, '_gvspace_translation_group', str_starts_with($group, 'home-seo-single-') ? 'home-seo-text' : $group);
+
+        foreach ($group_posts as $post) {
+            if ((int) $post->ID === (int) $keeper->ID) continue;
+            wp_delete_post($post->ID, true);
+        }
+    }
+
+    update_option('gvspace_home_seo_text_centralized_v1', '1', false);
+    delete_option('gvspace_home_seo_text_centralized_v1_lock');
+}
+add_action('init', 'gvspace_centralize_home_seo_texts', 21);
 
 function gvspace_seed_demo_partners(): void
 {
@@ -986,6 +1188,19 @@ function gvspace_get_content_locale(WP_Post $post): string
     return $stored_locale ?: ($post->post_status === 'auto-draft' ? 'uk' : 'legacy');
 }
 
+function gvspace_centralized_language_group(string $post_type): string
+{
+    return match ($post_type) {
+        'gv_service' => 'service-language',
+        'gv_team_member' => 'team-member-language',
+        'gv_faq' => 'faq-language',
+        'gv_home_seo_text' => 'home-seo-text-language',
+        'gv_privacy_policy' => 'privacy-policy-language',
+        'gv_terms_of_use' => 'terms-of-use-language',
+        default => 'language',
+    };
+}
+
 function gvspace_render_field_set(WP_Post $post, array $fields, string $name_prefix, string $meta_prefix, string $meta_suffix = ''): void
 {
     foreach ($fields as $key => $config) {
@@ -1042,7 +1257,7 @@ function gvspace_sanitize_translation_status(string $value): string
 
 add_action('add_meta_boxes', function (): void {
     foreach (GVSPACE_LOCALIZED_POST_TYPES as $post_type) {
-        if (in_array($post_type, ['gv_service', 'gv_team_member'], true)) continue;
+        if (in_array($post_type, GVSPACE_CENTRALIZED_POST_TYPES, true)) continue;
         add_meta_box(
             'gvspace-localization',
             'GVSPACE: локалізація',
@@ -1139,6 +1354,7 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
 
 add_action('add_meta_boxes', function (): void {
     foreach (GVSPACE_LOCALIZED_POST_TYPES as $post_type) {
+        if (in_array($post_type, ['gv_faq', 'gv_home_seo_text'], true)) continue;
         add_meta_box(
             'gvspace-seo',
             'GVSPACE: SEO та соцмережі',
@@ -1181,8 +1397,8 @@ function gvspace_render_seo_fields(WP_Post $post): void
     $locale = gvspace_get_content_locale($post);
     echo '<p class="description"><strong>SEO Title і Meta Description не є текстом сторінки.</strong> Вони відображаються у коді сторінки, вкладці браузера та пошуковій видачі. Для видимого заголовка заповніть «H1 сторінки». Зміни на сайті можуть з’явитися із затримкою до 60 секунд через кеш.</p>';
 
-    if (in_array($post->post_type, ['gv_service', 'gv_team_member'], true)) {
-        $language_group = $post->post_type === 'gv_service' ? 'service-language' : 'team-member-language';
+    if (in_array($post->post_type, GVSPACE_CENTRALIZED_POST_TYPES, true)) {
+        $language_group = gvspace_centralized_language_group($post->post_type);
         $active_locale = $locale !== 'legacy' && array_key_exists($locale, GVSPACE_CONTENT_LOCALES) ? $locale : 'uk';
         echo '<p><label for="gvspace-seo-language"><strong>Мова SEO</strong></label> ';
         echo '<select id="gvspace-seo-language" data-gvspace-language-select="' . esc_attr($language_group) . '">';
@@ -1228,7 +1444,7 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
     }
 
     $locale = gvspace_get_content_locale($post);
-    $suffixes = in_array($post->post_type, ['gv_service', 'gv_team_member'], true)
+    $suffixes = in_array($post->post_type, GVSPACE_CENTRALIZED_POST_TYPES, true)
         ? array_map(static fn (string $content_locale): string => '_' . $content_locale, array_keys(GVSPACE_CONTENT_LOCALES))
         : ($locale === 'legacy' ? ['_uk', '_en'] : ['']);
     foreach ($suffixes as $locale_suffix) {
@@ -1243,7 +1459,7 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
 }, 10, 2);
 
 foreach (GVSPACE_LOCALIZED_POST_TYPES as $gvspace_localized_post_type) {
-    if (in_array($gvspace_localized_post_type, ['gv_service', 'gv_team_member'], true)) continue;
+    if (in_array($gvspace_localized_post_type, GVSPACE_CENTRALIZED_POST_TYPES, true)) continue;
     add_filter("manage_{$gvspace_localized_post_type}_posts_columns", function (array $columns): array {
         $columns['gvspace_locale'] = 'Мова';
         $columns['gvspace_translation_status'] = 'Переклад';
@@ -1267,33 +1483,163 @@ add_action('add_meta_boxes', function (): void {
     add_meta_box('gvspace-technology-details', 'Налаштування технології', 'gvspace_render_technology_fields', 'gv_technology', 'normal', 'high');
     add_meta_box('gvspace-team-member-details', 'Дані учасника команди', 'gvspace_render_team_member_fields', 'gv_team_member', 'normal', 'high');
     add_meta_box('gvspace-partner-details', 'Дані партнера', 'gvspace_render_partner_fields', 'gv_partner', 'normal', 'high');
+    add_meta_box('gvspace-faq-content', 'Контент FAQ', 'gvspace_render_faq_content_fields', 'gv_faq', 'normal', 'high');
     add_meta_box('gvspace-faq-details', 'Розміщення FAQ', 'gvspace_render_faq_fields', 'gv_faq', 'side', 'default');
+    add_meta_box('gvspace-home-seo-text-content', 'Контент SEO-тексту', 'gvspace_render_home_seo_text_fields', 'gv_home_seo_text', 'normal', 'high');
 });
+
+add_action('admin_head', function (): void {
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$screen || !in_array($screen->post_type, ['gv_faq', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use'], true) || !in_array($screen->base, ['post', 'post-new'], true)) return;
+    echo '<style>#titlediv{display:none!important}</style>';
+});
+
+function gvspace_render_faq_content_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_faq', 'gvspace_faq_nonce');
+    $stored_locale = gvspace_get_content_locale($post);
+    $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+    echo '<p class="description"><strong>Одне питання — один запис.</strong> Оберіть мову та заповніть її переклад. Перемикання мови не перезавантажує сторінку й не видаляє введений текст.</p>';
+    echo '<p><label for="gvspace-faq-language"><strong>Редагувати мовну версію</strong></label> ';
+    echo '<select id="gvspace-faq-language" data-gvspace-language-select="faq-language">';
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active_locale, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select></p>';
+
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $question = (string) get_post_meta($post->ID, '_gvspace_faq_question_' . $locale, true);
+        $answer = (string) get_post_meta($post->ID, '_gvspace_faq_answer_' . $locale, true);
+        if ($locale === 'uk' && $question === '') $question = $post->post_title;
+        if ($locale === 'uk' && $answer === '') $answer = wp_strip_all_tags((string) $post->post_content);
+        echo '<div data-gvspace-language-panel="faq-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h3>' . esc_html($label) . '</h3>';
+        echo '<p><label for="gvspace_faq_question_' . esc_attr($locale) . '"><strong>Питання</strong></label><br>';
+        echo '<input type="text" id="gvspace_faq_question_' . esc_attr($locale) . '" name="gvspace_faq_question_' . esc_attr($locale) . '" value="' . esc_attr($question) . '" style="width:100%"></p>';
+        echo '<p><label for="gvspace_faq_answer_' . esc_attr($locale) . '"><strong>Відповідь</strong></label><br>';
+        echo '<textarea id="gvspace_faq_answer_' . esc_attr($locale) . '" name="gvspace_faq_answer_' . esc_attr($locale) . '" rows="6" style="width:100%">' . esc_textarea($answer) . '</textarea></p>';
+        echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
 
 function gvspace_render_faq_fields(WP_Post $post): void
 {
-    wp_nonce_field('gvspace_save_faq', 'gvspace_faq_nonce');
     $placement = (string) get_post_meta($post->ID, '_gvspace_faq_placement', true) ?: 'home';
     ?>
     <p><label for="gvspace_faq_placement"><strong>Показувати на сторінці</strong></label></p>
     <select id="gvspace_faq_placement" name="gvspace_faq_placement" style="width:100%">
         <option value="home" <?php selected($placement, 'home'); ?>>Головна сторінка</option>
     </select>
-    <p class="description">Питання задається в заголовку, відповідь — у редакторі. Порядок — у блоці «Атрибути».</p>
+    <p class="description">Порядок на сторінці задається у блоці «Атрибути».</p>
     <?php
 }
 
 add_action('save_post_gv_faq', function (int $post_id): void {
+    static $saving_title = false;
+    if ($saving_title) return;
     if (
         !isset($_POST['gvspace_faq_nonce'])
         || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_faq_nonce'])), 'gvspace_save_faq')
         || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
         || !current_user_can('edit_post', $post_id)
     ) return;
+
     $placement = isset($_POST['gvspace_faq_placement'])
         ? sanitize_key(wp_unslash($_POST['gvspace_faq_placement']))
         : 'home';
     update_post_meta($post_id, '_gvspace_faq_placement', $placement === 'home' ? 'home' : 'home');
+
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $question_field = 'gvspace_faq_question_' . $locale;
+        $answer_field = 'gvspace_faq_answer_' . $locale;
+        if (isset($_POST[$question_field])) {
+            update_post_meta($post_id, '_gvspace_faq_question_' . $locale, sanitize_text_field(wp_unslash($_POST[$question_field])));
+        }
+        if (isset($_POST[$answer_field])) {
+            update_post_meta($post_id, '_gvspace_faq_answer_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$answer_field])));
+        }
+    }
+
+    update_post_meta($post_id, '_gvspace_content_locale', 'legacy');
+    update_post_meta($post_id, '_gvspace_translation_status', 'published');
+    if ((string) get_post_meta($post_id, '_gvspace_translation_group', true) === '') {
+        $default_group = sanitize_title((string) get_post_field('post_name', $post_id) ?: (string) get_post_field('post_title', $post_id));
+        update_post_meta($post_id, '_gvspace_translation_group', $default_group ?: 'faq-' . $post_id);
+    }
+
+    $uk_title = (string) get_post_meta($post_id, '_gvspace_faq_question_uk', true);
+    $uk_answer = (string) get_post_meta($post_id, '_gvspace_faq_answer_uk', true);
+    if ($uk_title !== '' && (get_post_field('post_title', $post_id) !== $uk_title || get_post_field('post_content', $post_id) !== $uk_answer)) {
+        $saving_title = true;
+        wp_update_post(['ID' => $post_id, 'post_title' => $uk_title, 'post_content' => $uk_answer]);
+        $saving_title = false;
+    }
+});
+
+function gvspace_render_home_seo_text_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_home_seo_text', 'gvspace_home_seo_text_nonce');
+    $stored_locale = gvspace_get_content_locale($post);
+    $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+    echo '<p class="description"><strong>Один SEO-текст — один запис.</strong> Оберіть мову та заповніть її переклад. Перемикання мови не перезавантажує сторінку й не видаляє введений текст. Достатньо одного опублікованого запису для всіх мов головної сторінки.</p>';
+    echo '<p><label for="gvspace-home-seo-text-language"><strong>Редагувати мовну версію</strong></label> ';
+    echo '<select id="gvspace-home-seo-text-language" data-gvspace-language-select="home-seo-text-language">';
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active_locale, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select></p>';
+
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $title = (string) get_post_meta($post->ID, '_gvspace_home_seo_title_' . $locale, true);
+        $content = (string) get_post_meta($post->ID, '_gvspace_home_seo_content_' . $locale, true);
+        if ($locale === 'uk' && $title === '') $title = $post->post_title;
+        if ($locale === 'uk' && $content === '') $content = wp_strip_all_tags((string) $post->post_content);
+        echo '<div data-gvspace-language-panel="home-seo-text-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h3>' . esc_html($label) . '</h3>';
+        echo '<p><label for="gvspace_home_seo_title_' . esc_attr($locale) . '"><strong>Виділений перший рядок</strong></label><br>';
+        echo '<input type="text" id="gvspace_home_seo_title_' . esc_attr($locale) . '" name="gvspace_home_seo_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
+        echo '<p><label for="gvspace_home_seo_content_' . esc_attr($locale) . '"><strong>SEO-текст</strong></label><br>';
+        echo '<textarea id="gvspace_home_seo_content_' . esc_attr($locale) . '" name="gvspace_home_seo_content_' . esc_attr($locale) . '" rows="8" style="width:100%">' . esc_textarea($content) . '</textarea></p>';
+        echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
+
+add_action('save_post_gv_home_seo_text', function (int $post_id): void {
+    static $saving_title = false;
+    if ($saving_title) return;
+    if (
+        !isset($_POST['gvspace_home_seo_text_nonce'])
+        || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_home_seo_text_nonce'])), 'gvspace_save_home_seo_text')
+        || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        || !current_user_can('edit_post', $post_id)
+    ) return;
+
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $title_field = 'gvspace_home_seo_title_' . $locale;
+        $content_field = 'gvspace_home_seo_content_' . $locale;
+        if (isset($_POST[$title_field])) {
+            update_post_meta($post_id, '_gvspace_home_seo_title_' . $locale, sanitize_text_field(wp_unslash($_POST[$title_field])));
+        }
+        if (isset($_POST[$content_field])) {
+            update_post_meta($post_id, '_gvspace_home_seo_content_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$content_field])));
+        }
+    }
+
+    update_post_meta($post_id, '_gvspace_content_locale', 'legacy');
+    update_post_meta($post_id, '_gvspace_translation_status', 'published');
+    if ((string) get_post_meta($post_id, '_gvspace_translation_group', true) === '') {
+        update_post_meta($post_id, '_gvspace_translation_group', 'home-seo-text');
+    }
+
+    $uk_title = (string) get_post_meta($post_id, '_gvspace_home_seo_title_uk', true);
+    $uk_content = (string) get_post_meta($post_id, '_gvspace_home_seo_content_uk', true);
+    if ($uk_title !== '' && (get_post_field('post_title', $post_id) !== $uk_title || get_post_field('post_content', $post_id) !== $uk_content)) {
+        $saving_title = true;
+        wp_update_post(['ID' => $post_id, 'post_title' => $uk_title, 'post_content' => $uk_content]);
+        $saving_title = false;
+    }
 });
 
 function gvspace_render_partner_fields(WP_Post $post): void
@@ -1606,7 +1952,7 @@ add_action('graphql_register_types', function (): void {
         ],
     ]);
 
-    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember', 'FaqItem', 'HomeSeoText'] as $graphql_type) {
+    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember', 'FaqItem', 'HomeSeoText', 'PrivacyPolicy', 'TermsOfUse'] as $graphql_type) {
         register_graphql_field($graphql_type, 'gvspaceLocalization', [
             'type' => 'GvspaceLocalization',
             'resolve' => static function ($source): array {
@@ -1648,6 +1994,22 @@ add_action('graphql_register_types', function (): void {
                     $service_headline = trim((string) get_post_meta($post_id, '_gvspace_service_headline_' . $requested_locale, true));
                     if ($service_title !== '') $content_title = $service_title;
                     if ($service_headline !== '') $h1_fallback = $service_headline;
+                }
+                if ($post->post_type === 'gv_privacy_policy') {
+                    $privacy_locale = $requested_locale === 'en' ? 'en' : 'uk';
+                    $privacy_title = trim((string) get_post_meta($post_id, '_gvspace_privacy_title_' . $privacy_locale, true));
+                    if ($privacy_title !== '') {
+                        $content_title = $privacy_title;
+                        $h1_fallback = $privacy_title;
+                    }
+                }
+                if ($post->post_type === 'gv_terms_of_use') {
+                    $terms_locale = $requested_locale === 'en' ? 'en' : 'uk';
+                    $terms_title = trim((string) get_post_meta($post_id, '_gvspace_terms_title_' . $terms_locale, true));
+                    if ($terms_title !== '') {
+                        $content_title = $terms_title;
+                        $h1_fallback = $terms_title;
+                    }
                 }
                 $title = $value('title') ?: $content_title;
                 $description = $value('description') ?: $fallback_description;
@@ -1728,6 +2090,52 @@ add_action('graphql_register_types', function (): void {
         'type' => 'String',
         'resolve' => static function ($source): string {
             return (string) get_post_meta((int) $source->databaseId, '_gvspace_faq_placement', true) ?: 'home';
+        },
+    ]);
+    register_graphql_object_type('GvspaceFaqDetails', [
+        'description' => 'Localized question and answer for a GVSPACE FAQ item.',
+        'fields' => [
+            'question' => ['type' => 'String'],
+            'answer' => ['type' => 'String'],
+        ],
+    ]);
+    register_graphql_field('FaqItem', 'faqDetails', [
+        'type' => 'GvspaceFaqDetails',
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): array {
+            $post_id = (int) $source->databaseId;
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
+            $question = (string) get_post_meta($post_id, '_gvspace_faq_question_' . $locale, true);
+            $answer = (string) get_post_meta($post_id, '_gvspace_faq_answer_' . $locale, true);
+            if ($question === '') $question = (string) get_post_meta($post_id, '_gvspace_faq_question_uk', true);
+            if ($answer === '') $answer = (string) get_post_meta($post_id, '_gvspace_faq_answer_uk', true);
+            if ($question === '') $question = (string) get_the_title($post_id);
+            if ($answer === '') $answer = wp_strip_all_tags((string) get_post_field('post_content', $post_id));
+            return ['question' => $question, 'answer' => $answer];
+        },
+    ]);
+    register_graphql_object_type('GvspaceHomeSeoTextDetails', [
+        'description' => 'Localized homepage SEO text.',
+        'fields' => [
+            'title' => ['type' => 'String'],
+            'content' => ['type' => 'String'],
+        ],
+    ]);
+    register_graphql_field('HomeSeoText', 'homeSeoTextDetails', [
+        'type' => 'GvspaceHomeSeoTextDetails',
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): array {
+            $post_id = (int) $source->databaseId;
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
+            $title = (string) get_post_meta($post_id, '_gvspace_home_seo_title_' . $locale, true);
+            $content = (string) get_post_meta($post_id, '_gvspace_home_seo_content_' . $locale, true);
+            if ($title === '') $title = (string) get_post_meta($post_id, '_gvspace_home_seo_title_uk', true);
+            if ($content === '') $content = (string) get_post_meta($post_id, '_gvspace_home_seo_content_uk', true);
+            if ($title === '') $title = (string) get_the_title($post_id);
+            if ($content === '') $content = wp_strip_all_tags((string) get_post_field('post_content', $post_id));
+            return ['title' => $title, 'content' => $content];
         },
     ]);
 
@@ -2424,12 +2832,25 @@ function gvspace_seed_reference_l3_service(): void
 }
 add_action('init', 'gvspace_seed_reference_l3_service', 27);
 
+function gvspace_get_service_directions(): array
+{
+    return get_posts([
+        'post_type' => 'gv_service',
+        'post_parent' => 0,
+        'post_status' => ['publish', 'draft', 'pending', 'private', 'future'],
+        'numberposts' => -1,
+        'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
+        'suppress_filters' => true,
+    ]);
+}
+
 add_filter('manage_gv_service_posts_columns', function (array $columns): array {
     $result = [];
     foreach ($columns as $key => $label) {
         $result[$key] = $label;
         if ($key === 'title') {
             $result['gvspace_service_level'] = 'Тип';
+            $result['gvspace_service_direction'] = 'Напрямок';
             $result['gvspace_service_locale'] = 'Мови';
             $result['menu_order'] = 'Порядок';
         }
@@ -2439,6 +2860,10 @@ add_filter('manage_gv_service_posts_columns', function (array $columns): array {
 
 add_action('manage_gv_service_posts_custom_column', function (string $column, int $post_id): void {
     if ($column === 'gvspace_service_level') echo get_post_field('post_parent', $post_id) ? 'Послуга (L3)' : 'Напрямок (L2)';
+    if ($column === 'gvspace_service_direction') {
+        $parent_id = (int) get_post_field('post_parent', $post_id);
+        echo $parent_id ? esc_html(get_the_title($parent_id)) : '—';
+    }
     if ($column === 'gvspace_service_locale') echo 'UK, EN +';
     if ($column === 'menu_order') echo esc_html((string) get_post_field('menu_order', $post_id));
 }, 10, 2);
@@ -2448,9 +2873,64 @@ add_filter('manage_edit-gv_service_sortable_columns', function (array $columns):
     return $columns;
 });
 
+add_action('restrict_manage_posts', function (string $post_type): void {
+    if ($post_type !== 'gv_service') return;
+
+    $selected_level = isset($_GET['gv_service_level']) ? sanitize_key(wp_unslash($_GET['gv_service_level'])) : '';
+    $selected_direction = isset($_GET['gv_service_direction']) ? absint($_GET['gv_service_direction']) : 0;
+
+    echo '<label for="gv_service_level" class="screen-reader-text">Фільтр за типом</label>';
+    echo '<select name="gv_service_level" id="gv_service_level">';
+    echo '<option value="">Усі типи</option>';
+    echo '<option value="l2"' . selected($selected_level, 'l2', false) . '>Лише напрямки (L2)</option>';
+    echo '<option value="l3"' . selected($selected_level, 'l3', false) . '>Лише послуги (L3)</option>';
+    echo '</select>';
+
+    echo '<label for="gv_service_direction" class="screen-reader-text">Фільтр за напрямком</label>';
+    echo '<select name="gv_service_direction" id="gv_service_direction">';
+    echo '<option value="0">Усі напрямки</option>';
+    foreach (gvspace_get_service_directions() as $direction) {
+        echo '<option value="' . esc_attr((string) $direction->ID) . '"' . selected($selected_direction, (int) $direction->ID, false) . '>' . esc_html($direction->post_title) . '</option>';
+    }
+    echo '</select>';
+});
+
 add_action('pre_get_posts', function (WP_Query $query): void {
     if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'gv_service') return;
     if (!$query->get('orderby')) $query->set('orderby', ['menu_order' => 'ASC', 'title' => 'ASC']);
+
+    $level = isset($_GET['gv_service_level']) ? sanitize_key(wp_unslash($_GET['gv_service_level'])) : '';
+    $direction_id = isset($_GET['gv_service_direction']) ? absint($_GET['gv_service_direction']) : 0;
+
+    if ($direction_id) {
+        if ($level === 'l2') {
+            $query->set('post__in', [$direction_id]);
+        } elseif ($level === 'l3') {
+            $query->set('post_parent', $direction_id);
+        } else {
+            $child_ids = get_posts([
+                'post_type' => 'gv_service',
+                'post_parent' => $direction_id,
+                'post_status' => 'any',
+                'numberposts' => -1,
+                'fields' => 'ids',
+                'suppress_filters' => true,
+            ]);
+            $query->set('post__in', array_map('intval', array_merge([$direction_id], $child_ids)));
+            $query->set('posts_per_page', -1);
+        }
+        return;
+    }
+
+    if ($level === 'l2') {
+        $query->set('post_parent', 0);
+        return;
+    }
+
+    if ($level === 'l3') {
+        $direction_ids = array_map('intval', wp_list_pluck(gvspace_get_service_directions(), 'ID'));
+        $query->set('post_parent__in', $direction_ids ?: [0]);
+    }
 });
 
 /* Legacy v1 seed kept only as a migration marker. */
@@ -2709,3 +3189,52 @@ add_action('admin_menu', function (): void {
     }
     unset($item);
 }, 20);
+
+function gvspace_restore_stripped_json_newlines(string $body): string
+{
+    if ($body === '' || str_contains($body, "\n")) {
+        return $body;
+    }
+    $body = preg_replace('/n(?=—)/u', "\n", $body) ?? $body;
+    $body = preg_replace('/([.:;!?…»“”"\'\]\)])nn/u', "$1\n\n", $body) ?? $body;
+    return $body;
+}
+
+function gvspace_normalize_legal_sections(array $decoded): array
+{
+    $sections = [];
+    foreach ($decoded as $section) {
+        if (!is_array($section)) continue;
+        $sections[] = [
+            'number' => (string) ($section['number'] ?? ''),
+            'title' => (string) ($section['title'] ?? ''),
+            'body' => gvspace_restore_stripped_json_newlines((string) ($section['body'] ?? '')),
+        ];
+    }
+    return $sections;
+}
+
+function gvspace_sanitize_legal_sections_meta($value): string
+{
+    $decoded = is_array($value) ? $value : json_decode((string) $value, true);
+    if (!is_array($decoded)) {
+        return is_string($value) ? sanitize_textarea_field($value) : '';
+    }
+    $sections = [];
+    foreach (gvspace_normalize_legal_sections($decoded) as $section) {
+        $sections[] = [
+            'number' => sanitize_text_field($section['number']),
+            'title' => sanitize_text_field($section['title']),
+            'body' => sanitize_textarea_field($section['body']),
+        ];
+    }
+    return wp_json_encode($sections, JSON_UNESCAPED_UNICODE);
+}
+
+function gvspace_update_legal_sections_meta(int $post_id, string $key, array $sections): void
+{
+    update_post_meta($post_id, $key, wp_slash(wp_json_encode($sections, JSON_UNESCAPED_UNICODE)));
+}
+
+require_once __DIR__ . '/privacy-policy.php';
+require_once __DIR__ . '/terms-of-use.php';

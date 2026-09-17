@@ -6520,9 +6520,11 @@ h2 {
 }
 footer {
   margin-top: auto;
-  background:
-    radial-gradient(ellipse 58% 135% at 24% 0%, rgba(0, 0, 128, 0.95), transparent 72%),
-    radial-gradient(ellipse 46% 110% at 62% 112%, rgba(1, 46, 246, 0.72), transparent 72%), #00003d;
+  background-color: #00003d;
+  background-image: url("/images/footer-bg.svg?v=2");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
   color: #fff;
   padding: 80px 0 32px;
 }
@@ -6539,6 +6541,12 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.footer-grid > div > b {
+  color: #c5c0dc;
+  font-family: var(--font-geist-mono), "Courier New", monospace;
+  font-size: 15px;
+  font-weight: 400;
 }
 .footer-grid a,
 .footer-grid span {
@@ -6615,26 +6623,6 @@ footer {
 .footer-mobile-wordmark {
   display: none;
 }
-.legal-page {
-  max-width: 900px;
-  padding-top: 145px;
-  padding-bottom: 96px;
-}
-.legal-page h1 {
-  margin: 0 0 24px;
-  color: var(--navy);
-  font-size: clamp(42px, 6vw, 72px);
-  line-height: 1;
-}
-.legal-intro {
-  max-width: 720px;
-  color: var(--muted);
-  font-size: 20px;
-  line-height: 1.5;
-}
-.legal-page > .btn {
-  margin-top: 40px;
-}
 .privacy-page {
   padding-top: 81px;
 }
@@ -6688,18 +6676,24 @@ footer {
 .privacy-aside nav > span {
   margin-bottom: 12px;
   color: #9690bb;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 .privacy-aside nav a {
   padding: 8px 8px;
   border-left: 2px solid transparent;
-  color: #9690bb;
-  font-size: 12px;
-  line-height: 1.35;
+  color: rgba(43, 0, 191, 0.5);
+  font-size: 14px;
+  line-height: 1.65;
+  display: flex;
+  gap: 8px;
   transition:
     color 180ms ease,
     padding-left 180ms ease;
+}
+.privacy-aside nav a > span {
+  flex: 0 0 auto;
+  color: inherit;
 }
 .privacy-aside nav a:hover {
   padding-left: 12px;
@@ -6730,19 +6724,22 @@ footer {
 .privacy-section-number {
   display: block;
   margin-bottom: 14px;
-  color: #b8b1d5;
-  font-size: 10px;
-  line-height: 1;
+  color: #9690bb;
+  font-size: 12px;
+  line-height: 1.1;
 }
 .privacy-document p,
 .privacy-document li {
-  color: #9690bb;
-  font-size: 14px;
+  color: #6b6494;
+  font-size: 15px;
   font-weight: 300;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 .privacy-document p + p {
   margin-top: 22px;
+}
+.privacy-section-body {
+  white-space: pre-line;
 }
 .privacy-document .privacy-after-items {
   margin-top: 22px;
@@ -7474,10 +7471,10 @@ footer {
   }
   .privacy-layout {
     grid-template-columns: 1fr;
-    gap: 56px;
+    gap: 24px;
   }
   .privacy-aside nav {
-    display: none;
+    position: static;
   }
   .not-found-content {
     grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
@@ -7844,64 +7841,109 @@ footer {
     margin-bottom: 48px;
   }
   footer {
-    min-height: 602px;
-    padding: 24px 0 0;
-    overflow: hidden;
+    min-height: 0;
+    padding: 32px 0 16px;
+    overflow: visible;
   }
   .footer-mobile-wordmark {
-    width: 100%;
-    margin: 45px 0 0;
-    display: block;
+    width: calc(100% - 40px);
+    margin: 36px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
   }
   .footer-mobile-wordmark img {
-    width: max(300px, calc(100vw + 32px));
+    width: 100%;
     height: auto;
     display: block;
   }
+  .footer-mobile-wordmark .social {
+    margin-top: 0;
+    gap: 16px;
+  }
   .privacy-page {
-    padding-top: 80px;
+    padding-top: 78px;
   }
   .privacy-hero {
-    min-height: 280px;
+    min-height: 0;
     padding-top: 56px;
-    padding-bottom: 40px;
+    padding-bottom: 32px;
   }
   .privacy-eyebrow {
-    margin-bottom: 18px;
-    font-size: 10px;
+    margin-bottom: 8px;
+    font-size: 11px;
   }
   .privacy-hero h1 {
-    max-width: 335px;
-    font-size: clamp(36px, 10vw, 48px);
-    line-height: 1;
+    max-width: none;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
   .privacy-updated {
-    margin-top: 24px;
-    font-size: 10px;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    color: #9690bb;
+    font-size: 11px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  .privacy-updated-sep {
+    display: none;
   }
   .privacy-layout {
-    padding-top: 40px;
-    padding-bottom: 72px;
-    gap: 44px;
+    padding-top: 32px;
+    padding-bottom: 0;
+    gap: 24px;
   }
-  .privacy-aside > p {
-    font-size: 17px;
-    line-height: 1.55;
+  .privacy-aside nav {
+    padding: 24px 16px;
+    background: #f1eff8;
+    gap: 4px;
+  }
+  .privacy-aside nav > span {
+    margin-bottom: 0;
+  }
+  .privacy-aside nav a {
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 300;
   }
   .privacy-document section {
-    padding-bottom: 36px;
+    min-height: 0;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
   .privacy-document section + section {
-    padding-top: 36px;
+    padding-top: 56px;
+  }
+  .privacy-section-number {
+    margin-bottom: 0;
+    font-size: 11px;
   }
   .privacy-document h2 {
-    margin-bottom: 16px;
-    font-size: 22px;
+    margin-bottom: 0;
+    font-size: 20px;
+    line-height: 1.2;
   }
   .privacy-document p,
   .privacy-document li {
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.7;
+  }
+  .privacy-page > .seo-breadcrumbs {
+    padding-top: 32px;
+    padding-bottom: 56px;
+    font-size: 11px;
+    color: #2b00bf;
+    text-transform: none;
+  }
+  .privacy-page > .seo-breadcrumbs > span:first-child a {
+    color: rgba(43, 0, 191, 0.5);
   }
   .not-found-page {
     padding-top: 80px;
@@ -8204,6 +8246,7 @@ footer {
   color: var(--accent, #5d00ff);
 }
 
+.privacy-page > .seo-breadcrumbs,
 .services-page > .seo-breadcrumbs,
 .about-page > .seo-breadcrumbs,
 .careers-page > .seo-breadcrumbs,
@@ -8967,35 +9010,58 @@ footer {
   }
   footer {
     min-height: 0;
-    padding-top: 40px;
+    padding: 32px 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    background-image: url("/images/footer-bg-mobile.svg");
   }
   .footer-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 38px 18px;
+    gap: 8px 12px;
+  }
+  .footer-grid > div {
+    gap: 8px;
   }
   .footer-grid > div:last-child {
     grid-column: 1 / -1;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .footer-grid a,
+  .footer-grid span {
+    font-size: 13px;
+    line-height: 1.6;
   }
   .footer-mobile-wordmark {
     width: calc(100% - 40px);
-    margin: 52px auto 0;
+    margin: 0 auto;
   }
   .footer-mobile-wordmark img {
     width: 100%;
   }
   .footer-mobile-wordmark .social {
-    margin-top: 24px;
+    margin-top: 0;
     display: flex;
-    gap: 18px;
+    gap: 16px;
   }
   .footer-mobile-wordmark .social svg {
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
   }
   .legal {
     width: calc(100% - 40px);
-    margin-top: 48px;
-    padding: 20px 0 30px;
+    margin-top: 0;
+    padding: 16px 0 0;
+    border-top-color: #9690bb;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .legal nav {
+    margin-top: 0;
+    gap: 8px;
   }
 }
 

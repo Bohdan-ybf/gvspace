@@ -14,6 +14,7 @@ type FaqNode = {
   content?: string;
   menuOrder?: number;
   faqPlacement?: string;
+  faqDetails?: { question?: string; answer?: string };
   gvspaceLocalization?: ContentLocalization | null;
 };
 
@@ -41,6 +42,7 @@ export async function getHomeFaqs(locale: Locale): Promise<FaqItem[]> {
           faqItems(first: 100) {
             nodes {
               databaseId title content menuOrder faqPlacement
+              faqDetails(locale: "${locale}") { question answer }
               gvspaceLocalization { locale translationGroup status }
             }
           }
@@ -60,10 +62,11 @@ export async function getHomeFaqs(locale: Locale): Promise<FaqItem[]> {
       .filter((item) => item.faqPlacement === "home")
       .map((item) => ({
         id: item.databaseId,
-        question: plainText(item.title),
-        answer: plainText(item.content ?? ""),
+        question: plainText(item.faqDetails?.question || item.title),
+        answer: plainText(item.faqDetails?.answer || item.content || ""),
         order: item.menuOrder ?? 0,
       }))
+      .filter((item) => item.question !== "")
       .sort((a, b) => a.order - b.order || a.id - b.id);
   } catch {
     return [];

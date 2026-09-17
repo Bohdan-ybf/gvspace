@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 794" preserveAspectRatio="none">
+  <defs>
+    <radialGradient id="footer-blue-m" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="10" gradientTransform="matrix(13.001 -54.391 1.3437 27.519 254.71 600.13)">
+      <stop offset="0" stop-color="#012ef6" stop-opacity="0.2" />
+      <stop offset="0.25" stop-color="#0123c8" stop-opacity="0.2" />
+      <stop offset="0.5" stop-color="#01179a" stop-opacity="0.2" />
+      <stop offset="0.75" stop-color="#000c6b" stop-opacity="0.2" />
+      <stop offset="0.875" stop-color="#000654" stop-opacity="0.2" />
+      <stop offset="1" stop-color="#00003d" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="footer-navy-m" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="10" gradientTransform="matrix(-7.7488 -22.596 0.8212 -24.128 130.41 622.84)">
+      <stop offset="0" stop-color="#000080" stop-opacity="0.32" />
+      <stop offset="0.5" stop-color="#00005f" stop-opacity="0.32" />
+      <stop offset="1" stop-color="#00003d" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#00003d" />
+  <rect width="100%" height="100%" fill="url(#footer-navy-m)" />
+  <rect width="100%" height="100%" fill="url(#footer-blue-m)" />
+</svg>

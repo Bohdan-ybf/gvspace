@@ -64,14 +64,7 @@ export function Footer({ locale }: { locale: Locale }) {
           <span>{footer.contacts[2]}</span>
         </div>
       </div>
-      <div className="legal container">
-        © 2026 GVSPACE. {footer.copyright}
-        <nav aria-label={t.legalNavigationLabel}>
-          <Link href={`/${locale}/privacy-policy`}>{footer.privacy}</Link>
-          <Link href={`/${locale}/terms-of-use`}>{footer.terms}</Link>
-        </nav>
-      </div>
-      <div className="footer-mobile-wordmark" aria-hidden="true">
+      <div className="footer-mobile-wordmark">
         <Logo variant="footer" />
         <nav className="social" aria-label={t.socialNavigationLabel}>
           <a href="#" aria-label="Facebook">
@@ -86,6 +79,13 @@ export function Footer({ locale }: { locale: Locale }) {
           <a href="#" aria-label="Clutch">
             <ClutchIcon />
           </a>
+        </nav>
+      </div>
+      <div className="legal container">
+        © 2026 GVSPACE. {footer.copyright}
+        <nav aria-label={t.legalNavigationLabel}>
+          <Link href={`/${locale}/privacy-policy`}>{footer.privacy}</Link>
+          <Link href={`/${locale}/terms-of-use`}>{footer.terms}</Link>
         </nav>
       </div>
     </footer>

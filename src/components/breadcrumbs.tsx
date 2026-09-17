@@ -9,13 +9,15 @@ export function Breadcrumbs({
   locale,
   items,
   visible = false,
+  homeLabel,
 }: {
   locale: Locale;
   items: BreadcrumbItem[];
   visible?: boolean;
+  homeLabel?: string;
 }) {
-  const homeLabel = locale === "uk" ? "Головна" : "Home";
-  const allItems = [{ label: homeLabel, pathname: "/" }, ...items];
+  const resolvedHomeLabel = homeLabel ?? (locale === "uk" ? "Головна" : "Home");
+  const allItems = [{ label: resolvedHomeLabel, pathname: "/" }, ...items];
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 type NavigationSection = {
   id: string;
   title: string;
+  number?: string;
 };
 
 export function LegalNavigation({
@@ -68,6 +69,7 @@ export function LegalNavigation({
           aria-current={activeId === section.id ? "location" : undefined}
           onClick={() => setActiveId(section.id)}
         >
+          {section.number ? <span className="mono">{section.number}</span> : null}
           {section.title}
         </a>
       ))}
