@@ -2751,7 +2751,7 @@ add_action('graphql_register_types', function (): void {
         ],
     ]);
 
-    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember', 'FaqItem', 'HomeSeoText', 'PrivacyPolicy', 'TermsOfUse'] as $graphql_type) {
+    foreach (['Post', 'Vacancy', 'ProjectCase', 'ServiceOffering', 'ClientReview', 'Technology', 'TeamMember', 'FaqItem', 'HomeSeoText', 'PrivacyPolicy', 'TermsOfUse', 'ContactsPage'] as $graphql_type) {
         register_graphql_field($graphql_type, 'gvspaceLocalization', [
             'type' => 'GvspaceLocalization',
             'resolve' => static function ($source): array {

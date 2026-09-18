@@ -243,7 +243,17 @@ const fallbackByLocale: Record<"uk" | "en", Omit<ContactsPageContent, "seo">> = 
 };
 
 export function getFallbackContacts(locale: Locale): ContactsPageContent {
-  return fallbackByLocale[locale === "en" ? "en" : "uk"];
+  const content = fallbackByLocale[locale === "en" ? "en" : "uk"];
+  return {
+    ...content,
+    seo: normalizeSeoData(undefined, {
+      title: locale === "en" ? "Contact GVSPACE" : "Контакти GVSPACE",
+      description:
+        locale === "en"
+          ? "Contact the GVSPACE team via Telegram, email, or phone. Offices in Kyiv, Renton, and Bratislava."
+          : "Зв’яжіться з командою GVSPACE: Telegram, email, телефон, офіси в Києві, Renton і Братиславі.",
+    }),
+  };
 }
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -286,9 +296,10 @@ export async function getContactsPage(locale: Locale): Promise<ContactsPageConte
       data?: { contactsPages?: { nodes?: ContactsNode[] } };
       errors?: unknown[];
     };
-    if (result.errors) return fallback;
+    const nodes = result.data?.contactsPages?.nodes ?? [];
+    if (result.errors && nodes.length === 0) return fallback;
 
-    const item = filterPublishedForLocale(result.data?.contactsPages?.nodes ?? [], locale)[0];
+    const item = filterPublishedForLocale(nodes, locale)[0];
     const details = item?.contactsPageDetails;
     if (!item || !details?.title) return fallback;
 
