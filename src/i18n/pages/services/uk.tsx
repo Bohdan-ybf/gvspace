@@ -19,6 +19,7 @@ export default {
     serviceProcessTitle: "Від запиту до результату",
     resultsEyebrow: "РЕЗУЛЬТАТ КЛІЄНТА",
     casesEyebrow: "КЕЙСИ ПО НАПРЯМКУ",
+    casesAction: "Усі кейси цього напряму",
     faqTitle: "Часті запитання",
     faqDescription: "та відповіді до них",
   },

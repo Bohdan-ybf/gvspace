@@ -1,25 +1,34 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
+import { CaseCard } from "./case-card";
 import { getCaseStudies } from "./wordpress-cases";
-
 import { getTranslations } from "@/i18n/pages";
+
 type CasesShowcaseSectionProps = {
   locale: Locale;
   eyebrow?: string;
   title?: string;
+  subtitle?: string;
+  actionLabel?: string;
   limit?: number;
   excludeSlug?: string;
   allowExcludedFallback?: boolean;
+  cardVariant?: "catalog" | "related" | "list";
+  layout?: "grid" | "list";
 };
 
 export async function CasesShowcaseSection({
   locale,
   eyebrow,
   title,
+  subtitle,
+  actionLabel,
   limit = 3,
   excludeSlug,
   allowExcludedFallback = false,
+  cardVariant = "related",
+  layout = "grid",
 }: CasesShowcaseSectionProps) {
   const allProjects = await getCaseStudies(locale);
   const filteredProjects = allProjects.filter((project) => project.slug !== excludeSlug);
@@ -30,67 +39,45 @@ export async function CasesShowcaseSection({
 
   if (!projects.length) return null;
 
+  const heading = title ?? t.title;
+  const cta = actionLabel ?? t.allCases;
+
+  if (layout === "list") {
+    return (
+      <section className="section container cases">
+        <aside>
+          <h2>{heading}</h2>
+          {subtitle ? <p>{subtitle}</p> : null}
+          <Link className="btn btn-primary" href={`/${locale}/cases`}>
+            <span>{cta}</span>
+            <ArrowRight />
+          </Link>
+        </aside>
+        <div className="home-cases-list">
+          {projects.map((project) => (
+            <CaseCard key={project.slug} locale={locale} project={project} variant="list" />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="section container cases-showcase">
       <header>
         <div>
           <span className="mono">{eyebrow ?? t.eyebrow}</span>
-          <h2>{title ?? t.title}</h2>
+          <h2>{heading}</h2>
         </div>
         <Link className="btn btn-primary" href={`/${locale}/cases`}>
-          {t.allCases}
+          {cta}
           <ArrowRight />
         </Link>
       </header>
-
       <div className="cases-showcase-grid">
-        {projects.map((project) => {
-          const dateLabel = project.publishedAt
-            ? new Intl.DateTimeFormat(t.dateLocale, {
-                month: "long",
-                year: "numeric",
-              })
-                .format(new Date(project.publishedAt))
-                .toUpperCase()
-            : null;
-          const categoryLabel = [project.projectType, ...project.services]
-            .filter(Boolean)
-            .slice(0, 3)
-            .join(" / ");
-
-          return (
-            <article className="showcase-case-card" key={project.slug}>
-              <Link
-                aria-label={project.title}
-                className="showcase-case-image"
-                href={`/${locale}/cases/${project.slug}`}
-                style={project.image ? { backgroundImage: `url(${project.image})` } : undefined}
-              >
-                <span className="showcase-case-labels mono">
-                  {dateLabel && <span>{dateLabel}</span>}
-                  {categoryLabel && <span>[ {categoryLabel} ]</span>}
-                </span>
-              </Link>
-
-              <div className="showcase-case-copy">
-                <h3>
-                  <Link href={`/${locale}/cases/${project.slug}`}>{project.title}</Link>
-                </h3>
-                <p>[{project.result}]</p>
-                <dl>
-                  {project.metrics.slice(0, 2).map((metric) => (
-                    <div key={`${metric.value}-${metric.label}`}>
-                      <dt>{t.metricLabel}</dt>
-                      <dd>
-                        {metric.value} <small>{metric.label}</small>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            </article>
-          );
-        })}
+        {projects.map((project) => (
+          <CaseCard key={project.slug} locale={locale} project={project} variant={cardVariant} />
+        ))}
       </div>
     </section>
   );

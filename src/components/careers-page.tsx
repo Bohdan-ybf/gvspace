@@ -3,7 +3,7 @@ import type { Locale } from "@/i18n";
 import { CareersValuesSection } from "./careers-values-section";
 import { Breadcrumbs } from "./breadcrumbs";
 import { OpenApplicationBanner } from "./open-application-banner";
-import { VacancyCard } from "./vacancy-card";
+import { VacanciesCatalog } from "./vacancies-catalog";
 import { getVacancies } from "./wordpress-vacancies";
 
 import { getTranslations } from "@/i18n/pages";
@@ -54,14 +54,7 @@ export async function CareersPage({ locale }: { locale: Locale }) {
             <p>{t.workDescription}</p>
           </div>
 
-          <section className="vacancies-section">
-            <span className="mono">{t.vacanciesEyebrow}</span>
-            <div className="vacancies-grid">
-              {vacancies.map((vacancy) => (
-                <VacancyCard key={vacancy.slug} locale={locale} vacancy={vacancy} />
-              ))}
-            </div>
-          </section>
+          <VacanciesCatalog locale={locale} vacancies={vacancies} />
         </section>
 
         <CareersValuesSection locale={locale} />

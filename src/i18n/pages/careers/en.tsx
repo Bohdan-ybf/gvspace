@@ -35,6 +35,9 @@ export default {
       </>
     ),
     vacanciesEyebrow: "OPEN POSITIONS",
+    directionLabel: "Choose a direction",
+    employmentLabel: "Employment type",
+    emptyVacancies: "No vacancies match these filters.",
   },
   banner: {
     title: "We are looking for systematic thinkers",

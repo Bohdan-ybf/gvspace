@@ -180,11 +180,19 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         {isDirection ? (
           <>
             <TechnologyShowcaseSection locale={locale} />
-            <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
+            <CasesShowcaseSection
+              locale={locale}
+              eyebrow={t.casesEyebrow}
+              actionLabel={t.casesAction}
+            />
           </>
         ) : (
           <>
-            <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} />
+            <CasesShowcaseSection
+              locale={locale}
+              eyebrow={t.casesEyebrow}
+              actionLabel={t.casesAction}
+            />
             <TechnologyShowcaseSection locale={locale} />
           </>
         )}

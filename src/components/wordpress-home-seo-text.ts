@@ -8,7 +8,6 @@ export type HomeSeoText = {
 
 type HomeSeoTextNode = {
   title: string;
-  content?: string;
   homeSeoTextDetails?: { title?: string; content?: string };
   gvspaceLocalization?: ContentLocalization | null;
 };
@@ -36,7 +35,7 @@ export async function getHomeSeoText(locale: Locale): Promise<HomeSeoText | unde
         query: `query HomeSeoText {
           homeSeoTexts(first: 20) {
             nodes {
-              title content
+              title
               homeSeoTextDetails(locale: "${locale}") { title content }
               gvspaceLocalization { locale translationGroup status }
             }
@@ -57,7 +56,7 @@ export async function getHomeSeoText(locale: Locale): Promise<HomeSeoText | unde
     if (!item) return undefined;
     return {
       title: plainText(item.homeSeoTextDetails?.title || item.title),
-      content: plainText(item.homeSeoTextDetails?.content || item.content || ""),
+      content: plainText(item.homeSeoTextDetails?.content || ""),
     };
   } catch {
     return undefined;

@@ -5,62 +5,50 @@ import {
   type ContentLocalization,
 } from "@/content-localization";
 
+export type CaseMetric = { value: string; label: string };
+export type CaseVector = { title: string; description: string };
+export type CasePerson = { name: string; role: string; photo: string };
+
 export type CaseStudy = {
   slug: string;
   title: string;
+  catalogTitle: string;
+  excerpt: string;
   publishedAt?: string;
   modifiedAt?: string;
   result: string;
   services: string[];
-  metrics: Array<{ value: string; label: string }>;
+  metrics: CaseMetric[];
   challenge: string;
   problems: string[];
   discovery: string;
   discoveryResult: string;
-  architecture: Array<{ title: string; description: string }>;
+  step1: string;
+  step1Result: CaseVector;
+  step2: string;
+  architecture: CaseVector[];
+  step3: string;
+  step3Result: CaseVector;
   gallery: string[];
+  tasks: string[];
+  documents: string[];
+  team: CasePerson[];
   testimonial: string;
   testimonialAuthor: string;
+  testimonialCompany: string;
   projectType: string;
   industry: string;
+  direction: string;
   badge: string;
   image?: string;
 };
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
 
-export const fallback: CaseStudy = {
-  slug: "growth-system",
-  title: "[Назва бренду]",
-  result: "[Головний результат одним реченням].",
-  services: ["ТАНЦЮСТРІЯ", "ВИД ПОСЛУГИ"],
-  metrics: [
-    { value: "+140%", label: "ROAS" },
-    { value: "-30%", label: "CPL" },
-    { value: "x2", label: "Оборот" },
-  ],
-  challenge:
-    "[Опис ситуації до нас. Відсутність аналітики, непрозорі звіти, відчуття «стелі» у зростанні, стрес власника.]",
-  problems: [
-    "Висока вартість ліда",
-    "Застряглий сайт, що не конвертує",
-    "Відсутність наскрізної аналітики",
-    "Розрив між маркетингом і продажами",
-  ],
-  discovery: "Що показав аудит? Виявили «дірки» у воронці, знайшли неочевидні сегменти аудиторії.",
-  discoveryResult: "Дорожня карта (Roadmap) трансформації бізнесу.",
-  architecture: [
-    { title: "Вектор IT", description: "Що змінили в коді/структурі сайту" },
-    { title: "Вектор Marketing", description: "Які канали запустили та як зв’язали їх аналітикою" },
-    { title: "Вектор Content", description: "Як пакували сенси, щоб викликати довіру" },
-  ],
-  gallery: [],
-  testimonial:
-    "Життя після впровадження системи змінилося: з’явився час на стратегію, спокій за результат.",
-  testimonialAuthor: "Максим Бичок / Reason Agency",
-  projectType: "strategy",
-  industry: "services",
-  badge: "+140% ROAS",
+type CaseDetails = Partial<
+  Omit<CaseStudy, "slug" | "title" | "image" | "publishedAt" | "modifiedAt">
+> & {
+  title?: string;
 };
 
 type CaseNode = {
@@ -68,22 +56,71 @@ type CaseNode = {
   title: string;
   date?: string;
   modified?: string;
+  menuOrder?: number | null;
   featuredImage?: { node?: { sourceUrl?: string } };
-  caseDetails?: Omit<CaseStudy, "slug" | "title" | "image">;
+  caseDetails?: CaseDetails | null;
   gvspaceLocalization?: ContentLocalization | null;
 };
 
-const fields = `slug title date modified gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } caseDetails { result services metrics { value label } challenge problems discovery discoveryResult architecture { title description } gallery testimonial testimonialAuthor projectType industry badge }`;
+const fields = `
+  slug title date modified menuOrder
+  gvspaceLocalization { locale translationGroup status }
+  featuredImage { node { sourceUrl } }
+  caseDetails(locale: $locale) {
+    title catalogTitle excerpt result services
+    metrics { value label }
+    challenge problems discovery discoveryResult
+    step1 step1Result { title description }
+    step2 architecture { title description }
+    step3 step3Result { title description }
+    gallery tasks documents
+    team { name role photo }
+    testimonial testimonialAuthor testimonialCompany
+    projectType industry direction badge
+  }
+`;
+
+function emptyVector(vector?: CaseVector | null): CaseVector {
+  return { title: vector?.title ?? "", description: vector?.description ?? "" };
+}
 
 function mapCase(node: CaseNode): CaseStudy | undefined {
-  if (!node.caseDetails) return undefined;
+  const details = node.caseDetails;
+  if (!details) return undefined;
+  const title = details.title || node.title;
+  const excerpt = details.excerpt || details.result || "";
   return {
     slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
-    title: node.title,
+    title,
+    catalogTitle: details.catalogTitle || title,
+    excerpt,
     publishedAt: node.date,
     modifiedAt: node.modified,
+    result: excerpt,
+    services: details.services ?? [],
+    metrics: details.metrics ?? [],
+    challenge: details.challenge ?? "",
+    problems: details.problems ?? [],
+    discovery: details.discovery || details.step1 || "",
+    discoveryResult: details.discoveryResult || details.step1Result?.description || "",
+    step1: details.step1 || details.discovery || "",
+    step1Result: emptyVector(details.step1Result),
+    step2: details.step2 ?? "",
+    architecture: details.architecture ?? [],
+    step3: details.step3 ?? "",
+    step3Result: emptyVector(details.step3Result),
+    gallery: details.gallery ?? [],
+    tasks: details.tasks ?? [],
+    documents: details.documents ?? [],
+    team: details.team ?? [],
+    testimonial: details.testimonial ?? "",
+    testimonialAuthor: details.testimonialAuthor ?? "",
+    testimonialCompany: details.testimonialCompany ?? "",
+    projectType: details.projectType ?? "",
+    industry: details.industry ?? "",
+    direction: details.direction || details.badge || "",
+    badge: details.badge || details.direction || "",
     image: node.featuredImage?.node?.sourceUrl,
-    ...node.caseDetails,
   };
 }
 
@@ -94,17 +131,21 @@ export async function getCaseStudies(locale: Locale): Promise<CaseStudy[]> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Cases { projectCases(first: 100) { nodes { ${fields} } } }`,
+        query: `query CasesV2($locale: String!) { projectCases(first: 100) { nodes { ${fields} } } }`,
+        variables: { locale },
       }),
       next: { revalidate: 60 },
     });
     if (!response.ok) return [];
-    const result = (await response.json()) as { data?: { projectCases?: { nodes?: CaseNode[] } } };
-    return (
-      filterPublishedForLocale(result.data?.projectCases?.nodes ?? [], locale)
-        .map(mapCase)
-        .filter((item): item is CaseStudy => Boolean(item)) ?? []
-    );
+    const result = (await response.json()) as {
+      data?: { projectCases?: { nodes?: CaseNode[] } };
+      errors?: unknown[];
+    };
+    if (result.errors) return [];
+    return filterPublishedForLocale(result.data?.projectCases?.nodes ?? [], locale)
+      .sort((left, right) => (left.menuOrder ?? 0) - (right.menuOrder ?? 0))
+      .map(mapCase)
+      .filter((item): item is CaseStudy => Boolean(item));
   } catch {
     return [];
   }

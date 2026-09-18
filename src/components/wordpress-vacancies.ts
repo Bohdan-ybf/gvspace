@@ -5,36 +5,33 @@ import {
   isContentPublishedForLocale,
   type ContentLocalization,
 } from "@/content-localization";
-import { getVacancyBySlug as getFallbackVacancy, type Vacancy } from "./vacancy-data";
+import {
+  getFallbackVacancies,
+  getVacancyBySlug as getFallbackVacancy,
+  type Vacancy,
+} from "./vacancy-data";
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
 
 type VacancyDetails = {
+  title?: string;
   excerpt?: string;
+  salary?: string;
+  hot?: boolean;
+  tags?: string[];
+  direction?: string;
+  employmentTags?: string[];
   role?: string[];
   tasks?: string[];
   requirements?: string[];
+  tools?: string[];
   benefits?: string[];
-  titleEn: string;
-  excerptUk: string;
-  excerptEn: string;
-  salary: string;
-  hot: boolean;
-  tags: string[];
-  roleUk: string[];
-  roleEn: string[];
-  tasksUk: string[];
-  tasksEn: string[];
-  requirementsUk: string[];
-  requirementsEn: string[];
-  tools: string[];
-  benefitsUk: string[];
-  benefitsEn: string[];
 };
 
 type VacancyNode = {
   slug: string;
   title: string;
+  menuOrder?: number | null;
   modified?: string;
   vacancyDetails: VacancyDetails;
   gvspaceLocalization?: ContentLocalization | null;
@@ -47,19 +44,19 @@ export type VacancySummary = {
   salary: string;
   hot: boolean;
   tags: string[];
+  direction: string;
+  employmentTags: string[];
   modifiedAt?: string;
 };
 
 const vacancyFields = `
   slug
   title
+  menuOrder
   modified
   gvspaceLocalization { locale translationGroup status }
-  vacancyDetails {
-    excerpt role tasks requirements benefits
-    titleEn excerptUk excerptEn salary hot tags
-    roleUk roleEn tasksUk tasksEn requirementsUk requirementsEn
-    tools benefitsUk benefitsEn
+  vacancyDetails(locale: $locale) {
+    title excerpt salary hot tags direction employmentTags role tasks requirements tools benefits
   }
 `;
 
@@ -85,97 +82,126 @@ async function queryWordPress<T>(
   }
 }
 
-function pairLists(uk: string[] = [], en: string[] = []) {
-  return Array.from({ length: Math.max(uk.length, en.length) }, (_, index) => ({
-    uk: uk[index] || en[index] || "",
-    en: en[index] || uk[index] || "",
-  }));
-}
-
-function toVacancy(node: VacancyNode): Vacancy {
+function toVacancy(node: VacancyNode, locale: Locale): Vacancy {
   const details = node.vacancyDetails;
-  const localized = Boolean(
-    node.gvspaceLocalization?.locale && node.gvspaceLocalization.locale !== "legacy",
-  );
-  const localizedPairs = (items: string[] = []) => items.map((item) => ({ uk: item, en: item }));
+  const fallback = getFallbackVacancy(getPublicContentSlug(node.slug, node.gvspaceLocalization), locale);
   return {
     slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
-    title: localized
-      ? { uk: node.title, en: node.title }
-      : { uk: node.title, en: details.titleEn || node.title },
-    salary: details.salary,
-    hot: details.hot,
-    tags: details.tags,
+    title: details.title || node.title,
+    excerpt: details.excerpt || "",
+    salary: details.salary || fallback?.salary || "",
+    hot: Boolean(details.hot),
+    tags: details.tags ?? [],
     heroImage: "/images/careers/vacancy-hero.webp",
-    role: localized ? localizedPairs(details.role) : pairLists(details.roleUk, details.roleEn),
-    tasks: localized ? localizedPairs(details.tasks) : pairLists(details.tasksUk, details.tasksEn),
-    requirements: localized
-      ? localizedPairs(details.requirements)
-      : pairLists(details.requirementsUk, details.requirementsEn),
-    tools: details.tools,
-    benefits: localized
-      ? localizedPairs(details.benefits)
-      : pairLists(details.benefitsUk, details.benefitsEn),
+    role: details.role ?? [],
+    tasks: details.tasks ?? [],
+    requirements: details.requirements ?? [],
+    tools: details.tools ?? [],
+    benefits: details.benefits ?? [],
   };
 }
 
+function sortVacancyNodes(nodes: VacancyNode[]) {
+  return [...nodes].sort((left, right) => (left.menuOrder ?? 0) - (right.menuOrder ?? 0));
+}
+
+function normalizeVacancyTag(tag: string) {
+  return tag.trim().toUpperCase().replace(/\s+/g, "-");
+}
+
+const employmentTagNames = new Set([
+  "REMOTE",
+  "FULL-TIME",
+  "FULLTIME",
+  "PART-TIME",
+  "PARTTIME",
+  "HYBRID",
+  "OFFICE",
+  "ONSITE",
+  "ON-SITE",
+]);
+
+function isEmploymentTag(tag: string) {
+  return employmentTagNames.has(normalizeVacancyTag(tag));
+}
+
+function directionFromTags(tags: string[]) {
+  return tags.find((tag) => !isEmploymentTag(tag)) ?? "";
+}
+
+function employmentFromTags(tags: string[]) {
+  return tags.filter(isEmploymentTag);
+}
+
+function toSummary(node: VacancyNode): VacancySummary {
+  const tags = node.vacancyDetails.tags ?? [];
+  const employmentTags = node.vacancyDetails.employmentTags?.length
+    ? node.vacancyDetails.employmentTags
+    : employmentFromTags(tags);
+  return {
+    slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
+    title: node.vacancyDetails.title || node.title,
+    excerpt: node.vacancyDetails.excerpt ?? "",
+    salary: node.vacancyDetails.salary ?? "",
+    hot: Boolean(node.vacancyDetails.hot),
+    tags,
+    direction: node.vacancyDetails.direction || directionFromTags(tags),
+    employmentTags,
+    modifiedAt: node.modified,
+  };
+}
+
+function fallbackSummaries(locale: Locale): VacancySummary[] {
+  return getFallbackVacancies().map((vacancy) => {
+    const resolved = getFallbackVacancy(vacancy.slug, locale);
+    const tags = resolved?.tags ?? vacancy.tags;
+    return {
+      slug: vacancy.slug,
+      title: resolved?.title ?? vacancy.title[locale],
+      excerpt: resolved?.excerpt ?? vacancy.excerpt[locale],
+      salary: resolved?.salary ?? vacancy.salary,
+      hot: vacancy.hot,
+      tags,
+      direction: directionFromTags(tags),
+      employmentTags: employmentFromTags(tags),
+    };
+  });
+}
+
 export async function getVacancies(locale: Locale): Promise<VacancySummary[]> {
-  const data = await queryWordPress<{ vacancies: { nodes: VacancyNode[] } }>(`
-    query Vacancies {
+  const data = await queryWordPress<{ vacancies: { nodes: VacancyNode[] } }>(
+    `
+    query Vacancies($locale: String!) {
       vacancies(first: 100) { nodes { ${vacancyFields} } }
     }
-  `);
+  `,
+    { locale },
+  );
 
   if (data?.vacancies.nodes.length) {
-    return filterPublishedForLocale(data.vacancies.nodes, locale).map((node) => ({
-      slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
-      title:
-        node.gvspaceLocalization?.locale && node.gvspaceLocalization.locale !== "legacy"
-          ? node.title
-          : locale === "en" && node.vacancyDetails.titleEn
-            ? node.vacancyDetails.titleEn
-            : node.title,
-      excerpt:
-        node.gvspaceLocalization?.locale && node.gvspaceLocalization.locale !== "legacy"
-          ? (node.vacancyDetails.excerpt ?? "")
-          : locale === "uk"
-            ? node.vacancyDetails.excerptUk
-            : node.vacancyDetails.excerptEn,
-      salary: node.vacancyDetails.salary,
-      hot: node.vacancyDetails.hot,
-      tags: node.vacancyDetails.tags,
-      modifiedAt: node.modified,
-    }));
+    return sortVacancyNodes(filterPublishedForLocale(data.vacancies.nodes, locale)).map(toSummary);
   }
 
-  const fallback = getFallbackVacancy("performance-marketing-manager");
-  if (!fallback) return [];
-
-  return [
-    {
-      slug: fallback.slug,
-      title: fallback.title[locale],
-      excerpt:
-        locale === "uk"
-          ? "Шукаємо фахівця з досвідом у Meta та Google Ads, який вміє будувати системи."
-          : "We are looking for a Meta and Google Ads expert who knows how to build systems.",
-      salary: fallback.salary,
-      hot: fallback.hot,
-      tags: fallback.tags,
-    },
-  ];
+  return fallbackSummaries(locale);
 }
 
 export async function getVacancyBySlug(slug: string, locale: Locale): Promise<Vacancy | undefined> {
-  const data = await queryWordPress<{ vacancies: { nodes: VacancyNode[] } }>(`
-    query VacanciesForRoute {
+  const data = await queryWordPress<{ vacancies: { nodes: VacancyNode[] } }>(
+    `
+    query VacanciesForRoute($locale: String!) {
       vacancies(first: 100) { nodes { ${vacancyFields} } }
     }
-  `);
-  const node = data?.vacancies.nodes.find(
-    (candidate) =>
-      isContentPublishedForLocale(candidate.gvspaceLocalization, locale) &&
-      getPublicContentSlug(candidate.slug, candidate.gvspaceLocalization) === slug,
+  `,
+    { locale },
   );
-  return node ? toVacancy(node) : getFallbackVacancy(slug);
+  if (data?.vacancies.nodes.length) {
+    const node = data.vacancies.nodes.find(
+      (candidate) =>
+        isContentPublishedForLocale(candidate.gvspaceLocalization, locale) &&
+        getPublicContentSlug(candidate.slug, candidate.gvspaceLocalization) === slug,
+    );
+    return node ? toVacancy(node, locale) : undefined;
+  }
+
+  return getFallbackVacancy(slug, locale);
 }

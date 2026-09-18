@@ -7,10 +7,10 @@ import { CasesCatalog } from "./cases-catalog";
 import { ContactSection } from "./contact-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getCaseStudies } from "./wordpress-cases";
-
 import { getTranslations } from "@/i18n/pages";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
+
 export async function CasesPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const projects = await getCaseStudies(locale);
@@ -50,7 +50,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
             sizes="(max-width: 600px) 340px, (max-width: 900px) 410px, 497px"
           />
           <div className="container cases-hero-content">
-            <span className="mono">CASES</span>
+            <span className="mono">{t.heroEyebrow}</span>
             <h1>{t.heroTitle}</h1>
             <p>{t.heroDescription}</p>
             <Link className="btn btn-primary" href={`/${locale}/contacts`}>

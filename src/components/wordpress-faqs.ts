@@ -11,7 +11,6 @@ export type FaqItem = {
 type FaqNode = {
   databaseId: number;
   title: string;
-  content?: string;
   menuOrder?: number;
   faqPlacement?: string;
   faqDetails?: { question?: string; answer?: string };
@@ -41,7 +40,7 @@ export async function getHomeFaqs(locale: Locale): Promise<FaqItem[]> {
         query: `query HomeFaqs {
           faqItems(first: 100) {
             nodes {
-              databaseId title content menuOrder faqPlacement
+              databaseId title menuOrder faqPlacement
               faqDetails(locale: "${locale}") { question answer }
               gvspaceLocalization { locale translationGroup status }
             }
@@ -63,7 +62,7 @@ export async function getHomeFaqs(locale: Locale): Promise<FaqItem[]> {
       .map((item) => ({
         id: item.databaseId,
         question: plainText(item.faqDetails?.question || item.title),
-        answer: plainText(item.faqDetails?.answer || item.content || ""),
+        answer: plainText(item.faqDetails?.answer || ""),
         order: item.menuOrder ?? 0,
       }))
       .filter((item) => item.question !== "")

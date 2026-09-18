@@ -19,6 +19,7 @@ export default {
     serviceProcessTitle: "From request to result",
     resultsEyebrow: "CLIENT RESULT",
     casesEyebrow: "CASES IN THIS DIRECTION",
+    casesAction: "All cases in this direction",
     faqTitle: "Frequently asked questions",
     faqDescription: "and answers",
   },

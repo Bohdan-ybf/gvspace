@@ -62,7 +62,7 @@ export function TeamDirectorySection({
                   }
                 />
               ) : (
-                <span aria-hidden="true" />
+                <img src="/images/team/user-none.jpg" alt="" />
               )}
             </div>
             <div>

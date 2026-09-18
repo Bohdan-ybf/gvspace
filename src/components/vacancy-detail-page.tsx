@@ -27,8 +27,8 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
         data={{
           "@context": "https://schema.org",
           "@type": "JobPosting",
-          title: seo?.h1 || vacancy.title[locale],
-          description: vacancy.role.map((item) => item[locale]).join("\n\n"),
+          title: seo?.h1 || vacancy.title,
+          description: vacancy.excerpt || vacancy.role.join("\n\n"),
           hiringOrganization: {
             "@type": "Organization",
             name: "GVSPACE",
@@ -42,7 +42,7 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
           <Image src={vacancy.heroImage} alt="" fill priority sizes="100vw" />
           <div className="container vacancy-detail-hero-content">
             <div className="vacancy-title-row">
-              <h1>{seo?.h1 || vacancy.title[locale]}</h1>
+              <h1>{seo?.h1 || vacancy.title}</h1>
               {vacancy.hot && <span className="mono">{t.hotLabel}</span>}
             </div>
             <div className="vacancy-detail-tags mono">
@@ -58,16 +58,16 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
           <div className="vacancy-description">
             <VacancyTextSection
               title={sectionTitles.role}
-              paragraphs={vacancy.role.map((item) => item[locale])}
+              paragraphs={vacancy.role}
             />
             <VacancyListSection
               title={sectionTitles.tasks}
-              items={vacancy.tasks.map((item) => item[locale])}
+              items={vacancy.tasks}
               marker="—"
             />
             <VacancyListSection
               title={sectionTitles.requirements}
-              items={vacancy.requirements.map((item) => item[locale])}
+              items={vacancy.requirements}
               marker="✓"
             />
             <section className="vacancy-content-section">
@@ -80,7 +80,7 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
             </section>
             <VacancyListSection
               title={sectionTitles.benefits}
-              items={vacancy.benefits.map((item) => item[locale])}
+              items={vacancy.benefits}
               marker="+"
               accent
             />
@@ -91,7 +91,7 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
           locale={locale}
           items={[
             { label: t.careersLabel, pathname: "/careers" },
-            { label: seo?.h1 || vacancy.title[locale] },
+            { label: seo?.h1 || vacancy.title },
           ]}
           visible
         />

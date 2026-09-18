@@ -7,6 +7,7 @@ import { AboutPage } from "@/components/about-page";
 import { TeamPage } from "@/components/team-page";
 import { CareersPage } from "@/components/careers-page";
 import { VacancyDetailPage } from "@/components/vacancy-detail-page";
+import { getVacancyBySlug } from "@/components/wordpress-vacancies";
 import { TechnologiesPage } from "@/components/technologies-page";
 import { BlogPageServer } from "@/components/blog-page-server";
 import { BlogArticlePage } from "@/components/blog-article-page";
@@ -76,6 +77,20 @@ export async function generateMetadata({
         type: dynamicRoute.kind === "blog" ? "article" : "website",
       });
     }
+    if (dynamicRoute.kind === "vacancy") {
+      const vacancy = await getVacancyBySlug(dynamicRoute.publicSlug, locale);
+      if (vacancy) {
+        return buildSeoMetadata({
+          locale,
+          pathname,
+          seo: normalizeSeoData(undefined, {
+            title: vacancy.title,
+            description: vacancy.excerpt,
+          }),
+          alternateLocales,
+        });
+      }
+    }
   }
 
   const section = slug[0] as keyof (typeof routeSeo)[Locale];
@@ -120,7 +135,7 @@ export default async function RoutedPage({
     return <TeamPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "careers") {
-    return section("careers", <CareersPage locale={locale} />);
+    return <CareersPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 2 && slug[0] === "careers") {
     return <VacancyDetailPage locale={locale} slug={slug[1]} />;

@@ -10,11 +10,11 @@ export function VacancyApplicationForm({ locale }: { locale: Locale }) {
       <h2>{t.title}</h2>
       <div>
         <input aria-label={t.nameLabel} placeholder={t.namePlaceholder} required />
-        <input aria-label={t.phoneLabel} placeholder="+38 0__" inputMode="tel" />
+        <input aria-label={t.phoneLabel} placeholder={t.phonePlaceholder} inputMode="tel" />
       </div>
-      <input aria-label="Email" placeholder="Email" type="email" required />
-      <input aria-label="Telegram" placeholder="Telegram" />
-      <input aria-label="LinkedIn or portfolio" placeholder="LinkedIn або портфоліо" />
+      <input aria-label={t.emailLabel} placeholder={t.emailPlaceholder} type="email" required />
+      <input aria-label={t.telegramLabel} placeholder={t.telegramPlaceholder} />
+      <input aria-label={t.portfolioLabel} placeholder={t.portfolioPlaceholder} />
       <textarea aria-label={t.aboutLabel} placeholder={t.aboutPlaceholder} required />
       <label className="resume-upload mono">
         <input type="file" accept=".pdf" />
