@@ -8,7 +8,7 @@ import { normalizeSeoData, seoGraphqlFields, type SeoData, type SeoGraphqlData }
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
 
-export type DynamicSeoKind = "blog" | "case" | "vacancy" | "service";
+export type DynamicSeoKind = "blog" | "case" | "vacancy" | "service" | "technology";
 
 type SeoNode = {
   slug: string;
@@ -23,6 +23,7 @@ const roots: Record<DynamicSeoKind, string> = {
   case: "projectCases(first: 100)",
   vacancy: "vacancies(first: 100)",
   service: "serviceOfferings(first: 100)",
+  technology: "technologies(first: 100)",
 };
 
 export async function getDynamicSeo(

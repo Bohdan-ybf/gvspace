@@ -3,18 +3,23 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
 import { ContactSection } from "./contact-section";
+import { CasesShowcaseSection } from "./cases-showcase-section";
+import { ReviewsSection } from "./reviews-section";
+import { Breadcrumbs } from "./breadcrumbs";
 import { TechnologiesCatalog } from "./technologies-catalog";
 import { TechnologiesOverviewSection } from "./technologies-overview-section";
+import { getTechnologyStack } from "./wordpress-technologies";
 
 import { getTranslations } from "@/i18n/pages";
-export function TechnologiesPage({ locale }: { locale: Locale }) {
+export async function TechnologiesPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const t = getTranslations("technologies", locale).page;
+  const stack = await getTechnologyStack(locale);
   const contactText = {
     ...text.contact,
     eyebrow: t.contactEyebrow,
     title: t.contactTitle,
-    titleSecond: "на Clarity Session",
+    titleSecond: t.contactTitleSecond,
   };
 
   return (
@@ -48,7 +53,14 @@ export function TechnologiesPage({ locale }: { locale: Locale }) {
         </div>
       </section>
       <TechnologiesOverviewSection locale={locale} />
-      <TechnologiesCatalog locale={locale} />
+      <TechnologiesCatalog locale={locale} categories={stack.categories} items={stack.items} />
+      <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} cardVariant="related" />
+      <ReviewsSection locale={locale} eyebrow={t.reviewsEyebrow} title={t.reviewsTitle} />
+      <Breadcrumbs
+        locale={locale}
+        items={[{ label: locale === "uk" ? "Технології" : "Technologies" }]}
+        visible
+      />
       <ContactSection text={contactText} />
     </main>
   );

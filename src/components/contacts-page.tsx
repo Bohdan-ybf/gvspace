@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n";
+import { Breadcrumbs } from "./breadcrumbs";
 import { ArrowRight } from "./icons/arrow-right";
 import {
   EmailIcon,
@@ -9,115 +11,170 @@ import {
   PhoneIcon,
   TelegramIcon,
 } from "./icons/social-icons";
+import { getContactsPage, type ContactsChannel, type ContactsSocial } from "./wordpress-contacts";
 
-import { getTranslations } from "@/i18n/pages";
-const socials = [
-  { name: "LinkedIn", handle: "linkedin.com/company/[gvspace]", Icon: LinkedinIcon },
-  { name: "Instagram", handle: "@[gvspace]", Icon: InstagramIcon },
-  { name: "Facebook", handle: "facebook.com/[gvspace]", Icon: FacebookIcon },
-];
+const channelIcons = {
+  telegram: TelegramIcon,
+  email: EmailIcon,
+  phone: PhoneIcon,
+} as const;
 
-export function ContactsPage({ locale }: { locale: Locale }) {
-  const t = getTranslations("contacts", locale).page;
-  const cards = [t.telegram, t.email, t.phone];
-  const contactIcons = [TelegramIcon, EmailIcon, PhoneIcon];
+const socialIcons = {
+  linkedin: LinkedinIcon,
+  instagram: InstagramIcon,
+  facebook: FacebookIcon,
+  telegram: TelegramIcon,
+} as const;
+
+function channelHref(channel: ContactsChannel): string {
+  if (channel.url) return channel.url;
+  if (channel.kind === "email") return `mailto:${channel.value.replace(/[[\]]/g, "")}`;
+  if (channel.kind === "phone") return `tel:${channel.value.replace(/[^\d+]/g, "")}`;
+  if (channel.kind === "telegram") {
+    const handle = channel.value.replace(/^@/, "").replace(/[[\]]/g, "");
+    return `https://t.me/${handle}`;
+  }
+  return "#";
+}
+
+function socialHref(social: ContactsSocial): string {
+  return social.url || "#";
+}
+
+function SocialIcon({ network }: { network: string }) {
+  const Icon = socialIcons[network as keyof typeof socialIcons] || LinkedinIcon;
+  return <Icon />;
+}
+
+function ChannelIcon({ kind }: { kind: string }) {
+  const Icon = channelIcons[kind as keyof typeof channelIcons] || EmailIcon;
+  return <Icon />;
+}
+
+export async function ContactsPage({ locale }: { locale: Locale }) {
+  const page = await getContactsPage(locale);
 
   return (
     <main className="contacts-page">
       <section className="contacts-hero container">
         <div>
-          <span className="privacy-eyebrow mono">LEGAL</span>
-          <h1>{t.title}</h1>
-          <p>{t.intro}</p>
+          <span className="privacy-eyebrow mono">{page.eyebrow}</span>
+          <h1>{page.title}</h1>
+          <p>{page.intro}</p>
         </div>
-        <div className="response-badge mono">
-          <i />
-          {t.response}
-        </div>
+        {page.response ? (
+          <div className="response-badge mono">
+            <i />
+            {page.response}
+          </div>
+        ) : null}
       </section>
 
       <section className="contacts-main container">
         <div className="direct-contacts">
-          <h2 className="contact-label mono">{t.direct}</h2>
+          <h2 className="contact-label mono">{page.directLabel}</h2>
           <div className="contact-cards">
-            {cards.map((card, index) => {
-              const Icon = contactIcons[index];
-              const href =
-                index === 0
-                  ? "https://t.me/"
-                  : index === 1
-                    ? "mailto:email@gvspace.com"
-                    : "tel:+380000000000";
-
-              return (
-                <a href={href} key={card[0]}>
-                  <Icon />
-                  <span>
-                    <small className="mono">{card[0]}</small>
-                    <strong>{card[1]}</strong>
-                    <em>{card[2]}</em>
-                  </span>
-                </a>
-              );
-            })}
-          </div>
-
-          <div className="location-block">
-            <h2 className="contact-label mono">{t.location}</h2>
-            <div className="location-map">
-              <span aria-hidden="true">📍</span>
-              <b className="mono">{t.city}</b>
-            </div>
-            <dl>
-              {t.details.map(([term, value]) => (
-                <div key={term}>
-                  <dt className="mono">{term}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
+            {page.channels.map((channel) => (
+              <a href={channelHref(channel)} key={`${channel.kind}-${channel.value}`}>
+                <ChannelIcon kind={channel.kind} />
+                <span>
+                  <small className="mono">{channel.label}</small>
+                  <strong>{channel.value}</strong>
+                  {channel.hint ? <em>{channel.hint}</em> : null}
+                </span>
+              </a>
+            ))}
           </div>
         </div>
 
         <form className="contacts-form">
-          <h2 className="contact-label mono">{t.form}</h2>
+          <h2 className="contact-label mono">{page.formLabel}</h2>
           <div className="contacts-form-row">
-            <input aria-label={t.name} placeholder={t.name} required />
-            <input aria-label="Phone" inputMode="tel" placeholder="+38 0__" />
+            <input aria-label={page.namePlaceholder} placeholder={page.namePlaceholder} required />
+            <input
+              aria-label={page.phonePlaceholder}
+              inputMode="tel"
+              placeholder={page.phonePlaceholder}
+            />
           </div>
-          <input aria-label="Email" type="email" placeholder="Email" required />
-          <input aria-label={t.topic} placeholder={t.topic} required />
-          <textarea aria-label={t.message} placeholder={t.message} required />
+          <input
+            aria-label={page.emailPlaceholder}
+            type="email"
+            placeholder={page.emailPlaceholder}
+            required
+          />
+          <input aria-label={page.topicPlaceholder} placeholder={page.topicPlaceholder} required />
+          <textarea
+            aria-label={page.messagePlaceholder}
+            placeholder={page.messagePlaceholder}
+            required
+          />
           <button className="btn btn-primary" type="submit">
-            {t.submit}
+            {page.submit}
           </button>
-          <p className="mono">{t.consent}</p>
+          <p className="mono">{page.consent}</p>
         </form>
       </section>
 
-      <section className="contacts-social container">
-        <h2 className="contact-label mono">{t.social}</h2>
-        <div>
-          {socials.map(({ name, handle, Icon }) => (
-            <Link href="#" key={name}>
-              <Icon />
-              <span>
-                <strong>{name}</strong>
-                <small>{handle}</small>
-              </span>
-              <ArrowRight />
-            </Link>
-          ))}
-          <Link href="#">
-            <TelegramIcon />
-            <span>
-              <strong>Telegram-канал</strong>
-              <small>t.me/[gvspace]</small>
-            </span>
-            <ArrowRight />
-          </Link>
+      <section className="contacts-presence">
+        <div className="contacts-presence-copy">
+          <div className="contacts-presence-copy-bleed">
+            <div className="container">
+              <span className="mono">{page.presenceEyebrow}</span>
+              <h2>{page.presenceTitle}</h2>
+              <p>{page.presenceText}</p>
+            </div>
+          </div>
+        </div>
+        <div className={`contacts-presence-map${page.mapImage ? "" : " is-fallback"}`}>
+          <Image
+            src={page.mapImage || "/images/contacts/world-map.svg"}
+            alt=""
+            fill
+            sizes="(max-width: 900px) 100vw, 60vw"
+            unoptimized={Boolean(page.mapImage)}
+          />
         </div>
       </section>
+
+      {page.offices.length ? (
+        <section className="contacts-offices container">
+          {page.offices.map((office) => (
+            <article key={office.title}>
+              <h3>{office.title}</h3>
+              <p>{office.address}</p>
+              {office.phone ? (
+                <a href={`tel:${office.phone.replace(/[^\d+]/g, "")}`}>{office.phone}</a>
+              ) : null}
+              {office.email ? <a href={`mailto:${office.email}`}>{office.email}</a> : null}
+            </article>
+          ))}
+        </section>
+      ) : null}
+
+      {page.socials.length ? (
+        <section className="contacts-social container">
+          <h2 className="contact-label mono">{page.socialLabel}</h2>
+          <div>
+            {page.socials.map((social) => (
+              <Link href={socialHref(social)} key={`${social.network}-${social.name}`}>
+                <SocialIcon network={social.network} />
+                <span>
+                  <strong>{social.name}</strong>
+                  <small>{social.handle}</small>
+                </span>
+                <ArrowRight />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <Breadcrumbs
+        locale={locale}
+        visible
+        items={[{ label: locale === "uk" ? "Контакти" : "Contacts" }]}
+      />
     </main>
   );
 }

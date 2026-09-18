@@ -18,7 +18,7 @@ Every post, service, case, vacancy, review and technology has a **GVSPACE: local
 4. Replace the copied text with the translation. Publish the WordPress record and then set the translation status to **Published**.
 5. The frontend only returns records whose language matches the active domain and whose translation status is **Published**.
 
-For new vacancies, services and reviews, the data panel contains one neutral set of fields. Fill it in using the language selected in **GVSPACE: localization**. Changing the locale does not translate text automatically. Cases, blog posts and technologies use their standard one-language WordPress fields in the same way.
+For new vacancies, services, reviews, cases, team members and technologies, the data panel contains one set of fields. Fill it in using the language selected in the content block. Changing the locale does not translate text automatically.
 
 The extra locales are prepared for editorial work only. A domain must not be made public or indexable until its static frontend dictionary and reviewed dynamic content are ready.
 
@@ -33,6 +33,13 @@ The fields are available through WPGraphQL as `gvspaceLocalization { locale tran
 - Редагується в розділі **Політика конфіденційності**.
 - Один запис містить усі мовні версії. Селект **Редагувати мовну версію** синхронізований із блоком SEO.
 - Після оновлення плагін один раз створює запис із текстом з дизайну українською та англійською.
+
+## Контакти
+
+- Редагується в розділі **Контакти**.
+- Один запис містить усі мовні версії: банер, картки зв’язку, форму, офіси та соцмережі.
+- Підпис «ЛОКАЦІЯ» і тексти карти — у блоці **Локація і карта**. Карту завантажте як **Карта локації**. Якщо зображення немає, на сайті показується заглушка.
+- Селект мови синхронізований із блоком SEO.
 
 ## Послуги
 
@@ -58,14 +65,17 @@ WPGraphQL exposes the resolved structure through `gvspaceSeo(locale: "uk")` or `
 
 ## Технології
 
-У WordPress з'являється розділ **Технології**.
+У WordPress технології редагуються в розділі **Технології**.
 
-1. У **Технології → Категорії** створіть таби зі slug: `marketing`, `development`, `systems`, `content`.
-2. Додайте технологію та заповніть українську назву у заголовку.
-3. За потреби вкажіть англійську назву в блоці **Налаштування технології**.
-4. Завантажте SVG або PNG у **Головне зображення** — воно стане іконкою картки.
-5. Оберіть одну або кілька категорій і задайте **Порядок** у Page Attributes.
-6. Опублікуйте запис. Frontend оновлює дані раз на 60 секунд.
+1. Таби сторінки додаються в **Технології → Таби**. Українська назва — у стандартному полі, англійська — окремо, порядок — числом.
+2. Саму технологію додайте через **Технології → Додати технологію**.
+3. Один запис містить усі мовні версії. У блоці **Налаштування технології** оберіть мову селектом і заповніть картку та сторінку. Перемикач синхронізований із блоком SEO.
+4. **Назва технології** є H1 на білому банері. Текст під назвою, фіолетовий блок «чому обираємо», тригери, «як застосовуємо», FAQ, SEO-текст і блок зустрічі заповнюються в мовній панелі.
+5. Іконку картки й банера завантажте як **Головне зображення** (SVG або PNG) — та сама іконка, що в каталозі.
+6. Фото експерта в блоці зустрічі оберіть з **медіатеки**. Якщо порожньо — береться фото з «Команда» або заглушка.
+7. Таб визначає послуги й кейси: Розробка підтягне IT-послуги та IT-кейси, Маркетинг — маркетингові. Конкретний кейс можна зафіксувати slug-ом.
+8. Зразок для маркетолога: записи **Next.js** і **Google Ads**. Нові технології створюйте за їхньою структурою.
+9. Порядок карток задається у **Атрибути → Порядок**.
 
 SVG дозволені лише адміністраторам. Завантажуйте тільки оптимізовані SVG із надійних джерел,
 оскільки формат може містити активний вміст.

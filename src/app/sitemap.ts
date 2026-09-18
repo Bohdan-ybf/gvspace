@@ -4,6 +4,7 @@ import { getBlogPosts } from "@/components/wordpress-posts";
 import { getCaseStudies } from "@/components/wordpress-cases";
 import { getServiceOfferings } from "@/components/wordpress-services";
 import { getVacancies } from "@/components/wordpress-vacancies";
+import { getTechnologyStack } from "@/components/wordpress-technologies";
 import type { Locale } from "@/i18n";
 import { getEnabledMarkets, getMarket, getMarketById } from "@/markets";
 
@@ -25,11 +26,12 @@ const staticPaths = [
 type SitemapEntry = { pathname: string; lastModified?: string };
 
 async function getLocalePaths(locale: Locale): Promise<SitemapEntry[]> {
-  const [posts, cases, vacancies, services] = await Promise.all([
+  const [posts, cases, vacancies, services, technologies] = await Promise.all([
     getBlogPosts(locale),
     getCaseStudies(locale),
     getVacancies(locale),
     getServiceOfferings(locale),
+    getTechnologyStack(locale),
   ]);
   return [
     ...staticPaths.map((pathname) => ({ pathname })),
@@ -50,6 +52,9 @@ async function getLocalePaths(locale: Locale): Promise<SitemapEntry[]> {
         ? `/services/${service.parentSlug}/${service.slug}`
         : `/services/${service.slug}`,
       lastModified: service.modifiedAt,
+    })),
+    ...technologies.items.map((item) => ({
+      pathname: `/technologies/${item.slug}`,
     })),
   ];
 }

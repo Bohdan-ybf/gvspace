@@ -1,19 +1,25 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
+import type { Locale } from "@/i18n";
 import type { TechnologyCategory, TechnologyItem } from "./wordpress-technologies";
 
 export function TechnologyShowcaseTabs({
+  locale,
   categories,
   items,
   emptyLabel,
+  initialCategory,
 }: {
+  locale: Locale;
   categories: TechnologyCategory[];
   items: TechnologyItem[];
   emptyLabel: string;
+  initialCategory?: string;
 }) {
-  const [active, setActive] = useState(categories[0]?.slug ?? "");
+  const [active, setActive] = useState(initialCategory || categories[0]?.slug || "");
   const selected = categories.some((category) => category.slug === active)
     ? active
     : (categories[0]?.slug ?? "");
@@ -40,7 +46,7 @@ export function TechnologyShowcaseTabs({
       </div>
       <div className="technology-showcase-grid" role="tabpanel">
         {visible.map((item) => (
-          <article key={item.id}>
+          <Link href={`/${locale}/technologies/${item.slug}`} key={item.id}>
             <div>
               {item.image ? (
                 <Image src={item.image} alt={item.imageAlt} fill sizes="70px" unoptimized />
@@ -49,7 +55,7 @@ export function TechnologyShowcaseTabs({
               )}
             </div>
             <p className="mono">{item.title}</p>
-          </article>
+          </Link>
         ))}
         {!visible.length && <p className="technology-showcase-empty">{emptyLabel}</p>}
       </div>

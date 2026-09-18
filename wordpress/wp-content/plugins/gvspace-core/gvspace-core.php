@@ -159,6 +159,7 @@ const GVSPACE_LOCALIZED_POST_TYPES = [
     'gv_home_seo_text',
     'gv_privacy_policy',
     'gv_terms_of_use',
+    'gv_contacts_page',
 ];
 
 const GVSPACE_CONTENT_LOCALES = [
@@ -176,7 +177,32 @@ const GVSPACE_CONTENT_LOCALES = [
     'en-GB' => 'English (United Kingdom)',
 ];
 const GVSPACE_TRANSLATION_STATUSES = ['missing', 'draft', 'published'];
-const GVSPACE_CENTRALIZED_POST_TYPES = ['gv_service', 'gv_team_member', 'gv_vacancy', 'gv_case', 'gv_faq', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use'];
+const GVSPACE_LOCALIZED_TECHNOLOGY_CARD_FIELDS = [
+    'description' => ['label' => 'Короткий опис на картці каталогу', 'type' => 'textarea'],
+    'tag' => ['label' => 'Мітка на картці (наприклад, ПЛАТНА РЕКЛАМА)', 'type' => 'text'],
+];
+const GVSPACE_LOCALIZED_TECHNOLOGY_PAGE_FIELDS = [
+    'intro' => ['label' => 'Текст під назвою на білому банері', 'type' => 'textarea'],
+    'why' => ['label' => 'Чому ми обираємо це — текст фіолетового банера. Фразу можна виділити так: **текст**', 'type' => 'textarea'],
+    'triggers' => ['label' => 'Коли обираємо цю технологію — заголовок | опис (один рядок = одна картка)', 'type' => 'textarea'],
+    'uses' => ['label' => 'Як ми застосовуємо — заголовок | опис (один рядок = один пункт)', 'type' => 'textarea'],
+    'faq' => ['label' => 'FAQ на сторінці — питання | відповідь', 'type' => 'textarea'],
+    'seo_lead' => ['label' => 'SEO-текст — виділений перший рядок', 'type' => 'text'],
+    'seo_text' => ['label' => 'SEO-текст', 'type' => 'textarea'],
+    'meet_name' => ['label' => 'Блок зустрічі — ім’я експерта', 'type' => 'text'],
+    'meet_role' => ['label' => 'Блок зустрічі — посада', 'type' => 'text'],
+    'meet_quote' => ['label' => 'Блок зустрічі — цитата', 'type' => 'textarea'],
+    'meet_years' => ['label' => 'Блок зустрічі — років у компанії (наприклад, 6)', 'type' => 'text'],
+    'meet_projects' => ['label' => 'Блок зустрічі — проєктів реалізовано (наприклад, 150)', 'type' => 'text'],
+    'meet_tags' => ['label' => 'Блок зустрічі — компетенції (кожна з нового рядка)', 'type' => 'textarea'],
+];
+
+function gvspace_localized_technology_fields(): array
+{
+    return GVSPACE_LOCALIZED_TECHNOLOGY_CARD_FIELDS + GVSPACE_LOCALIZED_TECHNOLOGY_PAGE_FIELDS;
+}
+
+const GVSPACE_CENTRALIZED_POST_TYPES = ['gv_service', 'gv_team_member', 'gv_vacancy', 'gv_case', 'gv_faq', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use', 'gv_contacts_page', 'gv_technology'];
 
 const GVSPACE_SEO_FIELDS = [
     'title' => ['label' => 'SEO Title', 'type' => 'text', 'limit' => 60],
@@ -194,14 +220,15 @@ add_action('after_setup_theme', function (): void {
 // Technology logos are best stored as SVG. Restrict SVG uploads to administrators
 // because SVG files may contain scripts or other active content.
 add_filter('upload_mimes', function (array $mimes): array {
-    if (current_user_can('manage_options')) {
+    if (current_user_can('manage_options') || !empty($GLOBALS['gvspace_allow_svg_seed'])) {
         $mimes['svg'] = 'image/svg+xml';
     }
     return $mimes;
 });
 
 add_filter('wp_check_filetype_and_ext', function (array $data, string $file, string $filename, ?array $mimes): array {
-    if (!current_user_can('manage_options') || strtolower((string) pathinfo($filename, PATHINFO_EXTENSION)) !== 'svg') {
+    $allow_svg = current_user_can('manage_options') || !empty($GLOBALS['gvspace_allow_svg_seed']);
+    if (!$allow_svg || strtolower((string) pathinfo($filename, PATHINFO_EXTENSION)) !== 'svg') {
         return $data;
     }
 
@@ -403,7 +430,7 @@ add_action('init', function (): void {
         ],
         'public' => true, 'hierarchical' => true, 'show_in_rest' => true, 'show_in_graphql' => true,
         'graphql_single_name' => 'serviceOffering', 'graphql_plural_name' => 'serviceOfferings',
-        'menu_icon' => 'dashicons-admin-generic', 'rewrite' => ['slug' => 'services'],
+        'menu_icon' => 'dashicons-index-card', 'rewrite' => ['slug' => 'services'],
         'supports' => ['title', 'thumbnail', 'page-attributes'],
     ]);
 
@@ -529,14 +556,36 @@ add_action('init', function (): void {
         'supports' => ['title'],
     ]);
 
+    register_post_type('gv_contacts_page', [
+        'labels' => [
+            'name' => 'Контакти',
+            'singular_name' => 'Контакти',
+            'menu_name' => 'Контакти',
+            'add_new_item' => 'Додати сторінку контактів',
+            'edit_item' => 'Редагувати контакти',
+            'new_item' => 'Нова сторінка контактів',
+            'all_items' => 'Контакти',
+            'not_found' => 'Сторінку контактів не знайдено',
+            'featured_image' => 'Карта локації',
+            'set_featured_image' => 'Завантажити карту',
+            'remove_featured_image' => 'Видалити карту',
+            'use_featured_image' => 'Використати як карту',
+        ],
+        'public' => true, 'publicly_queryable' => false, 'exclude_from_search' => true,
+        'show_in_rest' => true, 'show_in_graphql' => true,
+        'graphql_single_name' => 'contactsPage', 'graphql_plural_name' => 'contactsPages',
+        'menu_icon' => 'dashicons-email-alt',
+        'supports' => ['title', 'thumbnail'],
+    ]);
+
     register_taxonomy('gv_technology_category', ['gv_technology'], [
         'labels' => [
-            'name' => 'Категорії технологій',
-            'singular_name' => 'Категорія технологій',
-            'menu_name' => 'Категорії',
-            'all_items' => 'Усі категорії',
-            'edit_item' => 'Редагувати категорію',
-            'add_new_item' => 'Додати категорію',
+            'name' => 'Таби технологій',
+            'singular_name' => 'Таб технологій',
+            'menu_name' => 'Таби',
+            'all_items' => 'Усі таби',
+            'edit_item' => 'Редагувати таб',
+            'add_new_item' => 'Додати таб',
         ],
         'public' => true,
         'hierarchical' => false,
@@ -565,7 +614,7 @@ add_action('init', function (): void {
         'show_in_graphql' => true,
         'graphql_single_name' => 'technology',
         'graphql_plural_name' => 'technologies',
-        'menu_icon' => 'dashicons-admin-tools',
+        'menu_icon' => 'dashicons-editor-code',
         'supports' => ['title', 'thumbnail', 'page-attributes'],
         'taxonomies' => ['gv_technology_category'],
     ]);
@@ -614,6 +663,25 @@ add_action('init', function (): void {
         'sanitize_callback' => 'sanitize_text_field',
         'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
     ]);
+
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        register_post_meta('gv_technology', '_gvspace_technology_title_' . $locale, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        foreach (array_keys(gvspace_localized_technology_fields()) as $field) {
+            register_post_meta('gv_technology', '_gvspace_technology_' . $field . '_' . $locale, [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'sanitize_callback' => 'sanitize_textarea_field',
+                'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+            ]);
+        }
+    }
 
     foreach (array_keys(GVSPACE_CASE_FIELDS) as $field) {
         register_post_meta('gv_case', '_gvspace_case_' . $field, [
@@ -1241,7 +1309,7 @@ add_filter('ajax_query_attachments_args', function (array $query): array {
 add_action('admin_enqueue_scripts', function (string $hook): void {
     if (in_array($hook, ['post.php', 'post-new.php'], true)) {
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if ($screen && $screen->post_type === 'gv_case') {
+        if ($screen && in_array($screen->post_type, ['gv_case', 'gv_technology'], true)) {
             wp_enqueue_media();
         }
     }
@@ -1405,6 +1473,8 @@ function gvspace_centralized_language_group(string $post_type): string
         'gv_home_seo_text' => 'home-seo-text-language',
         'gv_privacy_policy' => 'privacy-policy-language',
         'gv_terms_of_use' => 'terms-of-use-language',
+        'gv_contacts_page' => 'contacts-page-language',
+        'gv_technology' => 'technology-language',
         default => 'language',
     };
 }
@@ -1698,7 +1768,7 @@ add_action('add_meta_boxes', function (): void {
 
 add_action('admin_head', function (): void {
     $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-    if (!$screen || !in_array($screen->post_type, ['gv_faq', 'gv_vacancy', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use'], true) || !in_array($screen->base, ['post', 'post-new'], true)) return;
+    if (!$screen || !in_array($screen->post_type, ['gv_faq', 'gv_vacancy', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use', 'gv_contacts_page', 'gv_technology'], true) || !in_array($screen->base, ['post', 'post-new'], true)) return;
     echo '<style>#titlediv{display:none!important}</style>';
 });
 
@@ -1935,28 +2005,166 @@ add_action('save_post_gv_team_member', function (int $post_id): void {
     }
 });
 
-function gvspace_render_technology_fields(WP_Post $post): void
+function gvspace_technology_meet_photo_value(int $post_id): string
 {
-    wp_nonce_field('gvspace_save_technology', 'gvspace_technology_nonce');
-    $locale = gvspace_get_content_locale($post);
-    if ($locale !== 'legacy') {
-        echo '<p class="description">Назву введіть у стандартному полі заголовка вибраною мовою. Іконку завантажте через «Головне зображення», таб оберіть у «Категоріях», позицію — у полі «Порядок».</p>';
-        return;
+    return (string) get_post_meta($post_id, '_gvspace_technology_meet_photo', true);
+}
+
+function gvspace_technology_meet_photo_url(int $post_id): string
+{
+    $raw = gvspace_technology_meet_photo_value($post_id);
+    if ($raw === '') return '';
+    if (ctype_digit($raw)) {
+        $url = wp_get_attachment_image_url((int) $raw, 'large');
+        return $url ?: '';
     }
-    $title_en = (string) get_post_meta($post->ID, '_gvspace_technology_title_en', true);
+    return $raw;
+}
+
+function gvspace_render_technology_meet_photo_field(WP_Post $post): void
+{
+    $raw = gvspace_technology_meet_photo_value($post->ID);
+    $preview = gvspace_technology_meet_photo_url($post->ID);
+    if ($preview === '' && $raw !== '' && !ctype_digit($raw)) $preview = $raw;
+    echo '<div data-gvspace-meet-photo style="margin:12px 0 18px">';
+    echo '<p style="margin-bottom:8px"><strong>Фото експерта в блоці зустрічі</strong></p>';
+    echo '<input type="hidden" name="gvspace_technology_meet_photo" value="' . esc_attr($raw) . '">';
+    echo '<div data-gvspace-meet-photo-preview style="margin:0 0 8px' . ($preview === '' ? ';display:none' : '') . '">';
+    echo '<img src="' . esc_url($preview) . '" alt="" style="display:block;width:140px;height:180px;object-fit:cover;border:1px solid #c3c4c7;border-radius:2px;background:#f0f0f1">';
+    echo '</div>';
+    echo '<p style="margin:0">';
+    echo '<button type="button" class="button" data-gvspace-meet-photo-select>Обрати фото</button> ';
+    echo '<button type="button" class="button-link" data-gvspace-meet-photo-remove' . ($raw === '' ? ' hidden' : '') . '>Видалити</button>';
+    echo '</p>';
+    echo '<p class="description">Оберіть зображення з медіатеки. Якщо порожньо, береться фото з розділу «Команда» або заглушка.</p>';
+    echo '</div>';
+    gvspace_render_technology_meet_photo_script();
+}
+
+function gvspace_render_technology_meet_photo_script(): void
+{
+    static $rendered = false;
+    if ($rendered) return;
+    $rendered = true;
     ?>
-    <p class="description">
-        Українську назву задайте у полі заголовка. Іконку завантажте через «Головне зображення».
-        Таб оберіть у блоці «Категорії», а позицію картки — у полі «Порядок».
-    </p>
-    <p>
-        <label for="gvspace_technology_title_en"><strong>Назва англійською</strong></label><br>
-        <input class="regular-text" id="gvspace_technology_title_en" name="gvspace_technology_title_en" value="<?php echo esc_attr($title_en); ?>">
-    </p>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var root = document.querySelector('[data-gvspace-meet-photo]');
+        if (!root || !window.wp || !wp.media) return;
+        var input = root.querySelector('input[name="gvspace_technology_meet_photo"]');
+        var previewWrap = root.querySelector('[data-gvspace-meet-photo-preview]');
+        var preview = previewWrap ? previewWrap.querySelector('img') : null;
+        var selectButton = root.querySelector('[data-gvspace-meet-photo-select]');
+        var removeButton = root.querySelector('[data-gvspace-meet-photo-remove]');
+        if (!input || !previewWrap || !preview || !selectButton || !removeButton) return;
+
+        var thumbUrl = function (attachment) {
+            if (attachment.sizes && attachment.sizes.medium) return attachment.sizes.medium.url;
+            if (attachment.sizes && attachment.sizes.thumbnail) return attachment.sizes.thumbnail.url;
+            return attachment.url;
+        };
+
+        var setPhoto = function (id, url) {
+            input.value = id ? String(id) : '';
+            preview.src = url || '';
+            previewWrap.style.display = url ? '' : 'none';
+            if (url) removeButton.removeAttribute('hidden');
+            else removeButton.setAttribute('hidden', 'hidden');
+        };
+
+        selectButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            var selectedId = parseInt(input.value, 10) || 0;
+            var frame = wp.media({
+                title: 'Фото експерта',
+                button: { text: 'Обрати фото' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            frame.on('open', function () {
+                if (!selectedId) return;
+                var selection = frame.state().get('selection');
+                var attachment = wp.media.attachment(selectedId);
+                attachment.fetch();
+                selection.reset([attachment]);
+            });
+            frame.on('select', function () {
+                var attachment = frame.state().get('selection').first();
+                if (!attachment) return;
+                var data = attachment.toJSON();
+                if (!data.id) return;
+                setPhoto(data.id, thumbUrl(data));
+            });
+            frame.open();
+        });
+
+        removeButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            setPhoto(0, '');
+        });
+    });
+    </script>
     <?php
 }
 
+function gvspace_render_technology_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_technology', 'gvspace_technology_nonce');
+    $stored_locale = gvspace_get_content_locale($post);
+    $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+    $selected_tabs = wp_get_object_terms($post->ID, 'gv_technology_category', ['fields' => 'slugs']);
+    if (!is_array($selected_tabs)) $selected_tabs = [];
+    $tabs_url = admin_url('edit-tags.php?taxonomy=gv_technology_category&post_type=gv_technology');
+
+    echo '<p class="description"><strong>Одна технологія — один запис.</strong> Іконку для каталогу і білого банера завантажте як «Головне зображення» (SVG або PNG). Назва технології є H1 на сторінці. Порядок картки задається у «Атрибути → Порядок». Оберіть мову та заповніть її переклад. Перемикання мови не перезавантажує сторінку й не видаляє вже введені тексти. Зразок заповнення — записи Next.js та Google Ads.</p>';
+    echo '<input type="hidden" name="gvspace_technology_tabs_submitted" value="1">';
+    echo '<p><strong>Таби на сайті</strong></p>';
+    echo '<div style="display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:8px">';
+    foreach (gvspace_get_technology_tab_options() as $slug => $label) {
+        echo '<label><input type="checkbox" name="gvspace_technology_tabs[]" value="'
+            . esc_attr($slug) . '"'
+            . checked(in_array($slug, $selected_tabs, true), true, false)
+            . '> ' . esc_html($label) . '</label>';
+    }
+    echo '</div>';
+    echo '<p><label for="gvspace_technology_tab_new">Або додайте новий таб</label><br>';
+    echo '<input type="text" id="gvspace_technology_tab_new" name="gvspace_technology_tab_new" placeholder="Наприклад, AI" style="width:100%;max-width:420px"></p>';
+    echo '<p class="description">Таб визначає, які послуги і кейси підтягнуться на сторінку: Розробка → IT-послуги та IT-кейси, Маркетинг → маркетингові тощо. Список табів також можна редагувати в <a href="' . esc_url($tabs_url) . '">Технології → Таби</a>. Таби спільні для всіх мов.</p>';
+    $related_case = (string) get_post_meta($post->ID, '_gvspace_technology_related_case', true);
+    echo '<p><label for="gvspace_technology_related_case"><strong>Кейс на сторінці технології</strong></label><br>';
+    echo '<input type="text" id="gvspace_technology_related_case" name="gvspace_technology_related_case" value="' . esc_attr($related_case) . '" placeholder="detox-new-year" style="width:100%;max-width:420px"></p>';
+    echo '<p class="description">Публічний slug кейсу, спільний для всіх мов. Якщо порожньо — підтягнемо кейс за табом технології (наприклад, IT-кейс для розробки).</p>';
+    gvspace_render_technology_meet_photo_field($post);
+
+    echo '<p><label for="gvspace-technology-language"><strong>Редагувати мовну версію</strong></label> ';
+    echo '<select id="gvspace-technology-language" data-gvspace-language-select="technology-language">';
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active_locale, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select></p>';
+
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $title = (string) get_post_meta($post->ID, '_gvspace_technology_title_' . $locale, true);
+        if ($title === '') {
+            if ($locale === 'uk') $title = $post->post_title;
+            if ($locale === 'en') $title = (string) get_post_meta($post->ID, '_gvspace_technology_title_en', true);
+        }
+        echo '<div data-gvspace-language-panel="technology-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h3>' . esc_html($label) . '</h3>';
+        echo '<p><label for="gvspace_technology_title_' . esc_attr($locale) . '"><strong>Назва технології (H1 на сторінці)</strong></label><br>';
+        echo '<input type="text" id="gvspace_technology_title_' . esc_attr($locale) . '" name="gvspace_technology_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
+        echo '<h4>Картка в каталозі</h4>';
+        gvspace_render_field_set($post, GVSPACE_LOCALIZED_TECHNOLOGY_CARD_FIELDS, 'gvspace_technology_' . $locale . '_', '_gvspace_technology_', '_' . $locale);
+        echo '<h4>Сторінка технології</h4>';
+        gvspace_render_field_set($post, GVSPACE_LOCALIZED_TECHNOLOGY_PAGE_FIELDS, 'gvspace_technology_' . $locale . '_', '_gvspace_technology_', '_' . $locale);
+        echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
+
 add_action('save_post_gv_technology', function (int $post_id): void {
+    static $saving_title = false;
+    if ($saving_title) return;
     if (
         !isset($_POST['gvspace_technology_nonce'])
         || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_technology_nonce'])), 'gvspace_save_technology')
@@ -1966,13 +2174,98 @@ add_action('save_post_gv_technology', function (int $post_id): void {
         return;
     }
 
-    $post = get_post($post_id);
-    if (!$post || gvspace_get_content_locale($post) !== 'legacy') return;
+    if (isset($_POST['gvspace_technology_tabs_submitted'])) {
+        $tabs = [];
+        if (isset($_POST['gvspace_technology_tabs']) && is_array($_POST['gvspace_technology_tabs'])) {
+            foreach ($_POST['gvspace_technology_tabs'] as $slug) {
+                $clean = sanitize_title(wp_unslash((string) $slug));
+                if ($clean !== '') $tabs[] = $clean;
+            }
+        }
+        $new_tab = sanitize_text_field(wp_unslash((string) ($_POST['gvspace_technology_tab_new'] ?? '')));
+        if ($new_tab !== '') {
+            $created = gvspace_ensure_technology_tab($new_tab);
+            if ($created !== '') $tabs[] = $created;
+        }
+        wp_set_object_terms($post_id, array_values(array_unique($tabs)), 'gv_technology_category', false);
+    }
 
-    $title_en = isset($_POST['gvspace_technology_title_en'])
-        ? sanitize_text_field(wp_unslash($_POST['gvspace_technology_title_en']))
-        : '';
-    update_post_meta($post_id, '_gvspace_technology_title_en', $title_en);
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $title_field = 'gvspace_technology_title_' . $locale;
+        if (isset($_POST[$title_field])) {
+            update_post_meta($post_id, '_gvspace_technology_title_' . $locale, sanitize_text_field(wp_unslash($_POST[$title_field])));
+        }
+        foreach (array_keys(gvspace_localized_technology_fields()) as $field) {
+            $field_name = 'gvspace_technology_' . $locale . '_' . $field;
+            if (!isset($_POST[$field_name])) continue;
+            update_post_meta($post_id, '_gvspace_technology_' . $field . '_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$field_name])));
+        }
+    }
+
+    if (isset($_POST['gvspace_technology_related_case'])) {
+        update_post_meta($post_id, '_gvspace_technology_related_case', sanitize_title(wp_unslash($_POST['gvspace_technology_related_case'])));
+    }
+    if (isset($_POST['gvspace_technology_meet_photo'])) {
+        $meet_photo = sanitize_text_field(wp_unslash($_POST['gvspace_technology_meet_photo']));
+        if ($meet_photo !== '' && ctype_digit($meet_photo)) {
+            $attachment_id = (int) $meet_photo;
+            $meet_photo = get_post_type($attachment_id) === 'attachment' ? (string) $attachment_id : '';
+        } elseif ($meet_photo !== '') {
+            $meet_photo = esc_url_raw($meet_photo);
+        }
+        if ($meet_photo !== '') {
+            update_post_meta($post_id, '_gvspace_technology_meet_photo', $meet_photo);
+        } else {
+            delete_post_meta($post_id, '_gvspace_technology_meet_photo');
+        }
+    }
+    if (isset($_POST['gvspace_technology_visual'])) {
+        update_post_meta($post_id, '_gvspace_technology_visual', esc_url_raw(wp_unslash($_POST['gvspace_technology_visual'])));
+    }
+
+    update_post_meta($post_id, '_gvspace_content_locale', 'legacy');
+    update_post_meta($post_id, '_gvspace_translation_status', 'published');
+    if ((string) get_post_meta($post_id, '_gvspace_translation_group', true) === '') {
+        $default_group = sanitize_title((string) get_post_field('post_name', $post_id) ?: (string) get_post_field('post_title', $post_id));
+        update_post_meta($post_id, '_gvspace_translation_group', $default_group ?: 'technology-' . $post_id);
+    }
+
+    $uk_title = (string) get_post_meta($post_id, '_gvspace_technology_title_uk', true);
+    if ($uk_title !== '' && get_post_field('post_title', $post_id) !== $uk_title) {
+        $saving_title = true;
+        wp_update_post(['ID' => $post_id, 'post_title' => $uk_title]);
+        $saving_title = false;
+    }
+});
+
+add_action('add_meta_boxes', function (): void {
+    remove_meta_box('tagsdiv-gv_technology_category', 'gv_technology', 'side');
+}, 20);
+
+add_action('restrict_manage_posts', function (string $post_type): void {
+    if ($post_type !== 'gv_technology') return;
+    $selected = isset($_GET['gv_technology_tab']) ? sanitize_title(wp_unslash((string) $_GET['gv_technology_tab'])) : '';
+    echo '<label for="gv_technology_tab" class="screen-reader-text">Фільтр за табом</label>';
+    echo '<select name="gv_technology_tab" id="gv_technology_tab">';
+    echo '<option value="">Усі таби</option>';
+    foreach (gvspace_get_technology_tab_options() as $slug => $label) {
+        echo '<option value="' . esc_attr($slug) . '"' . selected($selected, $slug, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select>';
+});
+
+add_action('pre_get_posts', function (WP_Query $query): void {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'gv_technology') return;
+    $tab = isset($_GET['gv_technology_tab']) ? sanitize_title(wp_unslash((string) $_GET['gv_technology_tab'])) : '';
+    if ($tab === '') return;
+    $tax_query = $query->get('tax_query');
+    if (!is_array($tax_query)) $tax_query = [];
+    $tax_query[] = [
+        'taxonomy' => 'gv_technology_category',
+        'field' => 'slug',
+        'terms' => [$tab],
+    ];
+    $query->set('tax_query', $tax_query);
 });
 
 function gvspace_render_case_fields(WP_Post $post): void
@@ -2538,6 +2831,32 @@ add_action('graphql_register_types', function (): void {
                     if ($service_title !== '') $content_title = $service_title;
                     if ($service_headline !== '') $h1_fallback = $service_headline;
                 }
+                if ($post->post_type === 'gv_technology') {
+                    $technology_title = trim(gvspace_technology_locale_field($post_id, 'title', $requested_locale));
+                    $technology_intro = trim(gvspace_technology_locale_field($post_id, 'intro', $requested_locale));
+                    $technology_description = trim(gvspace_technology_locale_field($post_id, 'description', $requested_locale));
+                    if ($technology_title !== '') {
+                        $content_title = $technology_title;
+                        $h1_fallback = $technology_title;
+                    }
+                    if ($technology_intro !== '') $fallback_description = $technology_intro;
+                    elseif ($technology_description !== '') $fallback_description = $technology_description;
+                }
+                if ($post->post_type === 'gv_contacts_page') {
+                    $contacts_title = trim((string) get_post_meta($post_id, '_gvspace_contacts_title_' . $requested_locale, true));
+                    $contacts_intro = trim((string) get_post_meta($post_id, '_gvspace_contacts_intro_' . $requested_locale, true));
+                    if ($contacts_title === '' && $requested_locale !== 'uk') {
+                        $contacts_title = trim((string) get_post_meta($post_id, '_gvspace_contacts_title_uk', true));
+                    }
+                    if ($contacts_intro === '' && $requested_locale !== 'uk') {
+                        $contacts_intro = trim((string) get_post_meta($post_id, '_gvspace_contacts_intro_uk', true));
+                    }
+                    if ($contacts_title !== '') {
+                        $content_title = $contacts_title;
+                        $h1_fallback = $contacts_title;
+                    }
+                    if ($contacts_intro !== '') $fallback_description = $contacts_intro;
+                }
                 if ($post->post_type === 'gv_privacy_policy') {
                     $privacy_locale = $requested_locale === 'en' ? 'en' : 'uk';
                     $privacy_title = trim((string) get_post_meta($post_id, '_gvspace_privacy_title_' . $privacy_locale, true));
@@ -2577,7 +2896,105 @@ add_action('graphql_register_types', function (): void {
         'type' => 'String',
         'description' => 'English technology name.',
         'resolve' => static function ($source): string {
-            return (string) get_post_meta((int) $source->databaseId, '_gvspace_technology_title_en', true);
+            return gvspace_technology_locale_field((int) $source->databaseId, 'title', 'en');
+        },
+    ]);
+
+    register_graphql_object_type('GvspaceTechnologyDetails', [
+        'description' => 'Localized technology card and page fields.',
+        'fields' => [
+            'title' => ['type' => 'String'],
+            'description' => ['type' => 'String'],
+            'tag' => ['type' => 'String'],
+            'headline' => ['type' => 'String'],
+            'intro' => ['type' => 'String'],
+            'why' => ['type' => 'String'],
+            'triggers' => ['type' => 'String'],
+            'uses' => ['type' => 'String'],
+            'stats' => ['type' => 'String'],
+            'benefits' => ['type' => 'String'],
+            'faq' => ['type' => 'String'],
+            'seoLead' => ['type' => 'String'],
+            'seoText' => ['type' => 'String'],
+            'meetName' => ['type' => 'String'],
+            'meetRole' => ['type' => 'String'],
+            'meetQuote' => ['type' => 'String'],
+            'meetYears' => ['type' => 'String'],
+            'meetProjects' => ['type' => 'String'],
+            'meetTags' => ['type' => 'String'],
+        ],
+    ]);
+    register_graphql_field('Technology', 'technologyDetails', [
+        'type' => 'GvspaceTechnologyDetails',
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): array {
+            $post_id = (int) $source->databaseId;
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
+            $intro = gvspace_technology_locale_field($post_id, 'intro', $locale);
+            if ($intro === '') $intro = gvspace_technology_locale_field($post_id, 'body', $locale);
+            $why = gvspace_technology_locale_field($post_id, 'why', $locale);
+            if ($why === '') $why = gvspace_technology_locale_field($post_id, 'headline', $locale);
+            $triggers = gvspace_technology_locale_field($post_id, 'triggers', $locale);
+            if ($triggers === '') $triggers = gvspace_technology_locale_field($post_id, 'benefits', $locale);
+            return [
+                'title' => gvspace_technology_locale_field($post_id, 'title', $locale),
+                'description' => gvspace_technology_locale_field($post_id, 'description', $locale),
+                'tag' => gvspace_technology_locale_field($post_id, 'tag', $locale),
+                'headline' => gvspace_technology_locale_field($post_id, 'headline', $locale),
+                'intro' => $intro,
+                'why' => $why,
+                'triggers' => $triggers,
+                'uses' => gvspace_technology_locale_field($post_id, 'uses', $locale),
+                'stats' => gvspace_technology_locale_field($post_id, 'stats', $locale),
+                'benefits' => gvspace_technology_locale_field($post_id, 'benefits', $locale),
+                'faq' => gvspace_technology_locale_field($post_id, 'faq', $locale),
+                'seoLead' => gvspace_technology_locale_field($post_id, 'seo_lead', $locale),
+                'seoText' => gvspace_technology_locale_field($post_id, 'seo_text', $locale),
+                'meetName' => gvspace_technology_locale_field($post_id, 'meet_name', $locale),
+                'meetRole' => gvspace_technology_locale_field($post_id, 'meet_role', $locale),
+                'meetQuote' => gvspace_technology_locale_field($post_id, 'meet_quote', $locale),
+                'meetYears' => gvspace_technology_locale_field($post_id, 'meet_years', $locale),
+                'meetProjects' => gvspace_technology_locale_field($post_id, 'meet_projects', $locale),
+                'meetTags' => gvspace_technology_locale_field($post_id, 'meet_tags', $locale),
+            ];
+        },
+    ]);
+    register_graphql_field('Technology', 'relatedCase', [
+        'type' => 'String',
+        'resolve' => static function ($source): string {
+            return (string) get_post_meta((int) $source->databaseId, '_gvspace_technology_related_case', true);
+        },
+    ]);
+    register_graphql_field('Technology', 'visual', [
+        'type' => 'String',
+        'resolve' => static function ($source): string {
+            return (string) get_post_meta((int) $source->databaseId, '_gvspace_technology_visual', true);
+        },
+    ]);
+    register_graphql_field('Technology', 'meetPhoto', [
+        'type' => 'String',
+        'resolve' => static function ($source): string {
+            return gvspace_technology_meet_photo_url((int) $source->databaseId);
+        },
+    ]);
+    register_graphql_field('TechnologyCategory', 'localizedName', [
+        'type' => 'String',
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): string {
+            $term_id = (int) ($source->term_id ?? $source->databaseId ?? 0);
+            $term = get_term($term_id, 'gv_technology_category');
+            if (!$term instanceof WP_Term) return '';
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
+            return gvspace_technology_tab_name($term, $locale);
+        },
+    ]);
+    register_graphql_field('TechnologyCategory', 'menuOrder', [
+        'type' => 'Int',
+        'resolve' => static function ($source): int {
+            $term_id = (int) ($source->term_id ?? $source->databaseId ?? 0);
+            return (int) get_term_meta($term_id, '_gvspace_order', true);
         },
     ]);
 
@@ -4043,5 +4460,7 @@ function gvspace_update_legal_sections_meta(int $post_id, string $key, array $se
 
 require_once __DIR__ . '/privacy-policy.php';
 require_once __DIR__ . '/terms-of-use.php';
+require_once __DIR__ . '/contacts-page.php';
 require_once __DIR__ . '/vacancies-seed.php';
 require_once __DIR__ . '/cases-seed.php';
+require_once __DIR__ . '/technologies-seed.php';

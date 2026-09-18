@@ -22,6 +22,7 @@ export function SiteShell({
   const pathSegments = localizedPathname.split("/").filter(Boolean);
   const isHomePage = localizedPathname === `/${locale}` || localizedPathname === `/${locale}/`;
   const isServiceDetail = pathSegments[1] === "services" && pathSegments.length >= 3;
+  const isTechnologyCatalog = localizedPathname === `/${locale}/technologies`;
   const hasDarkHero =
     isHomePage ||
     localizedPathname === `/${locale}/services` ||
@@ -31,7 +32,7 @@ export function SiteShell({
     localizedPathname.startsWith(`/${locale}/cases/`) ||
     localizedPathname === `/${locale}/about` ||
     localizedPathname === `/${locale}/team` ||
-    localizedPathname === `/${locale}/technologies` ||
+    isTechnologyCatalog ||
     localizedPathname === `/${locale}/blog` ||
     (localizedPathname.startsWith(`/${locale}/blog/`) &&
       !localizedPathname.startsWith(`/${locale}/blog/author/`)) ||

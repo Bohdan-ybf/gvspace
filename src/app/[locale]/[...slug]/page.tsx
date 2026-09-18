@@ -8,7 +8,9 @@ import { TeamPage } from "@/components/team-page";
 import { CareersPage } from "@/components/careers-page";
 import { VacancyDetailPage } from "@/components/vacancy-detail-page";
 import { getVacancyBySlug } from "@/components/wordpress-vacancies";
+import { getTechnologyBySlug } from "@/components/wordpress-technologies";
 import { TechnologiesPage } from "@/components/technologies-page";
+import { TechnologyDetailPage } from "@/components/technology-detail-page";
 import { BlogPageServer } from "@/components/blog-page-server";
 import { BlogArticlePage } from "@/components/blog-article-page";
 import { BlogAuthorPage } from "@/components/blog-author-page";
@@ -47,6 +49,8 @@ function getDynamicRoute(slug: string[]): { kind: DynamicSeoKind; publicSlug: st
   if (slug[0] === "blog" && slug.length === 2) return { kind: "blog", publicSlug: slug[1] };
   if (slug[0] === "cases" && slug.length === 2) return { kind: "case", publicSlug: slug[1] };
   if (slug[0] === "careers" && slug.length === 2) return { kind: "vacancy", publicSlug: slug[1] };
+  if (slug[0] === "technologies" && slug.length === 2)
+    return { kind: "technology", publicSlug: slug[1] };
   if (slug[0] === "services" && slug.length >= 2)
     return { kind: "service", publicSlug: slug.at(-1) ?? "" };
   return undefined;
@@ -86,6 +90,20 @@ export async function generateMetadata({
           seo: normalizeSeoData(undefined, {
             title: vacancy.title,
             description: vacancy.excerpt,
+          }),
+          alternateLocales,
+        });
+      }
+    }
+    if (dynamicRoute.kind === "technology") {
+      const technology = await getTechnologyBySlug(dynamicRoute.publicSlug, locale);
+      if (technology) {
+        return buildSeoMetadata({
+          locale,
+          pathname,
+          seo: normalizeSeoData(undefined, {
+            title: technology.title,
+            description: technology.intro || technology.description,
           }),
           alternateLocales,
         });
@@ -142,6 +160,9 @@ export default async function RoutedPage({
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "technologies") {
     return section("technologies", <TechnologiesPage locale={locale} />);
+  }
+  if (isLocale(locale) && slug.length === 2 && slug[0] === "technologies") {
+    return <TechnologyDetailPage locale={locale} slug={slug[1]} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "blog") {
     return section("blog", <BlogPageServer locale={locale} />);

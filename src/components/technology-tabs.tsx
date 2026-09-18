@@ -1,16 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo, useState, type KeyboardEvent } from "react";
+import type { Locale } from "@/i18n";
 import type { TechnologyCategory, TechnologyItem } from "./wordpress-technologies";
 
 type TechnologyTabsProps = {
+  locale: Locale;
   categories: TechnologyCategory[];
   items: TechnologyItem[];
   emptyLabel: string;
 };
 
-export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabsProps) {
+export function TechnologyTabs({ locale, categories, items, emptyLabel }: TechnologyTabsProps) {
   const firstCategory = categories[0]?.slug ?? "";
   const [activeCategory, setActiveCategory] = useState(firstCategory);
   const selectedCategory = categories.some(({ slug }) => slug === activeCategory)
@@ -20,7 +23,7 @@ export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabs
     () => items.filter(({ categorySlugs }) => categorySlugs.includes(selectedCategory)),
     [items, selectedCategory],
   );
-  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
 
@@ -70,7 +73,11 @@ export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabs
         aria-labelledby={`technology-tab-${selectedCategory}`}
       >
         {visibleItems.map((item) => (
-          <article className="technology-stack-card" key={item.id}>
+          <Link
+            className="technology-stack-card"
+            href={`/${locale}/technologies/${item.slug}`}
+            key={item.id}
+          >
             <div className="technology-stack-icon">
               {item.image ? (
                 <Image src={item.image} alt={item.imageAlt} fill sizes="84px" unoptimized />
@@ -79,7 +86,7 @@ export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabs
               )}
             </div>
             <p className="mono">{item.title}</p>
-          </article>
+          </Link>
         ))}
         {!visibleItems.length && <p className="technology-stack-empty">{emptyLabel}</p>}
       </div>

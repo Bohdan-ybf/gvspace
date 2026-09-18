@@ -25,7 +25,10 @@ export async function TechnologySection({ locale, title }: TechnologySectionProp
           </Link>
         </div>
         <TechnologyTabs
-          categories={stack.categories}
+          locale={locale}
+          categories={stack.categories.filter((category) =>
+            stack.items.some((item) => item.categorySlugs.includes(category.slug)),
+          )}
           items={stack.items}
           emptyLabel={t.emptyState}
         />

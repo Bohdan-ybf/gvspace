@@ -1,108 +1,72 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import type { Locale } from "@/i18n";
+import type { TechnologyCategory, TechnologyItem } from "./wordpress-technologies";
 
 import { getTranslations } from "@/i18n/pages";
-const categories = [
-  { uk: "Маркетинг & Аналітика", en: "Marketing & Analytics" },
-  { uk: "Frontend & Web", en: "Frontend & Web" },
-  { uk: "Backend & API", en: "Backend & API" },
-  { uk: "Мобільні додатки", en: "Mobile Applications" },
-  { uk: "Бази даних", en: "Databases" },
-  { uk: "Cloud & DevOps", en: "Cloud & DevOps" },
-];
 
-const tools = [
-  [
-    "google-analytics",
-    "Google Analytics 4",
-    "Поведінковий аналіз аудиторії, воронки конверсій, event-трекінг.",
-    "АНАЛІТИКА САЙТУ",
-  ],
-  [
-    "google-tag-manager",
-    "Google Tag Manager",
-    "Управління всіма тегами та пікселями без правок у коді.",
-    "ТЕГУВАННЯ",
-  ],
-  [
-    "meta-pixel",
-    "Meta Pixel & Ads",
-    "Ретаргетинг, lookalike-аудиторії, оптимізація конверсій.",
-    "ПЛАТНА РЕКЛАМА",
-  ],
-  [
-    "google-ads",
-    "Google Ads",
-    "Search, Performance Max, Display кампанії з фокусом на ROI.",
-    "ПЛАТНА РЕКЛАМА",
-  ],
-  [
-    "looker-studio",
-    "Looker Studio",
-    "Кастомні дашборди, де власник бачить реальний стан без жаргону.",
-    "ЗВІТНІСТЬ",
-  ],
-  [
-    "power-bi",
-    "Power BI",
-    "Глибока бізнес-аналітика для складних воронок і юніт-економіки.",
-    "BI & ЗВІТНІСТЬ",
-  ],
-  [
-    "tiktok-ads",
-    "TikTok Ads",
-    "Платна реклама для аудиторій, яких немає в інших каналах.",
-    "ПЛАТНА РЕКЛАМА",
-  ],
-  [
-    "search-console",
-    "Google Search Console",
-    "SEO-моніторинг, аналіз пошукових запитів, індексація.",
-    "SEO",
-  ],
-];
-
-export function TechnologiesCatalog({ locale }: { locale: Locale }) {
+export function TechnologiesCatalog({
+  locale,
+  categories,
+  items,
+}: {
+  locale: Locale;
+  categories: TechnologyCategory[];
+  items: TechnologyItem[];
+}) {
   const t = getTranslations("technologies", locale).catalog;
-  const [activeCategory, setActiveCategory] = useState(0);
+  const firstCategory = categories[0]?.slug ?? "";
+  const [activeCategory, setActiveCategory] = useState(firstCategory);
+  const selectedCategory = categories.some(({ slug }) => slug === activeCategory)
+    ? activeCategory
+    : firstCategory;
+  const visibleItems = useMemo(
+    () => items.filter(({ categorySlugs }) => categorySlugs.includes(selectedCategory)),
+    [items, selectedCategory],
+  );
 
   return (
     <section className="technologies-catalog section container">
       <nav aria-label={t.navigationLabel}>
-        {categories.map((category, index) => (
-          <button
-            className={activeCategory === index ? "is-active" : undefined}
-            type="button"
-            onClick={() => setActiveCategory(index)}
-            key={category.en}
-          >
-            <span className="mono">0{index + 1}</span>
-            <b>{category[locale]}</b>
-            <small>8</small>
-          </button>
-        ))}
+        {categories.map((category, index) => {
+          const count = items.filter((item) => item.categorySlugs.includes(category.slug)).length;
+          return (
+            <button
+              className={category.slug === selectedCategory ? "is-active" : undefined}
+              type="button"
+              onClick={() => setActiveCategory(category.slug)}
+              key={category.slug}
+            >
+              <span className="mono">{String(index + 1).padStart(2, "0")}</span>
+              <b>{category.name}</b>
+              <small>{count}</small>
+            </button>
+          );
+        })}
       </nav>
       <div className="technology-tools-grid">
-        {tools.map(([slug, name, description, tag]) => (
-          <article key={slug}>
-            <div className="technology-logo">
-              <Image
-                src={`/images/technologies/logos/${slug}.svg`}
-                alt={`${name} logo`}
-                fill
-                sizes="72px"
-              />
-            </div>
-            <div>
-              <h3>{name}</h3>
-              <p>{description}</p>
-              <span className="mono">{tag}</span>
-            </div>
+        {visibleItems.map((item) => (
+          <article key={item.slug}>
+            <Link href={`/${locale}/technologies/${item.slug}`}>
+              <div className="technology-logo">
+                {item.image ? (
+                  <Image src={item.image} alt={item.imageAlt} fill sizes="72px" unoptimized />
+                ) : (
+                  <span aria-hidden="true">[ icon ]</span>
+                )}
+              </div>
+              <div>
+                <h3>{item.title}</h3>
+                {item.description ? <p>{item.description}</p> : null}
+                {item.tag ? <span className="mono">{item.tag}</span> : null}
+              </div>
+            </Link>
           </article>
         ))}
+        {!visibleItems.length && <p className="technology-tools-empty">{t.emptyState}</p>}
       </div>
     </section>
   );

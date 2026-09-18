@@ -323,18 +323,390 @@ h2 {
 }
 .technology-tools-grid article {
   min-height: 148px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.technology-tools-grid article > a {
+  min-height: 148px;
   padding: 22px 26px;
   display: grid;
   grid-template-columns: 74px 1fr;
   gap: 18px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
 }
 .technology-tools-grid article:nth-child(even) {
   border-right: 0;
 }
 .technology-tools-grid article:nth-last-child(-n + 2) {
   border-bottom: 0;
+}
+.technology-tools-empty {
+  grid-column: 1 / -1;
+  padding: 32px 24px;
+  color: var(--muted);
+}
+.technology-detail-page {
+  padding-top: 0;
+}
+.technology-detail-hero {
+  padding: 140px 0 72px;
+  overflow: hidden;
+  background: #fff;
+}
+.technology-detail-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.6fr);
+  align-items: center;
+  gap: 40px;
+}
+.technology-detail-hero-copy {
+  display: grid;
+  gap: 18px;
+}
+.technology-detail-hero-copy h1 {
+  max-width: 16ch;
+  color: var(--navy);
+  font-size: clamp(48px, 5vw, 72px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.technology-detail-hero-copy p {
+  max-width: 54ch;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.5;
+}
+.technology-detail-logo {
+  width: min(28vw, 220px);
+  height: min(28vw, 220px);
+  position: relative;
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  padding: 18%;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #05050f;
+}
+.technology-detail-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.technology-detail-why {
+  padding: 56px 0;
+  color: #fff;
+  background: linear-gradient(180deg, #1c0b8a 0%, #14006a 100%);
+}
+.technology-detail-why > .container > span {
+  display: block;
+  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+}
+.technology-detail-why p {
+  max-width: 58ch;
+  color: #fff;
+  font-size: clamp(24px, 2.6vw, 34px);
+  line-height: 1.28;
+  letter-spacing: -0.03em;
+}
+.technology-detail-why strong {
+  font-weight: 700;
+}
+.technology-detail-triggers > span {
+  display: block;
+  margin-bottom: 24px;
+  color: #9690bb;
+  font-size: 10px;
+}
+.technology-detail-triggers > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.technology-detail-triggers article {
+  min-height: 214px;
+  padding: 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfaff;
+  box-shadow: 0 12px 28px rgba(25, 12, 84, 0.05);
+}
+.technology-detail-triggers small {
+  color: #9690bb;
+  font-size: 10px;
+}
+.technology-detail-triggers h2 {
+  margin: 18px 0 10px;
+  color: var(--navy);
+  font-size: 28px;
+}
+.technology-detail-triggers p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.technology-detail-uses > span {
+  display: block;
+  margin-bottom: 24px;
+  color: #9690bb;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.technology-detail-uses > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #dcd6f3;
+  border: 1px solid #dcd6f3;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.technology-detail-uses article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 14px;
+  padding: 28px 32px;
+  background: #fff;
+}
+.technology-detail-uses article > span {
+  color: var(--violet);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.technology-detail-uses h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 18px;
+  line-height: 1.35;
+}
+.technology-detail-uses p {
+  grid-column: 2;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.technology-detail-services {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  align-items: center;
+  gap: 48px;
+}
+.technology-detail-services-visual {
+  width: min(100%, 360px);
+  height: auto;
+  justify-self: center;
+}
+.technology-detail-services-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.technology-detail-services > div > span {
+  display: block;
+  margin-bottom: 18px;
+  color: #9690bb;
+  font-size: 10px;
+}
+.technology-detail-services > div > div {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+.technology-detail-services a {
+  min-height: 64px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  color: var(--navy);
+  font-weight: 600;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+.technology-detail-services a svg {
+  transition: transform 0.2s ease;
+}
+@media (hover: hover) {
+  .technology-detail-services a:hover {
+    color: var(--violet);
+    background: #f4f2ff;
+  }
+  .technology-detail-services a:hover svg {
+    transform: translateX(4px);
+  }
+}
+.technology-detail-case-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.technology-detail-case-head span {
+  color: #9690bb;
+  font-size: 10px;
+}
+.technology-detail-case-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 20px;
+  align-items: stretch;
+}
+.technology-detail-case-highlight {
+  min-height: 362px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  color: #fff;
+  background: linear-gradient(180deg, #6a2bff 0%, #3b00d0 100%);
+  border-radius: 16px;
+}
+.technology-detail-case-highlight strong {
+  font-size: clamp(42px, 4.4vw, 64px);
+  line-height: 0.95;
+}
+.technology-detail-case-highlight span,
+.technology-detail-case-highlight p {
+  max-width: 12ch;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 22px;
+  line-height: 1.25;
+}
+.technology-detail-case .home-case-card {
+  width: 100%;
+  max-width: none;
+}
+.technology-meet-block > header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.technology-meet-block h2 {
+  font-size: clamp(32px, 3.4vw, 48px);
+}
+.technology-meet-nav {
+  display: flex;
+  gap: 8px;
+}
+.technology-meet-nav button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--violet);
+  cursor: pointer;
+}
+.technology-meet-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(220px, 0.9fr) minmax(0, 1.15fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.technology-meet-clarity {
+  padding: 32px 28px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  color: #fff;
+  background: #16007a;
+  border-radius: 16px;
+}
+.technology-meet-clarity h3 {
+  max-width: 12ch;
+  font-size: 32px;
+  line-height: 1.1;
+}
+.technology-meet-clarity p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.technology-meet-clarity .btn {
+  width: max-content;
+  margin-top: 8px;
+}
+.technology-meet-photo {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #1b1633;
+}
+.technology-meet-photo img {
+  object-fit: cover;
+}
+.technology-meet-profile {
+  padding: 28px 8px 8px 16px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+.technology-meet-profile > span {
+  color: #9690bb;
+  font-size: 11px;
+}
+.technology-meet-profile strong {
+  color: var(--navy);
+  font-size: 32px;
+  line-height: 1.1;
+}
+.technology-meet-profile blockquote {
+  margin: 8px 0 12px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.technology-meet-profile blockquote::before {
+  content: "“";
+  display: block;
+  margin-bottom: 6px;
+  color: var(--violet);
+  font-size: 32px;
+  line-height: 1;
+}
+.technology-meet-profile dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 8px 0 0;
+}
+.technology-meet-profile dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.technology-meet-profile dd {
+  margin: 6px 0 0;
+  color: var(--violet);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+}
+.technology-meet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.technology-meet-tags small {
+  padding: 5px 8px;
+  color: #716c83;
+  background: #efefef;
+  font-size: 9px;
+}
+.technology-detail-page > .seo-breadcrumbs {
+  padding-top: 8px;
+  padding-bottom: 48px;
 }
 .technology-logo {
   width: 66px;
@@ -347,6 +719,14 @@ h2 {
 }
 .technology-tools-grid h3 {
   font-size: 17px;
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+.technology-tools-grid article > a:hover {
+  background: #e2dff0;
+}
+.technology-tools-grid article > a:hover h3 {
+  text-decoration: underline;
 }
 .technology-tools-grid p {
   margin: 8px 0 12px;
@@ -379,6 +759,42 @@ h2 {
     grid-row: auto;
     justify-self: start;
   }
+  .technology-detail-hero {
+    padding: 112px 0 48px;
+  }
+  .technology-detail-hero-grid,
+  .technology-detail-triggers > div,
+  .technology-detail-uses > div,
+  .technology-detail-services,
+  .technology-detail-case-grid,
+  .technology-meet-grid {
+    grid-template-columns: 1fr;
+  }
+  .technology-detail-logo {
+    width: min(42vw, 180px);
+    height: min(42vw, 180px);
+    justify-self: start;
+  }
+  .technology-detail-hero-copy h1 {
+    max-width: none;
+  }
+  .technology-detail-case-highlight {
+    min-height: 220px;
+  }
+  .technology-detail-uses article {
+    padding: 22px 20px;
+  }
+  .technology-meet-photo {
+    min-height: 280px;
+  }
+  .technology-detail-benefits article,
+  .technology-detail-benefits article:nth-last-child(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .technology-detail-benefits article:last-child {
+    border-bottom: 0;
+  }
   .technologies-catalog {
     grid-template-columns: 1fr;
   }
@@ -407,6 +823,9 @@ h2 {
   }
   .technologies-stats,
   .technology-tools-grid {
+    grid-template-columns: 1fr;
+  }
+  .technology-meet-profile dl {
     grid-template-columns: 1fr;
   }
   .technologies-stats article {
@@ -3356,10 +3775,16 @@ h2 {
 }
 .home-reviews-section > header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 28px;
+}
+.home-reviews-section > header > div > span {
+  display: block;
+  margin-bottom: 10px;
+  color: #9690bb;
+  font-size: 10px;
 }
 .home-reviews-section > header h2 {
   font-size: 36px;
@@ -3514,7 +3939,7 @@ h2 {
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 16px;
 }
-.technology-showcase-grid article {
+.technology-showcase-grid :is(article, a) {
   min-width: 0;
   height: 154px;
   display: flex;
@@ -3525,30 +3950,32 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 9px;
   background: #f8f7fc;
+  color: inherit;
+  text-decoration: none;
   overflow: hidden;
   transition:
     border-color 220ms ease,
     box-shadow 220ms ease;
 }
-.technology-showcase-grid article:hover {
+.technology-showcase-grid :is(article, a):hover {
   border-color: #c5c0dc;
   box-shadow: 0 8px 22px rgb(43 0 191 / 9%);
 }
-.technology-showcase-grid article > div {
+.technology-showcase-grid :is(article, a) > div {
   width: 72px;
   height: 72px;
   position: relative;
   color: #8883a5;
 }
-.technology-showcase-grid article img {
+.technology-showcase-grid :is(article, a) img {
   object-fit: contain;
   transform: scale(1);
   transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.technology-showcase-grid article:hover img {
+.technology-showcase-grid :is(article, a):hover img {
   transform: scale(1.08);
 }
-.technology-showcase-grid article p {
+.technology-showcase-grid :is(article, a) p {
   max-width: 100%;
   overflow: hidden;
   color: #716b91;
@@ -3759,7 +4186,7 @@ h2 {
     display: flex;
     overflow-x: auto;
   }
-  .technology-showcase-grid article {
+  .technology-showcase-grid :is(article, a) {
     min-width: 130px;
   }
   .technology-showcase-fade {
@@ -4789,6 +5216,8 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #f8f8fc;
+  color: inherit;
+  text-decoration: none;
   overflow: hidden;
   transition:
     border-color 220ms ease,
@@ -5061,18 +5490,18 @@ h2 {
     scrollbar-color: #dedbea transparent;
     scroll-snap-type: x proximity;
   }
-  .services-page .technology-showcase-grid article {
+  .services-page .technology-showcase-grid :is(article, a) {
     width: 141px;
     height: 180px;
     min-width: 141px;
     padding: 28px 12px 16px;
     scroll-snap-align: start;
   }
-  .services-page .technology-showcase-grid article > div {
+  .services-page .technology-showcase-grid :is(article, a) > div {
     width: 88px;
     height: 88px;
   }
-  .services-page .technology-showcase-grid article p {
+  .services-page .technology-showcase-grid :is(article, a) p {
     font-size: 12px;
   }
   .services-page .technology-showcase-fade {
@@ -7173,6 +7602,7 @@ footer {
 }
 .contacts-page {
   padding-top: 81px;
+  container-type: inline-size;
 }
 .contacts-hero {
   min-height: 310px;
@@ -7203,12 +7633,14 @@ footer {
   line-height: 1.55;
 }
 .response-badge {
-  width: 100%;
+  width: min(100%, 280px);
   min-height: 68px;
-  padding: 18px 24px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
+  justify-self: end;
+  align-self: start;
   color: #fff;
   background: var(--ink);
   font-size: 13px;
@@ -7257,13 +7689,10 @@ footer {
   transform: translateX(2px);
 }
 .contact-cards svg {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   flex: none;
   color: #000080;
-}
-.contact-cards > a:first-child svg {
-  opacity: 0.5;
 }
 .contact-cards a > span,
 .contacts-social a > span {
@@ -7286,11 +7715,10 @@ footer {
   font-style: normal;
 }
 .contacts-form {
-  padding: 28px 24px 22px;
+  padding: 4px 0 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border: 1px solid var(--line);
 }
 .contacts-form h2 {
   margin-bottom: 8px;
@@ -7335,7 +7763,91 @@ footer {
   color: #9690bb;
   font-size: 12px;
   line-height: 1.5;
-  text-align: center;
+  text-align: left;
+}
+.contacts-presence {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  min-height: 340px;
+  overflow-x: clip;
+}
+.contacts-presence-copy {
+  min-width: 0;
+  overflow: hidden;
+  padding: 56px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #fff;
+  background: var(--purple);
+}
+.contacts-presence-copy-bleed {
+  width: 100cqw;
+}
+.contacts-presence-copy .container > * {
+  max-width: min(100%, calc(42.5cqw - (100cqw - 100%) / 2 - 40px));
+}
+.contacts-presence-copy .container > span {
+  display: block;
+  margin-bottom: 18px;
+  color: rgb(255 255 255 / 0.7);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.contacts-presence-copy h2 {
+  color: #fff;
+  font-size: clamp(32px, 3.4vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+.contacts-presence-copy p {
+  margin-top: 18px;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.contacts-presence-map {
+  position: relative;
+  min-height: 340px;
+  background: #0b1430;
+}
+.contacts-presence-map img {
+  object-fit: cover;
+}
+.contacts-presence-map.is-fallback img {
+  object-fit: contain;
+}
+.contacts-offices {
+  padding: 48px 0 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px 48px;
+}
+.contacts-offices article {
+  min-width: 0;
+}
+.contacts-offices h3 {
+  margin-bottom: 12px;
+  color: var(--navy);
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+.contacts-offices p {
+  color: #7771a2;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+.contacts-offices a {
+  display: block;
+  margin-top: 10px;
+  color: var(--navy);
+  font-size: 15px;
+}
+.contacts-offices a:hover {
+  color: var(--violet);
 }
 .location-block {
   margin-top: 52px;
@@ -7383,9 +7895,8 @@ footer {
   font-weight: 500;
 }
 .contacts-social {
-  padding-top: 52px;
-  padding-bottom: 72px;
-  border-top: 1px solid var(--line);
+  padding-top: 24px;
+  padding-bottom: 48px;
 }
 .contacts-social > div {
   margin-top: 16px;
@@ -7806,8 +8317,16 @@ footer {
     grid-template-columns: 1fr;
     gap: 56px;
   }
-  .contacts-form {
-    grid-row: 1;
+  .contacts-presence,
+  .contacts-offices {
+    grid-template-columns: 1fr;
+  }
+  .contacts-presence-copy {
+    padding: 40px 0;
+    overflow: visible;
+  }
+  .contacts-presence-copy .container > * {
+    max-width: 100%;
   }
   .contacts-social > div {
     grid-template-columns: repeat(2, 1fr);
@@ -8327,7 +8846,7 @@ footer {
     gap: 48px;
   }
   .contacts-form {
-    padding: 22px 16px 18px;
+    padding: 0;
   }
   .contacts-form-row {
     grid-template-columns: 1fr;
@@ -8560,10 +9079,13 @@ footer {
 }
 
 .privacy-page > .seo-breadcrumbs,
+.contacts-page > .seo-breadcrumbs,
 .services-page > .seo-breadcrumbs,
 .about-page > .seo-breadcrumbs,
 .careers-page > .seo-breadcrumbs,
 .cases-page > .seo-breadcrumbs,
+.technologies-page > .seo-breadcrumbs,
+.technology-detail-page > .seo-breadcrumbs,
 .case-detail-page > .seo-breadcrumbs,
 .vacancy-detail-page > .seo-breadcrumbs,
 .service-detail-page > .seo-breadcrumbs {
@@ -8574,33 +9096,41 @@ footer {
   text-transform: uppercase;
 }
 .services-page > .seo-breadcrumbs > span:first-child a,
+.contacts-page > .seo-breadcrumbs > span:first-child a,
 .about-page > .seo-breadcrumbs > span:first-child a,
 .careers-page > .seo-breadcrumbs > span:first-child a,
 .cases-page > .seo-breadcrumbs > span:first-child a,
+.technologies-page > .seo-breadcrumbs > span:first-child a,
 .vacancy-detail-page > .seo-breadcrumbs > span:first-child a,
 .service-detail-page > .seo-breadcrumbs > span:first-child a {
   color: #aaa5c8;
 }
 .services-page > .seo-breadcrumbs > span:first-child a:hover,
+.contacts-page > .seo-breadcrumbs > span:first-child a:hover,
 .about-page > .seo-breadcrumbs > span:first-child a:hover,
 .careers-page > .seo-breadcrumbs > span:first-child a:hover,
 .cases-page > .seo-breadcrumbs > span:first-child a:hover,
+.technologies-page > .seo-breadcrumbs > span:first-child a:hover,
 .vacancy-detail-page > .seo-breadcrumbs > span:first-child a:hover,
 .service-detail-page > .seo-breadcrumbs > span:first-child a:hover {
   color: var(--violet);
 }
 .services-page > .seo-breadcrumbs > span:last-child > span[aria-hidden="true"],
+.contacts-page > .seo-breadcrumbs > span:last-child > span[aria-hidden="true"],
 .about-page > .seo-breadcrumbs > span:last-child > span[aria-hidden="true"],
 .careers-page > .seo-breadcrumbs > span:last-child > span[aria-hidden="true"],
 .cases-page > .seo-breadcrumbs > span:last-child > span[aria-hidden="true"],
+.technologies-page > .seo-breadcrumbs > span:last-child > span[aria-hidden="true"],
 .vacancy-detail-page > .seo-breadcrumbs > span > span[aria-hidden="true"],
 .service-detail-page > .seo-breadcrumbs > span > span[aria-hidden="true"] {
   color: var(--navy);
 }
 .services-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
+.contacts-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
 .about-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
 .careers-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
 .cases-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
+.technologies-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
 .vacancy-detail-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"],
 .service-detail-page > .seo-breadcrumbs > span:last-child > span[aria-current="page"] {
   color: var(--violet);
@@ -9542,14 +10072,14 @@ footer {
     scrollbar-color: #dedbea transparent;
     scroll-snap-type: x proximity;
   }
-  :is(.services-page, .service-detail-page) .technology-showcase-grid article {
+  :is(.services-page, .service-detail-page) .technology-showcase-grid :is(article, a) {
     width: 141px;
     height: 180px;
     min-width: 141px;
     padding: 28px 12px 16px;
     scroll-snap-align: start;
   }
-  :is(.services-page, .service-detail-page) .technology-showcase-grid article > div {
+  :is(.services-page, .service-detail-page) .technology-showcase-grid :is(article, a) > div {
     width: 88px;
     height: 88px;
   }

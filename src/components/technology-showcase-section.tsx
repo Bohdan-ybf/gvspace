@@ -9,13 +9,22 @@ export async function TechnologyShowcaseSection({
   locale,
   eyebrow,
   title,
+  excludeSlug,
+  initialCategory,
 }: {
   locale: Locale;
   eyebrow?: string;
   title?: string;
+  excludeSlug?: string;
+  initialCategory?: string;
 }) {
   const t = getTranslations("technologies", locale).showcase;
   const stack = await getTechnologyStack(locale);
+  const items = excludeSlug ? stack.items.filter((item) => item.slug !== excludeSlug) : stack.items;
+  const categories = stack.categories.filter((category) =>
+    items.some((item) => item.categorySlugs.includes(category.slug)),
+  );
+  if (!items.length) return null;
 
   return (
     <section className="section container technology-showcase">
@@ -27,9 +36,11 @@ export async function TechnologyShowcaseSection({
       </header>
       <div className="technology-showcase-content">
         <TechnologyShowcaseTabs
-          categories={stack.categories}
-          items={stack.items}
+          locale={locale}
+          categories={categories}
+          items={items}
           emptyLabel={t.emptyState}
+          initialCategory={initialCategory}
         />
         <div className="technology-showcase-fade" aria-hidden="true" />
         <Link className="btn technology-showcase-more" href={`/${locale}/technologies`}>
