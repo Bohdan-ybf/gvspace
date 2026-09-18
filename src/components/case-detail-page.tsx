@@ -14,7 +14,15 @@ function splitLine(line: string) {
   return { title: title || "", description: description || "" };
 }
 
-function StageResult({ label, title, description }: { label: string; title: string; description: string }) {
+function StageResult({
+  label,
+  title,
+  description,
+}: {
+  label: string;
+  title: string;
+  description: string;
+}) {
   const body = [title, description].filter(Boolean).join(". ");
   if (!body) return null;
   return (
@@ -56,7 +64,15 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
       <main className="case-detail-page">
         <section className="case-detail-hero">
           {data.image ? (
-            <Image alt="" className="case-detail-hero-image" fill priority sizes="100vw" src={data.image} unoptimized />
+            <Image
+              alt=""
+              className="case-detail-hero-image"
+              fill
+              priority
+              sizes="100vw"
+              src={data.image}
+              unoptimized
+            />
           ) : null}
           <div className="case-detail-hero-overlay" />
           <div className="container case-detail-hero-content">
@@ -140,7 +156,10 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
             </div>
           )}
 
-          {(data.step3 || data.step3Result.title || data.step3Result.description || data.gallery.length > 0) && (
+          {(data.step3 ||
+            data.step3Result.title ||
+            data.step3Result.description ||
+            data.gallery.length > 0) && (
             <div className="case-step is-split is-final">
               <div>
                 <h2>{t.step3Title}</h2>

@@ -56,15 +56,8 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
 
         <div className="vacancy-detail-layout container">
           <div className="vacancy-description">
-            <VacancyTextSection
-              title={sectionTitles.role}
-              paragraphs={vacancy.role}
-            />
-            <VacancyListSection
-              title={sectionTitles.tasks}
-              items={vacancy.tasks}
-              marker="—"
-            />
+            <VacancyTextSection title={sectionTitles.role} paragraphs={vacancy.role} />
+            <VacancyListSection title={sectionTitles.tasks} items={vacancy.tasks} marker="—" />
             <VacancyListSection
               title={sectionTitles.requirements}
               items={vacancy.requirements}

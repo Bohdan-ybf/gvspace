@@ -84,7 +84,10 @@ async function queryWordPress<T>(
 
 function toVacancy(node: VacancyNode, locale: Locale): Vacancy {
   const details = node.vacancyDetails;
-  const fallback = getFallbackVacancy(getPublicContentSlug(node.slug, node.gvspaceLocalization), locale);
+  const fallback = getFallbackVacancy(
+    getPublicContentSlug(node.slug, node.gvspaceLocalization),
+    locale,
+  );
   return {
     slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
     title: details.title || node.title,

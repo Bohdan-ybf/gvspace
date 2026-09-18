@@ -118,7 +118,11 @@ export function CasesCatalog({ locale, projects }: { locale: Locale; projects: C
       )}
 
       {currentPage < pageCount - 1 && (
-        <button className="btn cases-more" type="button" onClick={() => setPage((value) => value + 1)}>
+        <button
+          className="btn cases-more"
+          type="button"
+          onClick={() => setPage((value) => value + 1)}
+        >
           {t.more} <span aria-hidden="true">+</span>
         </button>
       )}

@@ -67,7 +67,13 @@ export function CaseCard({
         </div>
         <Link className="case-image" href={href}>
           {project.image ? (
-            <Image alt="" fill sizes="(max-width: 900px) 100vw, 50vw" src={project.image} unoptimized />
+            <Image
+              alt=""
+              fill
+              sizes="(max-width: 900px) 100vw, 50vw"
+              src={project.image}
+              unoptimized
+            />
           ) : null}
           <span className="home-case-labels mono">
             {dateLabel ? <span>{dateLabel}</span> : null}
@@ -83,7 +89,13 @@ export function CaseCard({
       <article className="showcase-case-card">
         <Link className="showcase-case-image" href={href}>
           {project.image ? (
-            <Image alt="" fill sizes="(max-width: 900px) 100vw, 33vw" src={project.image} unoptimized />
+            <Image
+              alt=""
+              fill
+              sizes="(max-width: 900px) 100vw, 33vw"
+              src={project.image}
+              unoptimized
+            />
           ) : null}
           <span className="showcase-case-labels mono">
             {dateLabel ? <span>{dateLabel}</span> : null}
@@ -120,7 +132,13 @@ export function CaseCard({
     <article className="catalog-case-card">
       <Link className="catalog-case-image" href={href}>
         {project.image ? (
-          <Image alt="" fill sizes="(max-width: 900px) 100vw, 50vw" src={project.image} unoptimized />
+          <Image
+            alt=""
+            fill
+            sizes="(max-width: 900px) 100vw, 50vw"
+            src={project.image}
+            unoptimized
+          />
         ) : null}
         <span className="catalog-case-labels mono">
           {dateLabel ? <b>{dateLabel}</b> : null}

@@ -60,10 +60,7 @@ export function VacanciesCatalog({
       <div className="vacancies-filters">
         <label>
           <span className="sr-only">{t.directionLabel}</span>
-          <select
-            value={direction}
-            onChange={(event) => setDirection(event.target.value)}
-          >
+          <select value={direction} onChange={(event) => setDirection(event.target.value)}>
             <option value="all">{t.directionLabel}</option>
             {directionOptions.map((option) => (
               <option key={option} value={option}>
@@ -75,10 +72,7 @@ export function VacanciesCatalog({
         </label>
         <label>
           <span className="sr-only">{t.employmentLabel}</span>
-          <select
-            value={employment}
-            onChange={(event) => setEmployment(event.target.value)}
-          >
+          <select value={employment} onChange={(event) => setEmployment(event.target.value)}>
             <option value="all">{t.employmentLabel}</option>
             {employmentOptions.map((option) => (
               <option key={option} value={option}>
