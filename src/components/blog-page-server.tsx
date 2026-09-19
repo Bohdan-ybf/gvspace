@@ -1,5 +1,5 @@
 import type { Locale } from "@/i18n";
-import { BlogPage } from "./blog-page";
+import { BlogDesignPage } from "./blog-design-page";
 import { getBlogPosts } from "./wordpress-posts";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
@@ -15,7 +15,7 @@ export async function BlogPageServer({ locale }: { locale: Locale }) {
           url: getLocalizedUrl(locale, `/blog/${post.slug}`),
         }))}
       />
-      <BlogPage locale={locale} posts={posts} />
+      <BlogDesignPage locale={locale} posts={posts} />
     </>
   );
 }

@@ -223,44 +223,42 @@ function Blog({
         </Link>
       </header>
       <div className={`home-blog-grid${posts.length === 1 ? " is-single" : ""}`}>
-        {posts.map((post, index) => (
-          <article className={`home-blog-card${index === 0 ? " is-featured" : ""}`} key={post.slug}>
-            <Link
-              aria-label={post.title}
-              className="home-blog-image"
-              href={`/${locale}/blog/${post.slug}`}
-              style={
-                post.image
-                  ? {
-                      backgroundImage: `url(${post.image})`,
-                      backgroundPosition: "center",
-                      backgroundSize: "cover",
-                    }
-                  : undefined
-              }
-            />
-            <div className="home-blog-body">
-              <div className="home-blog-meta mono">
-                <span className="home-blog-category">{post.category}</span>
-                <span>{post.publishedAt}</span>
-                {index === 0 && (
-                  <>
-                    <span aria-hidden="true">•</span>
-                    <span>
-                      {post.readingTime} {t.minutesLabel}
-                    </span>
-                  </>
-                )}
+        {posts.map((post, index) => {
+          const image = post.image || "/images/blog/blog-bg.png";
+          return (
+            <article
+              className={`home-blog-card${index === 0 ? " is-featured" : ""}`}
+              key={post.slug}
+            >
+              <Link
+                aria-label={post.title}
+                className={`home-blog-image${post.image ? "" : " is-placeholder"}`}
+                href={`/${locale}/blog/${post.slug}`}
+                style={{ backgroundImage: `url(${image})` }}
+              />
+              <div className="home-blog-body">
+                <div className="home-blog-meta mono">
+                  <span className="home-blog-category">{post.category}</span>
+                  <span>{post.publishedAt}</span>
+                  {index === 0 && (
+                    <>
+                      <span aria-hidden="true">•</span>
+                      <span>
+                        {post.readingTime} {t.minutesLabel}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <h3>
+                  <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
+                </h3>
+                <small className="home-blog-card-author mono">
+                  {t.cardAuthorLabel}: {post.authorName}
+                </small>
               </div>
-              <h3>
-                <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
-              </h3>
-              <small className="home-blog-card-author mono">
-                {t.cardAuthorLabel}: {post.authorName}
-              </small>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
     </section>
   );

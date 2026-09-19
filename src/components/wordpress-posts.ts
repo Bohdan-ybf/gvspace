@@ -15,6 +15,7 @@ export type BlogPost = {
   readingTime: number;
   author: { slug: string; name: string; role: string; avatar?: string };
   tags: string[];
+  image?: string;
 };
 
 export type BlogPostSummary = {
@@ -22,6 +23,7 @@ export type BlogPostSummary = {
   title: string;
   excerpt: string;
   category: string;
+  categorySlug: string;
   publishedAt: string;
   readingTime: number;
   authorName: string;
@@ -74,10 +76,16 @@ type WordPressPost = {
       gvspaceAuthorProfile?: { role?: string };
     };
   };
-  categories?: { nodes?: Array<{ name: string }> };
+  categories?: { nodes?: Array<{ name: string; slug?: string; gvspaceNameEn?: string }> };
   tags?: { nodes?: Array<{ name: string }> };
   featuredImage?: { node?: { sourceUrl?: string } };
   gvspaceLocalization?: ContentLocalization;
+  gvspaceBlog?: {
+    title?: string;
+    excerpt?: string;
+    content?: string;
+    isPublished?: boolean;
+  };
 };
 
 function stripHtml(value: string) {
@@ -94,20 +102,31 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query Posts { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date modified gvspaceLocalization { locale translationGroup status } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`,
+        query: `query Posts($locale: String!) { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date modified gvspaceLocalization { locale translationGroup status } gvspaceBlog(locale: $locale) { title excerpt content isPublished } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name slug gvspaceNameEn } } } } }`,
+        variables: { locale },
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return [];
     const result = (await response.json()) as { data?: { posts?: { nodes?: WordPressPost[] } } };
     return (
       result.data?.posts?.nodes
-        ?.filter((post) => isContentPublishedForLocale(post.gvspaceLocalization, locale))
+        ?.filter(
+          (post) =>
+            isContentPublishedForLocale(post.gvspaceLocalization, locale) &&
+            post.gvspaceBlog?.isPublished !== false,
+        )
         .map((post) => ({
           slug: getPublicContentSlug(post.slug, post.gvspaceLocalization),
-          title: stripHtml(post.title),
-          excerpt: stripHtml(post.excerpt),
-          category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
+          title: stripHtml(post.gvspaceBlog?.title || post.title),
+          excerpt: stripHtml(post.gvspaceBlog?.excerpt || post.excerpt),
+          category:
+            locale === "en"
+              ? post.categories?.nodes?.[0]?.gvspaceNameEn ||
+                post.categories?.nodes?.[0]?.name ||
+                "Blog"
+              : (post.categories?.nodes?.[0]?.name ?? "Блог"),
+          categorySlug: post.categories?.nodes?.[0]?.slug ?? "blog",
           publishedAt: new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : "en-GB", {
             day: "2-digit",
             month: "long",
@@ -115,7 +134,14 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
           }).format(new Date(post.date)),
           readingTime: Math.max(
             1,
-            Math.ceil(stripHtml(post.content || post.excerpt).split(" ").length / 200),
+            Math.ceil(
+              stripHtml(
+                post.gvspaceBlog?.content ||
+                  post.content ||
+                  post.gvspaceBlog?.excerpt ||
+                  post.excerpt,
+              ).split(" ").length / 200,
+            ),
           ),
           authorName: post.author?.node?.name ?? "GVSPACE",
           image: post.featuredImage?.node?.sourceUrl,
@@ -137,10 +163,10 @@ export async function getBlogPostsByAuthor(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query AuthorPosts($slug: ID!) { user(id: $slug, idType: SLUG) { posts(first: 100) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name } } } } } }`,
-        variables: { slug },
+        query: `query AuthorPosts($slug: ID!, $locale: String!) { user(id: $slug, idType: SLUG) { posts(first: 100) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } gvspaceBlog(locale: $locale) { title excerpt content isPublished } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name slug gvspaceNameEn } } } } } }`,
+        variables: { slug, locale },
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return [];
     const result = (await response.json()) as {
@@ -148,12 +174,22 @@ export async function getBlogPostsByAuthor(
     };
     return (
       result.data?.user?.posts?.nodes
-        ?.filter((post) => isContentPublishedForLocale(post.gvspaceLocalization, locale))
+        ?.filter(
+          (post) =>
+            isContentPublishedForLocale(post.gvspaceLocalization, locale) &&
+            post.gvspaceBlog?.isPublished !== false,
+        )
         .map((post) => ({
           slug: getPublicContentSlug(post.slug, post.gvspaceLocalization),
-          title: stripHtml(post.title),
-          excerpt: stripHtml(post.excerpt),
-          category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
+          title: stripHtml(post.gvspaceBlog?.title || post.title),
+          excerpt: stripHtml(post.gvspaceBlog?.excerpt || post.excerpt),
+          category:
+            locale === "en"
+              ? post.categories?.nodes?.[0]?.gvspaceNameEn ||
+                post.categories?.nodes?.[0]?.name ||
+                "Blog"
+              : (post.categories?.nodes?.[0]?.name ?? "Блог"),
+          categorySlug: post.categories?.nodes?.[0]?.slug ?? "blog",
           publishedAt: new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : "en-GB", {
             day: "2-digit",
             month: "long",
@@ -161,7 +197,14 @@ export async function getBlogPostsByAuthor(
           }).format(new Date(post.date)),
           readingTime: Math.max(
             1,
-            Math.ceil(stripHtml(post.content || post.excerpt).split(" ").length / 200),
+            Math.ceil(
+              stripHtml(
+                post.gvspaceBlog?.content ||
+                  post.content ||
+                  post.gvspaceBlog?.excerpt ||
+                  post.excerpt,
+              ).split(" ").length / 200,
+            ),
           ),
           authorName: post.author?.node?.name ?? "GVSPACE",
           image: post.featuredImage?.node?.sourceUrl,
@@ -179,9 +222,10 @@ export async function getBlogPost(slug: string, locale: Locale): Promise<BlogPos
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          query: `query PostsForRoute { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } author { node { slug name avatar { url } gvspaceAuthorProfile { role } } } categories { nodes { name } } tags { nodes { name } } featuredImage { node { sourceUrl } } } } }`,
+          query: `query PostsForRoute($locale: String!) { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } gvspaceBlog(locale: $locale) { title excerpt content isPublished } author { node { slug name avatar { url } gvspaceAuthorProfile { role } } } categories { nodes { name slug gvspaceNameEn } } tags { nodes { name } } featuredImage { node { sourceUrl } } } } }`,
+          variables: { locale },
         }),
-        next: { revalidate: 60 },
+        cache: "no-store",
       });
       const result = (await response.json()) as {
         data?: { posts?: { nodes?: WordPressPost[] } };
@@ -189,16 +233,25 @@ export async function getBlogPost(slug: string, locale: Locale): Promise<BlogPos
       const post = result.data?.posts?.nodes?.find(
         (candidate) =>
           isContentPublishedForLocale(candidate.gvspaceLocalization, locale) &&
+          candidate.gvspaceBlog?.isPublished !== false &&
           getPublicContentSlug(candidate.slug, candidate.gvspaceLocalization) === slug,
       );
       if (post && isContentPublishedForLocale(post.gvspaceLocalization, locale)) {
-        const words = stripHtml(post.content).split(" ").length;
+        const localizedTitle = post.gvspaceBlog?.title || post.title;
+        const localizedExcerpt = post.gvspaceBlog?.excerpt || post.excerpt;
+        const localizedContent = post.gvspaceBlog?.content || post.content;
+        const words = stripHtml(localizedContent).split(" ").length;
         return {
           slug: getPublicContentSlug(post.slug, post.gvspaceLocalization),
-          title: stripHtml(post.title),
-          excerpt: stripHtml(post.excerpt),
-          content: post.content,
-          category: post.categories?.nodes?.[0]?.name ?? "БЛОГ",
+          title: stripHtml(localizedTitle),
+          excerpt: stripHtml(localizedExcerpt),
+          content: localizedContent,
+          category:
+            locale === "en"
+              ? post.categories?.nodes?.[0]?.gvspaceNameEn ||
+                post.categories?.nodes?.[0]?.name ||
+                "Blog"
+              : (post.categories?.nodes?.[0]?.name ?? "Блог"),
           publishedAt: new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : "en-GB", {
             dateStyle: "long",
           }).format(new Date(post.date)),
@@ -210,6 +263,7 @@ export async function getBlogPost(slug: string, locale: Locale): Promise<BlogPos
             avatar: post.author?.node?.avatar?.url,
           },
           tags: post.tags?.nodes?.map(({ name }) => name) ?? [],
+          image: post.featuredImage?.node?.sourceUrl,
         };
       }
     } catch {

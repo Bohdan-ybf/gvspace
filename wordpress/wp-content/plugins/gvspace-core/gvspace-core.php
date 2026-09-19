@@ -202,7 +202,7 @@ function gvspace_localized_technology_fields(): array
     return GVSPACE_LOCALIZED_TECHNOLOGY_CARD_FIELDS + GVSPACE_LOCALIZED_TECHNOLOGY_PAGE_FIELDS;
 }
 
-const GVSPACE_CENTRALIZED_POST_TYPES = ['gv_service', 'gv_team_member', 'gv_vacancy', 'gv_case', 'gv_faq', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use', 'gv_contacts_page', 'gv_technology'];
+const GVSPACE_CENTRALIZED_POST_TYPES = ['post', 'gv_service', 'gv_team_member', 'gv_vacancy', 'gv_case', 'gv_faq', 'gv_home_seo_text', 'gv_privacy_policy', 'gv_terms_of_use', 'gv_contacts_page', 'gv_technology'];
 
 const GVSPACE_SEO_FIELDS = [
     'title' => ['label' => 'SEO Title', 'type' => 'text', 'limit' => 60],
@@ -1465,6 +1465,7 @@ function gvspace_get_content_locale(WP_Post $post): string
 function gvspace_centralized_language_group(string $post_type): string
 {
     return match ($post_type) {
+        'post' => 'blog-language',
         'gv_service' => 'service-language',
         'gv_team_member' => 'team-member-language',
         'gv_vacancy' => 'vacancy-language',
@@ -1477,6 +1478,11 @@ function gvspace_centralized_language_group(string $post_type): string
         'gv_technology' => 'technology-language',
         default => 'language',
     };
+}
+
+function gvspace_editor_locales_for_post_type(string $post_type): array
+{
+    return GVSPACE_CONTENT_LOCALES;
 }
 
 function gvspace_render_field_set(WP_Post $post, array $fields, string $name_prefix, string $meta_prefix, string $meta_suffix = ''): void
@@ -1677,14 +1683,15 @@ function gvspace_render_seo_fields(WP_Post $post): void
 
     if (in_array($post->post_type, GVSPACE_CENTRALIZED_POST_TYPES, true)) {
         $language_group = gvspace_centralized_language_group($post->post_type);
-        $active_locale = $locale !== 'legacy' && array_key_exists($locale, GVSPACE_CONTENT_LOCALES) ? $locale : 'uk';
+        $editor_locales = gvspace_editor_locales_for_post_type($post->post_type);
+        $active_locale = $locale !== 'legacy' && array_key_exists($locale, $editor_locales) ? $locale : 'uk';
         echo '<p><label for="gvspace-seo-language"><strong>Мова SEO</strong></label> ';
         echo '<select id="gvspace-seo-language" data-gvspace-language-select="' . esc_attr($language_group) . '">';
-        foreach (GVSPACE_CONTENT_LOCALES as $content_locale => $label) {
+        foreach ($editor_locales as $content_locale => $label) {
             echo '<option value="' . esc_attr($content_locale) . '"' . selected($active_locale, $content_locale, false) . '>' . esc_html($label) . '</option>';
         }
         echo '</select></p>';
-        foreach (GVSPACE_CONTENT_LOCALES as $content_locale => $label) {
+        foreach ($editor_locales as $content_locale => $label) {
             echo '<div data-gvspace-language-panel="' . esc_attr($language_group) . '" data-locale="' . esc_attr($content_locale) . '"' . ($content_locale === $active_locale ? '' : ' hidden') . '>';
             echo '<hr><h3>' . esc_html($label) . '</h3>';
             foreach (GVSPACE_SEO_FIELDS as $key => $config) {
@@ -1723,7 +1730,7 @@ add_action('save_post', function (int $post_id, WP_Post $post): void {
 
     $locale = gvspace_get_content_locale($post);
     $suffixes = in_array($post->post_type, GVSPACE_CENTRALIZED_POST_TYPES, true)
-        ? array_map(static fn (string $content_locale): string => '_' . $content_locale, array_keys(GVSPACE_CONTENT_LOCALES))
+        ? array_map(static fn (string $content_locale): string => '_' . $content_locale, array_keys(gvspace_editor_locales_for_post_type($post->post_type)))
         : ($locale === 'legacy' ? ['_uk', '_en'] : ['']);
     foreach ($suffixes as $locale_suffix) {
         foreach (array_keys(GVSPACE_SEO_FIELDS) as $key) {
@@ -2800,6 +2807,17 @@ add_action('graphql_register_types', function (): void {
                 }
                 $content_title = (string) get_the_title($post_id);
                 $h1_fallback = $content_title;
+                if ($post->post_type === 'post') {
+                    $blog_title = trim((string) get_post_meta($post_id, '_gvspace_blog_title_' . $requested_locale, true));
+                    $blog_excerpt = trim((string) get_post_meta($post_id, '_gvspace_blog_excerpt_' . $requested_locale, true));
+                    $blog_content = trim((string) get_post_meta($post_id, '_gvspace_blog_content_' . $requested_locale, true));
+                    if ($blog_title !== '') {
+                        $content_title = $blog_title;
+                        $h1_fallback = $blog_title;
+                    }
+                    if ($blog_excerpt !== '') $fallback_description = $blog_excerpt;
+                    elseif ($blog_content !== '') $fallback_description = wp_trim_words(wp_strip_all_tags(strip_shortcodes($blog_content)), 30, '…');
+                }
                 if ($post->post_type === 'gv_vacancy') {
                     $vacancy_title = trim((string) get_post_meta($post_id, '_gvspace_vacancy_title_' . $requested_locale, true));
                     if ($vacancy_title === '' && $requested_locale !== 'uk') {
@@ -4226,7 +4244,7 @@ add_action('init', function (): void {
 add_filter('comments_open', '__return_false', 100);
 add_filter('pings_open', '__return_false', 100);
 
-const GVSPACE_DUPLICABLE_POST_TYPES = ['post', 'gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology', 'gv_team_member', 'gv_partner', 'gv_faq'];
+const GVSPACE_DUPLICABLE_POST_TYPES = ['gv_case', 'gv_service', 'gv_review', 'gv_vacancy', 'gv_technology', 'gv_team_member', 'gv_partner', 'gv_faq'];
 
 function gvspace_prepare_localized_duplicate(int $source_id, int $duplicate_id, string $target_locale): void
 {
@@ -4464,3 +4482,4 @@ require_once __DIR__ . '/contacts-page.php';
 require_once __DIR__ . '/vacancies-seed.php';
 require_once __DIR__ . '/cases-seed.php';
 require_once __DIR__ . '/technologies-seed.php';
+require_once __DIR__ . '/blog-admin.php';

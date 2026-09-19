@@ -12,7 +12,7 @@ import { getTechnologyBySlug } from "@/components/wordpress-technologies";
 import { TechnologiesPage } from "@/components/technologies-page";
 import { TechnologyDetailPage } from "@/components/technology-detail-page";
 import { BlogPageServer } from "@/components/blog-page-server";
-import { BlogArticlePage } from "@/components/blog-article-page";
+import { BlogArticleDesignPage } from "@/components/blog-article-design-page";
 import { BlogAuthorPage } from "@/components/blog-author-page";
 import { CaseDetailPage } from "@/components/case-detail-page";
 import { ReviewsPage } from "@/components/reviews-page";
@@ -165,10 +165,10 @@ export default async function RoutedPage({
     return <TechnologyDetailPage locale={locale} slug={slug[1]} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "blog") {
-    return section("blog", <BlogPageServer locale={locale} />);
+    return <BlogPageServer locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 2 && slug[0] === "blog") {
-    return <BlogArticlePage locale={locale} slug={slug[1]} />;
+    return <BlogArticleDesignPage locale={locale} slug={slug[1]} />;
   }
   if (isLocale(locale) && slug.length === 3 && slug[0] === "blog" && slug[1] === "author") {
     return (

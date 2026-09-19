@@ -16,6 +16,7 @@ type SeoNode = {
   excerpt?: string;
   gvspaceLocalization?: ContentLocalization | null;
   gvspaceSeo?: SeoGraphqlData;
+  gvspaceBlog?: { title?: string; excerpt?: string; isPublished?: boolean };
 };
 
 const roots: Record<DynamicSeoKind, string> = {
@@ -35,6 +36,8 @@ export async function getDynamicSeo(
 
   try {
     const excerptField = kind === "blog" ? "excerpt" : "";
+    const blogField =
+      kind === "blog" ? "gvspaceBlog(locale: $locale) { title excerpt isPublished }" : "";
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,6 +48,7 @@ export async function getDynamicSeo(
               slug
               title
               ${excerptField}
+              ${blogField}
               gvspaceLocalization { locale translationGroup status }
               gvspaceSeo(locale: $locale) { ${seoGraphqlFields} }
             }
@@ -64,14 +68,15 @@ export async function getDynamicSeo(
     const node = result.data?.items?.nodes?.find(
       (candidate) =>
         isContentPublishedForLocale(candidate.gvspaceLocalization, locale) &&
+        (kind !== "blog" || candidate.gvspaceBlog?.isPublished !== false) &&
         getPublicContentSlug(candidate.slug, candidate.gvspaceLocalization) === publicSlug,
     );
     if (!node) return undefined;
 
     return normalizeSeoData(node.gvspaceSeo, {
-      title: node.title,
+      title: node.gvspaceBlog?.title || node.title,
       description:
-        node.excerpt
+        (node.gvspaceBlog?.excerpt || node.excerpt)
           ?.replace(/<[^>]*>/g, " ")
           .replace(/\s+/g, " ")
           .trim() || "",
