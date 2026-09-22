@@ -4482,4 +4482,5 @@ require_once __DIR__ . '/contacts-page.php';
 require_once __DIR__ . '/vacancies-seed.php';
 require_once __DIR__ . '/cases-seed.php';
 require_once __DIR__ . '/technologies-seed.php';
+require_once __DIR__ . '/l3-import.php';
 require_once __DIR__ . '/blog-admin.php';
