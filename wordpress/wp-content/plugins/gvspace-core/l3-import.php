@@ -123,7 +123,7 @@ function gvspace_l3_import_normalize_locale(string $value): string
 function gvspace_l3_import_filename_parts(string $filename): array
 {
     $base = strtolower((string) pathinfo($filename, PATHINFO_FILENAME));
-    $base = preg_replace('/^gvspace-l3-/', '', $base) ?? $base;
+    $base = preg_replace('/^gvspace-l[23]-/', '', $base) ?? $base;
     $locale = '';
     foreach (gvspace_l3_import_locale_codes() as $code) {
         $suffixes = ['.' . strtolower($code), '-' . strtolower($code)];
@@ -136,7 +136,7 @@ function gvspace_l3_import_filename_parts(string $filename): array
         }
     }
     $slug = sanitize_title($base);
-    if ($slug === 'l3-service') {
+    if (in_array($slug, ['l3-service', 'l2-direction', 'l2-service'], true)) {
         $slug = '';
     }
     return ['slug' => $slug, 'locale' => $locale];
@@ -226,13 +226,13 @@ function gvspace_l3_import_read_zip(string $tmp_path): array
     return ['files' => $files, 'error' => ''];
 }
 
-function gvspace_l3_import_collect_uploads(): array
+function gvspace_l3_import_collect_uploads(string $field = 'gvspace_l3_files'): array
 {
-    if (empty($_FILES['gvspace_l3_files']) || !is_array($_FILES['gvspace_l3_files']['name'])) {
+    if (empty($_FILES[$field]) || !is_array($_FILES[$field]['name'])) {
         return ['files' => [], 'error' => 'Додайте .md або .zip із файлами послуг.'];
     }
 
-    $bag = $_FILES['gvspace_l3_files'];
+    $bag = $_FILES[$field];
     $count = count((array) $bag['name']);
     $files = [];
     $errors = [];
@@ -512,7 +512,7 @@ function gvspace_render_l3_import_page(): void
         $action = sanitize_key((string) ($_POST['gvspace_l3_action'] ?? ''));
         if ($action === 'preview') {
             $parent_id = absint($_POST['gvspace_l3_parent'] ?? 0);
-            $uploads = gvspace_l3_import_collect_uploads();
+            $uploads = gvspace_l3_import_collect_uploads('gvspace_l3_files');
             if ($uploads['error'] !== '' && !$uploads['files']) {
                 $notice = $uploads['error'];
                 $notice_type = 'error';

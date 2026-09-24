@@ -17,11 +17,9 @@ import { Breadcrumbs } from "./breadcrumbs";
 export async function ServicesPage({ locale }: { locale: Locale }) {
   const t = getTranslations("services", locale).page;
   const serviceItems = await getServiceOfferings(locale);
-  const directionSlugs = ["strategy", "marketing", "development", "content"];
   const staticDirections = getTranslations("services", locale).directions;
   const dynamicDirections = serviceItems
-    .filter((item) => !item.parentSlug && directionSlugs.includes(item.slug))
-    .sort((a, b) => directionSlugs.indexOf(a.slug) - directionSlugs.indexOf(b.slug))
+    .filter((item) => !item.parentSlug)
     .map((item) => ({
       slug: item.slug,
       title: item.title,
