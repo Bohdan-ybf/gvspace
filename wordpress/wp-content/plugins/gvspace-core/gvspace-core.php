@@ -2526,6 +2526,14 @@ add_action('save_post_gv_review', function (int $post_id): void {
 add_action('add_meta_boxes', function (): void {
     add_meta_box('gvspace-service-details', 'Контент сторінки послуги', 'gvspace_render_service_fields', 'gv_service', 'normal', 'high');
 });
+function gvspace_localized_service_editor_fields(WP_Post $post): array
+{
+    $fields = GVSPACE_LOCALIZED_SERVICE_FIELDS;
+    if ((int) $post->post_parent === 0) {
+        unset($fields['fit_cards'], $fields['includes'], $fields['metrics']);
+    }
+    return $fields;
+}
 function gvspace_render_service_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_service', 'gvspace_service_nonce');
@@ -2548,7 +2556,7 @@ function gvspace_render_service_fields(WP_Post $post): void
         echo '<hr><h3>' . esc_html($label) . '</h3>';
         echo '<p><label for="gvspace_service_title_' . esc_attr($locale) . '"><strong>Назва послуги / напрямку</strong></label><br>';
         echo '<input type="text" id="gvspace_service_title_' . esc_attr($locale) . '" name="gvspace_service_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
-        gvspace_render_field_set($post, GVSPACE_LOCALIZED_SERVICE_FIELDS, 'gvspace_service_' . $locale . '_', '_gvspace_service_', '_' . $locale);
+        gvspace_render_field_set($post, gvspace_localized_service_editor_fields($post), 'gvspace_service_' . $locale . '_', '_gvspace_service_', '_' . $locale);
         echo '</div>';
     }
     gvspace_render_language_switcher_script();
@@ -2557,12 +2565,15 @@ add_action('save_post_gv_service', function (int $post_id): void {
     static $saving_title = false;
     if ($saving_title) return;
     if (!isset($_POST['gvspace_service_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_service_nonce'])), 'gvspace_save_service') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return;
+    $post = get_post($post_id);
+    if (!$post) return;
+    $fields = gvspace_localized_service_editor_fields($post);
     foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
         $title_field = 'gvspace_service_title_' . $locale;
         if (isset($_POST[$title_field])) {
             update_post_meta($post_id, '_gvspace_service_title_' . $locale, sanitize_text_field(wp_unslash($_POST[$title_field])));
         }
-        foreach (array_keys(GVSPACE_LOCALIZED_SERVICE_FIELDS) as $field) {
+        foreach (array_keys($fields) as $field) {
             $field_name = 'gvspace_service_' . $locale . '_' . $field;
             if (!isset($_POST[$field_name])) continue;
             update_post_meta($post_id, '_gvspace_service_' . $field . '_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$field_name])));
