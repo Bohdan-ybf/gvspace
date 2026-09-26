@@ -4,7 +4,7 @@ import type { Locale } from "@/i18n";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ContactSection } from "./contact-section";
 import { ReviewsCatalog } from "./reviews-catalog";
-import { getClientReviews } from "./wordpress-reviews";
+import { getClientReviews, type ClientReview } from "./wordpress-reviews";
 
 import { getTranslations } from "@/i18n/pages";
 import { getLocalizedUrl } from "@/markets";
@@ -13,10 +13,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
   const reviews = await getClientReviews(locale);
   const text = getTranslations("global", locale);
   const t = getTranslations("reviews", locale).page;
-  const companies = [...new Set(reviews.map((review) => review.company).filter(Boolean))].slice(
-    0,
-    6,
-  );
+  const clients = reviewClients(reviews);
 
   return (
     <>
@@ -86,17 +83,27 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        <section className="container review-clients">
-          <span className="mono">{t.clientsEyebrow}</span>
-          <div>
-            {(companies.length
-              ? companies
-              : ["CLIENT 01", "CLIENT 02", "CLIENT 03", "CLIENT 04"]
-            ).map((company) => (
-              <span key={company}>{company}</span>
-            ))}
-          </div>
-        </section>
+        {clients.length > 0 && (
+          <section className="container review-clients">
+            <span className="mono">{t.clientsEyebrow}</span>
+            <div>
+              {clients.map((client) =>
+                client.logo ? (
+                  <span className="review-client is-logo" key={client.slug}>
+                    <Image
+                      src={client.logo}
+                      alt={client.company || client.name}
+                      width={140}
+                      height={36}
+                    />
+                  </span>
+                ) : (
+                  <span key={client.slug}>{client.company}</span>
+                ),
+              )}
+            </div>
+          </section>
+        )}
 
         <ReviewsCatalog locale={locale} reviews={reviews} />
         <CasesShowcaseSection locale={locale} />
@@ -110,4 +117,16 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
       </main>
     </>
   );
+}
+
+function reviewClients(reviews: ClientReview[]) {
+  const seen = new Set<string>();
+  return reviews
+    .filter((review) => {
+      const key = (review.company || review.logo || "").trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 6);
 }

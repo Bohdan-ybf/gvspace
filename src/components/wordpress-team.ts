@@ -7,6 +7,8 @@ export type TeamMember = {
   name: string;
   role: string;
   tags: string[];
+  years: string;
+  projects: string;
   categorySlugs: string[];
   image?: string;
   imageAlt: string;
@@ -25,7 +27,13 @@ type TeamNode = {
   title: string;
   menuOrder?: number;
   featuredImage?: { node?: { sourceUrl?: string; altText?: string } };
-  teamMemberDetails?: { name?: string; role?: string; tags?: string[] };
+  teamMemberDetails?: {
+    name?: string;
+    role?: string;
+    tags?: string[];
+    years?: string;
+    projects?: string;
+  };
   teamMemberCategories?: { nodes?: TeamCategory[] };
   gvspaceLocalization?: ContentLocalization | null;
 };
@@ -53,7 +61,7 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
         teamMembers(first: 100) { nodes {
           databaseId title menuOrder gvspaceLocalization { locale translationGroup status }
           featuredImage { node { sourceUrl altText } }
-          teamMemberDetails(locale: "${locale}") { name role tags }
+          teamMemberDetails(locale: "${locale}") { name role tags years projects }
           teamMemberCategories { nodes { name slug } }
         } }
       }`,
@@ -75,6 +83,8 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
         name: node.teamMemberDetails?.name || node.title,
         role: node.teamMemberDetails?.role ?? "",
         tags: node.teamMemberDetails?.tags ?? [],
+        years: node.teamMemberDetails?.years ?? "",
+        projects: node.teamMemberDetails?.projects ?? "",
         categorySlugs: node.teamMemberCategories?.nodes?.map(({ slug }) => slug) ?? [],
         image: node.featuredImage?.node?.sourceUrl,
         imageAlt: node.featuredImage?.node?.altText || node.teamMemberDetails?.name || node.title,

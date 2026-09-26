@@ -42,7 +42,7 @@ export const en: Messages = {
     ],
   },
   vectors: {
-    title: "4 vectors for scaling your business",
+    title: "Vectors for scaling your business",
     imageAlt: "GVSPACE abstract symbol",
     items: [
       "Strategic audit",

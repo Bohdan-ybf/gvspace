@@ -22,6 +22,10 @@ import vacanciesUK from "./vacancies/uk";
 import vacanciesEN from "./vacancies/en";
 import contactsUK from "./contacts/uk";
 import contactsEN from "./contacts/en";
+import industriesUK from "./industries/uk";
+import industriesEN from "./industries/en";
+import partnersUK from "./partners/uk";
+import partnersEN from "./partners/en";
 import globalUK from "./global/uk";
 import globalEN from "./global/en";
 import type { Locale } from "../index";
@@ -39,6 +43,8 @@ const translations = {
   home: { uk: homeUK, en: homeEN },
   vacancies: { uk: vacanciesUK, en: vacanciesEN },
   contacts: { uk: contactsUK, en: contactsEN },
+  industries: { uk: industriesUK, en: industriesEN },
+  partners: { uk: partnersUK, en: partnersEN },
   global: { uk: globalUK, en: globalEN },
 } as const satisfies Record<string, Record<Locale, unknown>>;
 

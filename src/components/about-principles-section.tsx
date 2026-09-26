@@ -5,16 +5,34 @@ import { useState } from "react";
 import type { Locale } from "@/i18n";
 
 import { getTranslations } from "@/i18n/pages";
+import { AboutTeamSlider } from "./about-team-slider";
 import { ArrowRight } from "./icons/arrow-right";
+import type { TeamMember } from "./wordpress-team";
 
-export function AboutPrinciplesSection({ locale }: { locale: Locale }) {
+export function AboutPrinciplesSection({
+  locale,
+  members,
+}: {
+  locale: Locale;
+  members: TeamMember[];
+}) {
   const t = getTranslations("about", locale).principles;
   const [activeTab, setActiveTab] = useState<"values" | "vision">("values");
 
   return (
     <section className="about-principles section container">
       <div className="about-team">
-        <div className="about-team-photo">{t.photoLabel}</div>
+        {members.length ? (
+          <AboutTeamSlider
+            members={members}
+            yearsLabel={t.yearsLabel}
+            projectsLabel={t.projectsLabel}
+            previousLabel={t.previousMember}
+            nextLabel={t.nextMember}
+          />
+        ) : (
+          <div className="about-team-photo">{t.photoLabel}</div>
+        )}
         <div className="about-team-copy">
           <h2>{t.teamTitle}</h2>
           <p>{t.teamDescription}</p>

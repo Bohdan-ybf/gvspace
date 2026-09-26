@@ -196,7 +196,10 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             <TechnologyShowcaseSection locale={locale} />
           </>
         )}
-        <ReviewsSection locale={locale} />
+        <ReviewsSection
+          locale={locale}
+          tags={[item.parentSlug, item.slug].filter((tag): tag is string => Boolean(tag))}
+        />
         {!isDirection && <ServiceInsightsSection locale={locale} />}
         {faqs.length > 0 && (
           <section className="section container service-faq">

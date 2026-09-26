@@ -4,6 +4,10 @@ export default {
     teamTitle: "Our people are your operational support",
     teamDescription:
       "There are no assembly-line managers here. Architects, analysts, and creatives become part of your team.",
+    yearsLabel: "Years with the company",
+    projectsLabel: "Projects delivered",
+    previousMember: "Previous teammate",
+    nextMember: "Next teammate",
     valuesTitle: "Our values",
     visionLabel: "Vision",
     values: [

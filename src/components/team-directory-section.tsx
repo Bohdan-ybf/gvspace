@@ -92,7 +92,7 @@ export function TeamDirectorySection({
             </article>
           ))}
         </div>
-        <Link className="btn" href={`/${locale}/contacts`}>
+        <Link className="btn" href={`/${locale}/partners`}>
           {t.contactAction}
           <ArrowRight />
         </Link>

@@ -102,7 +102,7 @@ export function Header({
               "Ми не використовуємо один стек для всього. Кожен інструмент у нашому арсеналі вирішує конкретну задачу — і тільки її.",
           },
           {
-            href: "/cases",
+            href: "/industries",
             title: "Індустрії",
             description:
               "Кожна індустрія має власну економіку, цикл рішення і больові точки. Ми не переносимо шаблон з однієї ніші в іншу.",
@@ -116,7 +116,7 @@ export function Header({
               "We do not use one stack for everything. Every tool in our arsenal solves a specific task — and only that task.",
           },
           {
-            href: "/cases",
+            href: "/industries",
             title: "Industries",
             description:
               "Every industry has its own economics, decision cycle, and pain points. We do not transfer one niche's template to another.",

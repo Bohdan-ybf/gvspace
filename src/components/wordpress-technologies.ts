@@ -5,6 +5,7 @@ import {
   isContentPublishedForLocale,
   type ContentLocalization,
 } from "@/content-localization";
+import type { CaseStudy } from "./wordpress-cases";
 import { getFallbackTechnology, getFallbackTechnologyStack } from "./technology-data";
 
 export type TechnologyCategory = { name: string; slug: string; order: number };
@@ -329,6 +330,69 @@ export function caseMatchesTechnology(
   };
   const tags = categorySlugs.flatMap((slug) => tagsByCategory[slug] ?? [slug]);
   return tags.some((tag) => haystack.includes(tag.toLowerCase()));
+}
+
+function compactKey(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9а-яіїєґ]+/gi, "");
+}
+
+function technologyKeys(technology: Pick<TechnologyItem, "title" | "slug">) {
+  return [
+    ...new Set(
+      [technology.title, technology.slug.replace(/-/g, ""), technology.slug.replace(/-/g, " ")]
+        .map(compactKey)
+        .filter((key) => key.length >= 3),
+    ),
+  ];
+}
+
+function latestCase(cases: CaseStudy[]) {
+  return cases.reduce<CaseStudy | undefined>((latest, project) => {
+    if (!latest) return project;
+    const latestTime = latest.publishedAt ? Date.parse(latest.publishedAt) : 0;
+    const projectTime = project.publishedAt ? Date.parse(project.publishedAt) : 0;
+    return projectTime >= latestTime ? project : latest;
+  }, undefined);
+}
+
+export function pickTechnologyCase(
+  cases: CaseStudy[],
+  technology: Pick<TechnologyItem, "title" | "slug" | "categorySlugs" | "relatedCase">,
+) {
+  const keys = technologyKeys(technology);
+  const mentioned = cases.filter((project) => {
+    const haystack = compactKey(
+      [
+        project.title,
+        project.catalogTitle,
+        project.excerpt,
+        ...project.services,
+        project.badge,
+        project.direction,
+        project.projectType,
+      ].join(" "),
+    );
+    return keys.some((key) => haystack.includes(key));
+  });
+  const pool = mentioned.length
+    ? mentioned
+    : cases.filter((project) => caseMatchesTechnology(project, technology.categorySlugs));
+  return (
+    latestCase(pool) ||
+    (technology.relatedCase
+      ? cases.find((project) => project.slug === technology.relatedCase)
+      : undefined)
+  );
+}
+
+export function memberMatchesTechnology(
+  member: { tags: string[] },
+  technology: Pick<TechnologyItem, "title" | "slug" | "tag">,
+) {
+  const keys = new Set(
+    [...technologyKeys(technology), compactKey(technology.tag)].filter((key) => key.length >= 3),
+  );
+  return member.tags.some((tag) => keys.has(compactKey(tag)));
 }
 
 export async function getTechnologyBySlug(

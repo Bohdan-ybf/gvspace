@@ -118,20 +118,41 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
         : item,
     );
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `query Services($locale: String!) { serviceOfferings(first: 100) { nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails(locale: $locale) { title headline description order fitCards { label title description } includes steps { title duration description } faq { question answer } metrics } } } }`,
-        variables: { locale },
-      }),
-      next: { revalidate: 10 },
-    });
-    if (!response.ok) return fallback;
-    const json = (await response.json()) as {
-      data?: { serviceOfferings?: { nodes?: Node[] } };
-    };
-    const nodes = json.data?.serviceOfferings?.nodes ?? [];
+    const nodes: Node[] = [];
+    let after: string | null = null;
+
+    for (let page = 0; page < 20; page += 1) {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `query Services($locale: String!, $after: String) { serviceOfferings(first: 100, after: $after) { pageInfo { hasNextPage endCursor } nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails(locale: $locale) { title headline description order fitCards { label title description } includes steps { title duration description } faq { question answer } metrics } } } }`,
+          variables: { locale, after },
+        }),
+        next: { revalidate: 10 },
+      });
+      if (!response.ok) break;
+      const json = (await response.json()) as {
+        data?: {
+          serviceOfferings?: {
+            pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
+            nodes?: Node[];
+          };
+        };
+      };
+      const connection = json.data?.serviceOfferings;
+      const pageNodes = connection?.nodes ?? [];
+      nodes.push(...pageNodes);
+      if (
+        !connection?.pageInfo?.hasNextPage ||
+        !connection.pageInfo.endCursor ||
+        !pageNodes.length
+      ) {
+        break;
+      }
+      after = connection.pageInfo.endCursor;
+    }
+
     if (!nodes.length) return fallback;
     return filterPublishedForLocale(nodes, locale)
       .sort(

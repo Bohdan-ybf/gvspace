@@ -6,20 +6,23 @@ import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
 import { ArrowRight } from "./icons/arrow-right";
 import { Breadcrumbs } from "./breadcrumbs";
-import { CaseCard } from "./case-card";
+import { CaseArrow } from "./icons/case-arrow";
 import { ReviewsSection } from "./reviews-section";
 import { StructuredData } from "./structured-data";
 import { TechnologyMeetSection } from "./technology-meet-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
-import { getCaseStudies, getCaseStudy } from "./wordpress-cases";
+import { getCaseStudies } from "./wordpress-cases";
 import { getHomeFaqs } from "./wordpress-faqs";
 import { getServiceOfferings } from "./wordpress-services";
-import { getTeamDirectory } from "./wordpress-team";
+import { getTeamDirectory, type TeamMember } from "./wordpress-team";
 import {
-  caseMatchesTechnology,
   getTechnologyBySlug,
+  memberMatchesTechnology,
+  pickTechnologyCase,
   technologyServiceDirection,
+  type TechnologyItem,
 } from "./wordpress-technologies";
+import type { TechnologyMeetPerson } from "./technology-meet-section";
 
 function EmphasisText({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -34,6 +37,46 @@ function EmphasisText({ text }: { text: string }) {
       )}
     </>
   );
+}
+
+function caseDateLabel(date: string | undefined, locale: string) {
+  if (!date) return "";
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" })
+    .format(new Date(date))
+    .replace(/\s*р\.?$/i, "")
+    .toUpperCase();
+}
+
+function technologyPeople(
+  technology: TechnologyItem,
+  members: TeamMember[],
+): TechnologyMeetPerson[] {
+  const meetName = technology.meet.name.trim().toLowerCase();
+  const matched = members.filter((member) => memberMatchesTechnology(member, technology));
+  const people = matched.map((member) => ({
+    name: member.name,
+    role: member.role,
+    quote: meetName && member.name.trim().toLowerCase() === meetName ? technology.meet.quote : "",
+    years: member.years,
+    projects: member.projects,
+    tags: member.tags,
+    photo: member.image || technology.meet.photo || "/images/team/user-none.jpg",
+  }));
+  if (
+    technology.meet.name &&
+    !people.some((person) => person.name.trim().toLowerCase() === meetName)
+  ) {
+    people.unshift({
+      name: technology.meet.name,
+      role: technology.meet.role,
+      quote: technology.meet.quote,
+      years: technology.meet.years,
+      projects: technology.meet.projects,
+      tags: technology.meet.tags,
+      photo: technology.meet.photo || "/images/team/user-none.jpg",
+    });
+  }
+  return people;
 }
 
 function ServicesChevron() {
@@ -74,18 +117,13 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
   const text = getTranslations("global", locale);
   const seo = await getDynamicSeo("technology", slug, locale);
   const directionSlug = technologyServiceDirection(technology.categorySlugs);
-  const [relatedCaseOverride, cases, services, team, homeFaqs] = await Promise.all([
-    technology.relatedCase
-      ? getCaseStudy(technology.relatedCase, locale)
-      : Promise.resolve(undefined),
+  const [cases, services, team, homeFaqs] = await Promise.all([
     getCaseStudies(locale),
     getServiceOfferings(locale),
     getTeamDirectory(locale),
     technology.faq.length ? Promise.resolve([]) : getHomeFaqs(locale),
   ]);
-  const relatedCase =
-    relatedCaseOverride ||
-    cases.find((project) => caseMatchesTechnology(project, technology.categorySlugs));
+  const relatedCase = pickTechnologyCase(cases, technology);
   const relatedServices = services.filter((service) => service.parentSlug === directionSlug);
   const directionIcon = services.find(
     (service) => !service.parentSlug && service.slug === directionSlug,
@@ -105,38 +143,12 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
     content: locale === "uk" ? "Контент" : "Content",
   };
   const categoryName = categoryLabels[technology.categorySlugs[0] ?? ""] || t.detail.catalogLabel;
-  const teamCategory =
-    directionSlug === "development"
-      ? "development"
-      : technology.categorySlugs.includes("marketing")
-        ? "marketing"
-        : technology.categorySlugs[0];
-  const teamPeople = team.members
-    .filter((member) => (teamCategory ? member.categorySlugs.includes(teamCategory) : true))
-    .map((member) => ({
-      name: member.name,
-      role: member.role,
-      quote: "",
-      years: "",
-      projects: "",
-      tags: member.tags,
-      photo: member.image || "/images/team/user-none.jpg",
-    }));
-  const featuredPerson = technology.meet.name
-    ? {
-        name: technology.meet.name,
-        role: technology.meet.role,
-        quote: technology.meet.quote,
-        years: technology.meet.years,
-        projects: technology.meet.projects,
-        tags: technology.meet.tags,
-        photo: technology.meet.photo || "/images/team/user-none.jpg",
-      }
-    : undefined;
-  const meetPeople = featuredPerson
-    ? [featuredPerson, ...teamPeople.filter((member) => member.name !== featuredPerson.name)]
-    : teamPeople;
-  const caseHighlight = relatedCase?.metrics[0];
+  const meetPeople = technologyPeople(technology, team.members);
+  const casesCatalog = getTranslations("cases", locale).catalog;
+  const caseDate = caseDateLabel(relatedCase?.publishedAt, casesCatalog.dateLocale);
+  const caseCategories = [relatedCase?.projectType, relatedCase?.direction].filter(
+    (item): item is string => Boolean(item),
+  );
   const technologySchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -268,17 +280,53 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
               </Link>
             </div>
             <div className="technology-detail-case-grid">
-              {caseHighlight ? (
-                <article className="technology-detail-case-highlight">
-                  <strong>{caseHighlight.value}</strong>
-                  <span>{caseHighlight.label}</span>
-                </article>
-              ) : relatedCase.result ? (
-                <article className="technology-detail-case-highlight">
-                  <p>{relatedCase.result}</p>
-                </article>
+              {relatedCase.metrics.length ? (
+                <div className="technology-detail-case-metrics">
+                  {relatedCase.metrics.slice(0, 3).map((metric) => (
+                    <article key={`${metric.value}-${metric.label}`}>
+                      <strong>
+                        {metric.value}
+                        {metric.label ? <span> {metric.label}</span> : null}
+                      </strong>
+                    </article>
+                  ))}
+                </div>
               ) : null}
-              <CaseCard locale={locale} project={relatedCase} variant="list" />
+              <article className="technology-detail-case-card">
+                <Link
+                  className="technology-detail-case-media"
+                  href={`/${locale}/cases/${relatedCase.slug}`}
+                >
+                  {relatedCase.image ? (
+                    <Image
+                      src={relatedCase.image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 900px) 100vw, 720px"
+                      unoptimized
+                    />
+                  ) : null}
+                  <span className="technology-detail-case-labels mono">
+                    {caseDate ? <span>{caseDate}</span> : null}
+                    {caseCategories.length ? <span>[ {caseCategories.join(" / ")} ]</span> : null}
+                  </span>
+                </Link>
+                <div className="technology-detail-case-copy">
+                  <h3>
+                    <Link href={`/${locale}/cases/${relatedCase.slug}`}>
+                      {relatedCase.catalogTitle}
+                    </Link>
+                  </h3>
+                  {relatedCase.excerpt ? <p>[{relatedCase.excerpt}]</p> : null}
+                  <Link
+                    className="technology-detail-case-arrow"
+                    href={`/${locale}/cases/${relatedCase.slug}`}
+                    aria-label={casesCatalog.openCase}
+                  >
+                    <CaseArrow />
+                  </Link>
+                </div>
+              </article>
             </div>
           </section>
         ) : null}
@@ -298,6 +346,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
           locale={locale}
           eyebrow={t.page.reviewsEyebrow}
           title={t.page.reviewsTitle}
+          tags={[...technology.categorySlugs, directionSlug, technology.slug]}
         />
 
         <TechnologyShowcaseSection

@@ -15,8 +15,13 @@ export function ReviewCard({
     <article className={`client-review-card${compact ? " is-compact" : ""}`}>
       {!compact && (
         <div className="review-card-top mono">
-          <span>{review.category || "GVSPACE"}</span>
-          <span aria-label={`${review.rating} / 5`}>{"★".repeat(review.rating)}</span>
+          <span>{review.tagLabel || review.category || "GVSPACE"}</span>
+          <span className="review-stars" aria-label={`${review.rating} / 5`}>
+            <span aria-hidden="true">{"★".repeat(Math.min(5, review.rating))}</span>
+            <span className="is-muted" aria-hidden="true">
+              {"★".repeat(Math.max(0, 5 - review.rating))}
+            </span>
+          </span>
         </div>
       )}
       {!compact && (

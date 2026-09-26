@@ -18,7 +18,9 @@ export function ReviewsCatalog({
   const [active, setActive] = useState<(typeof categories)[number]>("all");
   const labels = t.categoryLabels;
   const visible =
-    active === "all" ? reviews : reviews.filter((review) => review.category === active);
+    active === "all"
+      ? reviews
+      : reviews.filter((review) => review.tags.includes(active) || review.category === active);
 
   return (
     <section className="section container reviews-catalog">
@@ -34,11 +36,15 @@ export function ReviewsCatalog({
           </button>
         ))}
       </nav>
-      <div className="reviews-masonry">
-        {visible.map((review) => (
-          <ReviewCard key={review.slug} review={review} />
-        ))}
-      </div>
+      {visible.length ? (
+        <div className="reviews-masonry">
+          {visible.map((review) => (
+            <ReviewCard key={review.slug} review={review} />
+          ))}
+        </div>
+      ) : (
+        <p className="reviews-empty">{t.empty}</p>
+      )}
     </section>
   );
 }

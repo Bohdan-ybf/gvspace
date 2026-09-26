@@ -19,6 +19,8 @@ const staticPaths = [
   "/team",
   "/careers",
   "/technologies",
+  "/industries",
+  "/partners",
   "/blog",
   "/contacts",
 ] as const;

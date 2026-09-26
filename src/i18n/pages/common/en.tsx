@@ -26,7 +26,7 @@ export default {
           "Strategists, engineers, and marketers united around one outcome: managed business growth.",
       },
       {
-        href: "/contacts",
+        href: "/partners",
         title: "Partnership",
         description:
           "We bring together trusted businesses and experts to create partnerships with mutual value.",

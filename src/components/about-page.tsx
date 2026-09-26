@@ -8,11 +8,13 @@ import { Breadcrumbs } from "./breadcrumbs";
 import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
 import { SystemTransitionSection } from "./system-transition-section";
+import { getTeamDirectory } from "./wordpress-team";
 
 import { getTranslations } from "@/i18n/pages";
-export function AboutPage({ locale }: { locale: Locale }) {
+export async function AboutPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const t = getTranslations("about", locale).page;
+  const team = await getTeamDirectory(locale);
 
   return (
     <main className="about-page">
@@ -49,7 +51,7 @@ export function AboutPage({ locale }: { locale: Locale }) {
       </section>
       <AboutStatsSection locale={locale} />
       <SystemTransitionSection locale={locale} />
-      <AboutPrinciplesSection locale={locale} />
+      <AboutPrinciplesSection locale={locale} members={team.members} />
       <AgencyComparisonSection locale={locale} />
       <Breadcrumbs
         locale={locale}

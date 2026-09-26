@@ -10,6 +10,8 @@ import { VacancyDetailPage } from "@/components/vacancy-detail-page";
 import { getVacancyBySlug } from "@/components/wordpress-vacancies";
 import { getTechnologyBySlug } from "@/components/wordpress-technologies";
 import { TechnologiesPage } from "@/components/technologies-page";
+import { IndustriesPage } from "@/components/industries-page";
+import { PartnersPage } from "@/components/partners-page";
 import { TechnologyDetailPage } from "@/components/technology-detail-page";
 import { BlogPageServer } from "@/components/blog-page-server";
 import { BlogArticleDesignPage } from "@/components/blog-article-design-page";
@@ -31,6 +33,8 @@ const routeSeo = {
     team: ["Команда", "Експерти GVSPACE"],
     careers: ["Вакансії", "Кар’єрні можливості у GVSPACE"],
     technologies: ["Технології", "Технологічний стек GVSPACE"],
+    industries: ["Індустрії", "Ніші, де GVSPACE знає специфіку звернення"],
+    partners: ["Партнерство", "Партнерська програма GVSPACE Partners"],
     blog: ["Блог", "Статті про маркетинг, стратегію та IT"],
   },
   en: {
@@ -41,6 +45,8 @@ const routeSeo = {
     team: ["Team", "GVSPACE experts"],
     careers: ["Careers", "Career opportunities at GVSPACE"],
     technologies: ["Technologies", "The GVSPACE technology stack"],
+    industries: ["Industries", "Niches where GVSPACE knows the specifics of the request"],
+    partners: ["Partnership", "The GVSPACE Partners program"],
     blog: ["Blog", "Insights on marketing, strategy, and IT"],
   },
 } as const;
@@ -157,6 +163,12 @@ export default async function RoutedPage({
   }
   if (isLocale(locale) && slug.length === 2 && slug[0] === "careers") {
     return <VacancyDetailPage locale={locale} slug={slug[1]} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "industries") {
+    return <IndustriesPage locale={locale} />;
+  }
+  if (isLocale(locale) && slug.length === 1 && slug[0] === "partners") {
+    return <PartnersPage locale={locale} />;
   }
   if (isLocale(locale) && slug.length === 1 && slug[0] === "technologies") {
     return section("technologies", <TechnologiesPage locale={locale} />);

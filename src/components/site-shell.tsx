@@ -33,6 +33,8 @@ export function SiteShell({
     localizedPathname === `/${locale}/about` ||
     localizedPathname === `/${locale}/team` ||
     isTechnologyCatalog ||
+    localizedPathname === `/${locale}/industries` ||
+    localizedPathname === `/${locale}/partners` ||
     localizedPathname === `/${locale}/blog` ||
     (localizedPathname.startsWith(`/${locale}/blog/`) &&
       !localizedPathname.startsWith(`/${locale}/blog/author/`)) ||

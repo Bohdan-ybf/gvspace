@@ -17,22 +17,43 @@ type ServiceVectorsProps = {
 
 export function ServiceVectors({ locale, text, clarity, services }: ServiceVectorsProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
-  const directions = text.slugs.map((slug, index) => {
-    const direction = services.find((service) => service.slug === slug && !service.parentSlug);
-    const children = services.filter((service) => service.parentSlug === slug);
-    return {
-      slug,
-      title: direction?.title || text.items[index],
-      description: direction?.description || text.descriptions[index],
-      children: children.length
-        ? children
-        : text.links[index].map((title, fallbackIndex) => ({
-            id: fallbackIndex,
-            slug: "",
-            title,
-          })),
-    };
-  });
+  const parents = services.filter((service) => !service.parentSlug);
+  const directions = parents.length
+    ? parents.map((direction) => {
+        const staticIndex = text.slugs.indexOf(direction.slug);
+        const children = services.filter((service) => service.parentSlug === direction.slug);
+        return {
+          slug: direction.slug,
+          title: direction.title || text.items[staticIndex] || direction.slug,
+          description:
+            direction.description ||
+            (staticIndex >= 0 ? text.descriptions[staticIndex] : "") ||
+            direction.headline,
+          children: children.length
+            ? children.map((service) => ({
+                id: service.id,
+                slug: service.slug,
+                title: service.title,
+              }))
+            : staticIndex >= 0
+              ? text.links[staticIndex].map((title, fallbackIndex) => ({
+                  id: fallbackIndex,
+                  slug: "",
+                  title,
+                }))
+              : [],
+        };
+      })
+    : text.slugs.map((slug, index) => ({
+        slug,
+        title: text.items[index],
+        description: text.descriptions[index],
+        children: text.links[index].map((title, fallbackIndex) => ({
+          id: fallbackIndex,
+          slug: "",
+          title,
+        })),
+      }));
 
   return (
     <section className="section container vectors-section">
@@ -84,7 +105,9 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
                     <span>]</span>
                   </span>
                 </button>
-                <p className="vector-description">{direction.description}</p>
+                {direction.description ? (
+                  <p className="vector-description">{direction.description}</p>
+                ) : null}
                 <div className="vector-panel" id={panelId} hidden={!isOpen}>
                   <ul>
                     {direction.children.map((service) => (
