@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { Locale } from "@/i18n";
-import { getLocalizedUrl } from "@/markets";
+import { getLocalizedUrl, marketList } from "@/markets";
 
 export type SeoData = {
   title: string;
@@ -9,6 +9,7 @@ export type SeoData = {
   openGraphTitle: string;
   openGraphDescription: string;
   openGraphImage?: string;
+  canonical?: string;
   datePublished?: string;
   dateModified?: string;
 };
@@ -22,6 +23,7 @@ export const seoGraphqlFields = `
   openGraphTitle
   openGraphDescription
   openGraphImage
+  canonical
   datePublished
   dateModified
 `;
@@ -40,12 +42,37 @@ export function normalizeSeoData(
     openGraphTitle: seo?.openGraphTitle?.trim() || title,
     openGraphDescription: seo?.openGraphDescription?.trim() || description,
     openGraphImage: seo?.openGraphImage?.trim() || undefined,
+    canonical: seo?.canonical?.trim() || undefined,
     datePublished: seo?.datePublished || undefined,
     dateModified: seo?.dateModified || undefined,
   };
 }
 
 const openGraphLocales: Record<Locale, string> = { uk: "uk_UA", en: "en_US" };
+
+const allowedCanonicalHosts = new Set(marketList.map((market) => market.domain));
+
+export function resolveCanonicalUrl(locale: Locale, pathname: string, override?: string): string {
+  const native = getLocalizedUrl(locale, pathname);
+  const value = override?.trim();
+  if (!value) return native;
+  if (value.startsWith("/")) return getLocalizedUrl(locale, value.split(/[?#]/)[0] || "/");
+
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    if (
+      (url.protocol !== "http:" && url.protocol !== "https:") ||
+      !allowedCanonicalHosts.has(host)
+    ) {
+      return native;
+    }
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return native;
+  }
+}
 
 export function buildSeoMetadata({
   locale,
@@ -60,7 +87,8 @@ export function buildSeoMetadata({
   alternateLocales: readonly Locale[];
   type?: "website" | "article";
 }): Metadata {
-  const canonical = getLocalizedUrl(locale, pathname);
+  const nativeCanonical = getLocalizedUrl(locale, pathname);
+  const canonical = resolveCanonicalUrl(locale, pathname, seo.canonical);
   const languages = Object.fromEntries(
     alternateLocales.map((alternateLocale) => [
       alternateLocale,
@@ -73,10 +101,14 @@ export function buildSeoMetadata({
     description: seo.description,
     alternates: {
       canonical,
-      languages: {
-        ...languages,
-        "x-default": getLocalizedUrl("en", alternateLocales.includes("en") ? pathname : "/"),
-      },
+      ...(canonical === nativeCanonical
+        ? {
+            languages: {
+              ...languages,
+              "x-default": getLocalizedUrl("en", alternateLocales.includes("en") ? pathname : "/"),
+            },
+          }
+        : {}),
     },
     openGraph: {
       type,

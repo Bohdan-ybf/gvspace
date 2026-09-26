@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { defaultLocale, isLocale, locales, type Locale } from "@/i18n";
 import { getLocaleOrigin } from "@/markets";
 import { buildSeoMetadata, normalizeSeoData } from "@/seo";
+import { getStaticPageSeo } from "@/wordpress-seo";
 import { StructuredData } from "@/components/structured-data";
 
 const localizedMetadata = {
@@ -27,10 +28,11 @@ export async function generateMetadata({
   const { locale: localeParam } = await params;
   const locale = isLocale(localeParam) ? localeParam : defaultLocale;
   const pageMetadata = localizedMetadata[locale];
+  const adminSeo = await getStaticPageSeo("home", locale);
   return buildSeoMetadata({
     locale,
     pathname: "/",
-    seo: normalizeSeoData(undefined, pageMetadata),
+    seo: normalizeSeoData(adminSeo, pageMetadata),
     alternateLocales: locales,
   });
 }

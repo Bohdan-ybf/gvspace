@@ -13,18 +13,6 @@ export type BlogAuthor = {
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
 
-export const fallbackAuthor: BlogAuthor = {
-  slug: "vasyl-hordiichuk",
-  name: "Василь Горайчук",
-  role: "CEO, GVSPACE",
-  headline:
-    "Засновник GVSPACE з фокусом на побудову систем керованого зростання для бізнесів різного масштабу.",
-  bio: "Орієнтований на прозору комунікацію, практичну користь і довгострокову цінність. 3–5 речень про ключові компетенції, галузі та підхід до роботи з клієнтами.",
-  experience: "8+",
-  projects: "50+",
-  photo: "/images/blog/authors/vasyl-hordiichuk.webp",
-};
-
 export async function getBlogAuthor(slug: string, locale: Locale): Promise<BlogAuthor | undefined> {
   if (endpoint) {
     try {
@@ -70,7 +58,7 @@ export async function getBlogAuthor(slug: string, locale: Locale): Promise<BlogA
         };
       }
     } catch {
-      // Keep the local preview available while WordPress is offline.
+      return undefined;
     }
   }
   return undefined;

@@ -86,6 +86,38 @@ export async function getDynamicSeo(
   }
 }
 
+export async function getStaticPageSeo(pageKey: string, locale: Locale): Promise<SeoGraphqlData> {
+  if (!endpoint) return undefined;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `query StaticPageSeo($locale: String!) {
+          staticPageSeos(first: 50) {
+            nodes {
+              slug
+              gvspaceSeo(locale: $locale) { ${seoGraphqlFields} }
+            }
+          }
+        }`,
+        variables: { locale },
+      }),
+      next: { revalidate: 10 },
+    });
+    if (!response.ok) return undefined;
+    const result = (await response.json()) as {
+      data?: { staticPageSeos?: { nodes?: Array<{ slug?: string; gvspaceSeo?: SeoGraphqlData }> } };
+      errors?: unknown[];
+    };
+    if (result.errors) return undefined;
+    return result.data?.staticPageSeos?.nodes?.find((node) => node.slug === pageKey)?.gvspaceSeo;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function getPublishedSeoLocales(
   kind: DynamicSeoKind,
   publicSlug: string,

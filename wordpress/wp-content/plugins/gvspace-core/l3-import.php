@@ -421,7 +421,7 @@ function gvspace_l3_import_upsert_service(int $parent_id, array $fields, int $or
         update_post_meta($post_id, '_gvspace_service_' . $field . '_' . $locale, sanitize_textarea_field((string) ($fields[$field] ?? '')));
     }
     foreach ((array) ($fields['seo'] ?? []) as $seo_field => $value) {
-        $clean = $seo_field === 'og_image' ? esc_url_raw((string) $value) : sanitize_textarea_field((string) $value);
+        $clean = gvspace_sanitize_seo_meta_value((string) $seo_field, (string) $value);
         update_post_meta($post_id, '_gvspace_seo_' . $seo_field . '_' . $locale, $clean);
     }
     clean_post_cache($post_id);

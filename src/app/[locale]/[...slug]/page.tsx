@@ -21,7 +21,12 @@ import { ReviewsPage } from "@/components/reviews-page";
 import { isLocale } from "@/i18n";
 import { locales, type Locale } from "@/i18n";
 import { buildSeoMetadata, normalizeSeoData } from "@/seo";
-import { getDynamicSeo, getPublishedSeoLocales, type DynamicSeoKind } from "@/wordpress-seo";
+import {
+  getDynamicSeo,
+  getPublishedSeoLocales,
+  getStaticPageSeo,
+  type DynamicSeoKind,
+} from "@/wordpress-seo";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 const routeSeo = {
@@ -119,7 +124,9 @@ export async function generateMetadata({
 
   const section = slug[0] as keyof (typeof routeSeo)[Locale];
   const fallback = routeSeo[locale][section] ?? ["GVSPACE", "Space for managed growth"];
-  const seo = normalizeSeoData(undefined, { title: fallback[0], description: fallback[1] });
+  const adminSeo =
+    section in routeSeo[locale] ? await getStaticPageSeo(section, locale) : undefined;
+  const seo = normalizeSeoData(adminSeo, { title: fallback[0], description: fallback[1] });
   return buildSeoMetadata({ locale, pathname, seo, alternateLocales: locales });
 }
 export default async function RoutedPage({

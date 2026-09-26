@@ -90,18 +90,7 @@ type Node = {
     includes?: string[];
     steps?: ServiceStep[];
     faq?: ServiceOffering["faq"];
-    titleEn?: string;
-    headlineUk?: string;
-    headlineEn?: string;
-    descriptionUk?: string;
-    descriptionEn?: string;
-    includesUk?: string[];
-    includesEn?: string[];
-    stepsUk?: ServiceStep[];
-    stepsEn?: ServiceStep[];
     metrics?: string[];
-    faqUk?: ServiceOffering["faq"];
-    faqEn?: ServiceOffering["faq"];
   };
   gvspaceLocalization?: ContentLocalization | null;
 };
@@ -162,34 +151,21 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
       )
       .map((node) => {
         const d = node.serviceDetails ?? {};
-        const en = locale === "en";
-        const localized = Boolean(
-          node.gvspaceLocalization?.locale && node.gvspaceLocalization.locale !== "legacy",
-        );
         return {
           id: node.databaseId,
           slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
           parentSlug: node.parent?.node?.slug
             ? getPublicContentSlug(node.parent.node.slug, node.parent.node.gvspaceLocalization)
             : undefined,
-          title: d.title || (localized ? node.title : en && d.titleEn ? d.titleEn : node.title),
-          headline:
-            d.headline ||
-            (localized
-              ? node.title
-              : (en ? d.headlineEn : d.headlineUk) || (en && d.titleEn ? d.titleEn : node.title)),
-          description:
-            d.description || (localized ? "" : ((en ? d.descriptionEn : d.descriptionUk) ?? "")),
+          title: d.title || node.title,
+          headline: d.headline || d.title || node.title,
+          description: d.description || "",
           image: node.featuredImage?.node?.sourceUrl,
           fitCards: d.fitCards ?? [],
-          includes:
-            d.includes?.length || localized
-              ? (d.includes ?? [])
-              : ((en ? d.includesEn : d.includesUk) ?? []),
-          steps:
-            d.steps?.length || localized ? (d.steps ?? []) : ((en ? d.stepsEn : d.stepsUk) ?? []),
+          includes: d.includes ?? [],
+          steps: d.steps ?? [],
           metrics: d.metrics ?? [],
-          faq: d.faq?.length || localized ? (d.faq ?? []) : ((en ? d.faqEn : d.faqUk) ?? []),
+          faq: d.faq ?? [],
           modifiedAt: node.modified,
         };
       });
