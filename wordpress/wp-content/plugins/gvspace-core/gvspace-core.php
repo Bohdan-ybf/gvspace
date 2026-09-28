@@ -4124,16 +4124,31 @@ function gvspace_find_localized_service(string $group, string $locale): ?WP_Post
     return $posts[0] ?? null;
 }
 
+function gvspace_service_direction_label(WP_Post $post): string
+{
+    $title = (string) get_post_meta($post->ID, '_gvspace_service_title_uk', true);
+    if ($title === '') {
+        $title = $post->post_title;
+    }
+    return $title !== '' ? $title : $post->post_name;
+}
+
 function gvspace_get_service_directions(): array
 {
-    return get_posts([
-        'post_type' => 'gv_service',
-        'post_parent' => 0,
-        'post_status' => ['publish', 'draft', 'pending', 'private', 'future'],
-        'numberposts' => -1,
-        'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
-        'suppress_filters' => true,
-    ]);
+    global $wpdb;
+    $statuses = ['publish', 'draft', 'pending', 'private', 'future'];
+    $placeholders = implode(', ', array_fill(0, count($statuses), '%s'));
+    $ids = $wpdb->get_col($wpdb->prepare(
+        "SELECT ID FROM {$wpdb->posts}
+         WHERE post_type = 'gv_service' AND post_parent = 0 AND post_status IN ($placeholders)
+         ORDER BY menu_order ASC, post_title ASC",
+        ...$statuses
+    ));
+    if (!is_array($ids) || !$ids) {
+        return [];
+    }
+    $posts = array_filter(array_map('get_post', array_map('intval', $ids)));
+    return array_values($posts);
 }
 
 add_filter('manage_gv_service_posts_columns', function (array $columns): array {
@@ -4182,7 +4197,7 @@ add_action('restrict_manage_posts', function (string $post_type): void {
     echo '<select name="gv_service_direction" id="gv_service_direction">';
     echo '<option value="0">Усі напрямки</option>';
     foreach (gvspace_get_service_directions() as $direction) {
-        echo '<option value="' . esc_attr((string) $direction->ID) . '"' . selected($selected_direction, (int) $direction->ID, false) . '>' . esc_html($direction->post_title) . '</option>';
+        echo '<option value="' . esc_attr((string) $direction->ID) . '"' . selected($selected_direction, (int) $direction->ID, false) . '>' . esc_html(gvspace_service_direction_label($direction)) . '</option>';
     }
     echo '</select>';
 });

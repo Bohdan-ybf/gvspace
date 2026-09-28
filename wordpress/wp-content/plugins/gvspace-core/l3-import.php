@@ -638,7 +638,7 @@ function gvspace_render_l3_import_page(): void
                             <select id="gvspace_l3_parent" name="gvspace_l3_parent" required>
                                 <option value="">Оберіть напрямок</option>
                                 <?php foreach ($directions as $direction) : ?>
-                                    <option value="<?php echo esc_attr((string) $direction->ID); ?>"><?php echo esc_html($direction->post_title); ?></option>
+                                    <option value="<?php echo esc_attr((string) $direction->ID); ?>"><?php echo esc_html(gvspace_service_direction_label($direction)); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </td>
