@@ -1,14 +1,61 @@
 import Link from "next/link";
+import type { ComponentType, SVGProps } from "react";
 import type { Locale } from "@/i18n";
-import { Logo } from "./logo";
-import { ClutchIcon, FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
-
 import { getTranslations } from "@/i18n/pages";
-const routes = ["services", "about", "blog"];
+import { Logo } from "./logo";
+import {
+  ClutchIcon,
+  FacebookIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  TelegramIcon,
+  XIcon,
+} from "./icons/social-icons";
+import type { FooterContactDetails } from "./wordpress-contacts";
 
-export function Footer({ locale }: { locale: Locale }) {
+const socialIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
+  facebook: FacebookIcon,
+  instagram: InstagramIcon,
+  linkedin: LinkedinIcon,
+  clutch: ClutchIcon,
+  x: XIcon,
+  twitter: XIcon,
+  telegram: TelegramIcon,
+};
+
+function SocialLinks({
+  socials,
+  label,
+}: {
+  socials: FooterContactDetails["socials"];
+  label: string;
+}) {
+  if (!socials.length) return null;
+
+  return (
+    <nav className="social" aria-label={label}>
+      {socials.map((social) => {
+        const Icon = socialIcons[social.network];
+        return (
+          <a
+            key={`${social.network}-${social.href}`}
+            href={social.href}
+            aria-label={social.name}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {Icon ? <Icon /> : social.name}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function Footer({ locale, contacts }: { locale: Locale; contacts: FooterContactDetails }) {
   const t = getTranslations("common", locale).footer;
   const { footer } = getTranslations("global", locale);
+  const columns = [footer.services, footer.company, footer.resources];
 
   return (
     <footer>
@@ -17,73 +64,39 @@ export function Footer({ locale }: { locale: Locale }) {
           <div className="footer-logo">
             <Logo variant="footer" />
           </div>
-          <nav className="social" aria-label={t.socialNavigationLabel}>
-            <a href="#" aria-label="Facebook">
-              <FacebookIcon />
-            </a>
-            <a href="#" aria-label="Instagram">
-              <InstagramIcon />
-            </a>
-            <a href="#" aria-label="LinkedIn">
-              <LinkedinIcon />
-            </a>
-            <a href="#" aria-label="Clutch">
-              <ClutchIcon />
-            </a>
-          </nav>
+          <SocialLinks socials={contacts.socials} label={t.socialNavigationLabel} />
         </div>
-        {footer.columns.map((column, columnIndex) => (
-          <div key={column[0]}>
-            <b>{column[0]}</b>
-            {column.slice(1).map((item, index) => {
-              const href =
-                columnIndex === 1 && index === 1
-                  ? `/${locale}/team`
-                  : columnIndex === 1 && index === 2
-                    ? `/${locale}/cases`
-                    : columnIndex === 1 && index === 3
-                      ? `/${locale}/reviews`
-                      : columnIndex === 2 && index === 1
-                        ? `/${locale}/technologies`
-                        : columnIndex === 2 && index === 2
-                          ? `/${locale}/careers`
-                          : `/${locale}/${routes[columnIndex]}${index ? `/${index}` : ""}`;
-
-              return (
-                <Link key={item} href={href}>
-                  {item}
-                </Link>
-              );
-            })}
+        {columns.map((column) => (
+          <div key={column.title}>
+            <b>{column.title}</b>
+            {column.links.map((item) => (
+              <Link key={item.href} href={`/${locale}${item.href}`}>
+                {item.label}
+              </Link>
+            ))}
           </div>
         ))}
         <div>
-          <b>{footer.contacts[0]}</b>
-          <span>[email@gvspace.com]</span>
-          <span>{footer.contacts[1]}</span>
-          <span>{footer.contacts[2]}</span>
+          <b>{footer.contactsTitle}</b>
+          {contacts.phone ? <a href={contacts.phone.href}>{contacts.phone.value}</a> : null}
+          {contacts.email ? <a href={contacts.email.href}>{contacts.email.value}</a> : null}
+          {contacts.offices.map((office) => (
+            <span className="footer-office" key={office.key}>
+              {office.text}
+            </span>
+          ))}
         </div>
       </div>
       <div className="footer-mobile-wordmark">
         <Logo variant="footer" />
-        <nav className="social" aria-label={t.socialNavigationLabel}>
-          <a href="#" aria-label="Facebook">
-            <FacebookIcon />
-          </a>
-          <a href="#" aria-label="Instagram">
-            <InstagramIcon />
-          </a>
-          <a href="#" aria-label="LinkedIn">
-            <LinkedinIcon />
-          </a>
-          <a href="#" aria-label="Clutch">
-            <ClutchIcon />
-          </a>
-        </nav>
+        <SocialLinks socials={contacts.socials} label={t.socialNavigationLabel} />
       </div>
       <div className="legal container">
-        © 2026 GVSPACE. {footer.copyright}
+        <span>
+          © {new Date().getFullYear()} GVSPACE. {footer.copyright}
+        </span>
         <nav aria-label={t.legalNavigationLabel}>
+          <Link href={`/${locale}/sitemap`}>{footer.sitemap}</Link>
           <Link href={`/${locale}/privacy-policy`}>{footer.privacy}</Link>
           <Link href={`/${locale}/terms-of-use`}>{footer.terms}</Link>
         </nav>

@@ -164,7 +164,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
         items={[{ label: locale === "uk" ? "Індустрії" : "Industries" }]}
         visible
       />
-      <ContactSection text={contactText} />
+      <ContactSection locale={locale} text={contactText} />
     </main>
   );
 }

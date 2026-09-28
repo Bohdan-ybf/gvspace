@@ -4,16 +4,19 @@ import { usePathname } from "next/navigation";
 import type { Locale } from "@/i18n";
 import { Footer } from "./footer";
 import { Header } from "./header";
+import type { FooterContactDetails } from "./wordpress-contacts";
 import type { ServiceOffering } from "./wordpress-services";
 
 export function SiteShell({
   children,
   locale,
   services,
+  contacts,
 }: {
   children: React.ReactNode;
   locale: Locale;
   services: ServiceOffering[];
+  contacts: FooterContactDetails;
 }) {
   const pathname = usePathname();
   const localizedPathname = pathname.startsWith(`/${locale}`)
@@ -45,7 +48,7 @@ export function SiteShell({
     <>
       <Header locale={locale} forceSolid={!hasDarkHero} services={services} />
       {children}
-      <Footer locale={locale} />
+      <Footer locale={locale} contacts={contacts} />
     </>
   );
 }

@@ -121,7 +121,7 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
             </div>
           )}
         </section>
-        <ContactSection text={getTranslations("global", locale).contact} />
+        <ContactSection locale={locale} text={getTranslations("global", locale).contact} />
       </main>
     </>
   );

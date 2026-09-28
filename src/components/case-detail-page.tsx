@@ -262,7 +262,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
             { label: `${seo?.h1 || data.title}${data.direction ? ` — ${data.direction}` : ""}` },
           ]}
         />
-        <ContactSection text={contact} />
+        <ContactSection locale={locale} text={contact} />
       </main>
     </>
   );

@@ -224,7 +224,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
           </section>
         )}
         <Breadcrumbs locale={locale} items={serviceBreadcrumbs} visible />
-        <ContactSection text={dictionary.contact} />
+        <ContactSection locale={locale} text={dictionary.contact} />
       </main>
     </>
   );

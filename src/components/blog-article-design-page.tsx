@@ -193,7 +193,7 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
         items={[{ label: t.blogBreadcrumb, pathname: "/blog" }, { label: seo?.h1 || post.title }]}
         visible
       />
-      <ContactSection text={getTranslations("global", locale).contact} />
+      <ContactSection locale={locale} text={getTranslations("global", locale).contact} />
     </main>
   );
 }

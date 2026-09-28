@@ -80,7 +80,7 @@ export async function Home({ locale }: { locale: Locale }) {
           <b>{homeSeoText?.title ?? text.mission.statement}</b>
           <p>{homeSeoText?.content ?? text.mission.description}</p>
         </section>
-        <ContactSection text={text.contact} />
+        <ContactSection locale={locale} text={text.contact} />
       </main>
     </>
   );

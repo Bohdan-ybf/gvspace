@@ -53,7 +53,7 @@ export async function TeamPage({ locale }: { locale: Locale }) {
         items={[{ label: locale === "uk" ? "Команда" : "Team" }]}
         visible
       />
-      <ContactSection text={text.contact} />
+      <ContactSection locale={locale} text={text.contact} />
     </main>
   );
 }

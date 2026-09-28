@@ -108,6 +108,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
         <ReviewsCatalog locale={locale} reviews={reviews} />
         <CasesShowcaseSection locale={locale} />
         <ContactSection
+          locale={locale}
           text={{
             ...text.contact,
             title: t.contactTitle,

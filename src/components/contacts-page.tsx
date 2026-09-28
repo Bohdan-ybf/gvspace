@@ -4,12 +4,14 @@ import type { Locale } from "@/i18n";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ArrowRight } from "./icons/arrow-right";
 import {
+  ClutchIcon,
   EmailIcon,
   FacebookIcon,
   InstagramIcon,
   LinkedinIcon,
   PhoneIcon,
   TelegramIcon,
+  XIcon,
 } from "./icons/social-icons";
 import { getContactsPage, type ContactsChannel, type ContactsSocial } from "./wordpress-contacts";
 
@@ -24,6 +26,9 @@ const socialIcons = {
   instagram: InstagramIcon,
   facebook: FacebookIcon,
   telegram: TelegramIcon,
+  clutch: ClutchIcon,
+  x: XIcon,
+  twitter: XIcon,
 } as const;
 
 function channelHref(channel: ContactsChannel): string {

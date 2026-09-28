@@ -124,10 +124,10 @@ const fallbackByLocale: Record<"uk" | "en", Omit<ContactsPageContent, "seo">> = 
     ],
     socials: [
       {
-        name: "LinkedIn",
-        handle: "linkedin.com/company/[gvspace]",
-        url: "https://www.linkedin.com/company/gvspace",
-        network: "linkedin",
+        name: "Facebook",
+        handle: "facebook.com/[gvspace]",
+        url: "https://www.facebook.com/gvspace",
+        network: "facebook",
       },
       {
         name: "Instagram",
@@ -136,10 +136,10 @@ const fallbackByLocale: Record<"uk" | "en", Omit<ContactsPageContent, "seo">> = 
         network: "instagram",
       },
       {
-        name: "Facebook",
-        handle: "facebook.com/[gvspace]",
-        url: "https://www.facebook.com/gvspace",
-        network: "facebook",
+        name: "LinkedIn",
+        handle: "linkedin.com/company/[gvspace]",
+        url: "https://www.linkedin.com/company/gvspace",
+        network: "linkedin",
       },
       {
         name: "Telegram-канал",
@@ -215,10 +215,10 @@ const fallbackByLocale: Record<"uk" | "en", Omit<ContactsPageContent, "seo">> = 
     ],
     socials: [
       {
-        name: "LinkedIn",
-        handle: "linkedin.com/company/[gvspace]",
-        url: "https://www.linkedin.com/company/gvspace",
-        network: "linkedin",
+        name: "Facebook",
+        handle: "facebook.com/[gvspace]",
+        url: "https://www.facebook.com/gvspace",
+        network: "facebook",
       },
       {
         name: "Instagram",
@@ -227,10 +227,10 @@ const fallbackByLocale: Record<"uk" | "en", Omit<ContactsPageContent, "seo">> = 
         network: "instagram",
       },
       {
-        name: "Facebook",
-        handle: "facebook.com/[gvspace]",
-        url: "https://www.facebook.com/gvspace",
-        network: "facebook",
+        name: "LinkedIn",
+        handle: "linkedin.com/company/[gvspace]",
+        url: "https://www.linkedin.com/company/gvspace",
+        network: "linkedin",
       },
       {
         name: "Telegram channel",
@@ -241,6 +241,59 @@ const fallbackByLocale: Record<"uk" | "en", Omit<ContactsPageContent, "seo">> = 
     ],
   },
 };
+
+export type FooterContactDetails = {
+  phone: { value: string; href: string } | null;
+  email: { value: string; href: string } | null;
+  offices: { key: string; text: string }[];
+  socials: { name: string; href: string; network: string }[];
+};
+
+const socialOrder = ["facebook", "instagram", "linkedin", "clutch", "x", "twitter", "telegram"];
+
+function socialRank(network: string) {
+  const index = socialOrder.indexOf(network);
+  return index === -1 ? socialOrder.length : index;
+}
+
+function channelHref(kind: string, value: string, url?: string) {
+  if (url) return url;
+  if (kind === "email") return `mailto:${value.replace(/[[\]]/g, "")}`;
+  if (kind === "phone") return `tel:${value.replace(/[^\d+]/g, "")}`;
+  return value;
+}
+
+export function toFooterContacts(page: ContactsPageContent): FooterContactDetails {
+  const phoneChannel = page.channels.find((channel) => channel.kind === "phone" && channel.value);
+  const emailChannel = page.channels.find((channel) => channel.kind === "email" && channel.value);
+  const officePhone = page.offices.find((office) => office.phone);
+  const officeEmail = page.offices.find((office) => office.email);
+  const phoneValue = phoneChannel?.value || officePhone?.phone || "";
+  const emailValue = emailChannel?.value || officeEmail?.email || "";
+
+  return {
+    phone: phoneValue
+      ? { value: phoneValue, href: channelHref("phone", phoneValue, phoneChannel?.url) }
+      : null,
+    email: emailValue
+      ? { value: emailValue, href: channelHref("email", emailValue, emailChannel?.url) }
+      : null,
+    offices: page.offices
+      .map((office, index) => ({
+        key: `${office.title}-${index}`,
+        text: office.address.trim() || office.title.replace(/:\s*$/, ""),
+      }))
+      .filter((office) => office.text),
+    socials: page.socials
+      .filter((social) => social.url)
+      .map((social) => ({
+        name: social.name || social.network,
+        href: social.url,
+        network: social.network,
+      }))
+      .sort((left, right) => socialRank(left.network) - socialRank(right.network)),
+  };
+}
 
 export function getFallbackContacts(locale: Locale): ContactsPageContent {
   const content = fallbackByLocale[locale === "en" ? "en" : "uk"];

@@ -61,7 +61,7 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
         items={[{ label: locale === "uk" ? "Технології" : "Technologies" }]}
         visible
       />
-      <ContactSection text={contactText} />
+      <ContactSection locale={locale} text={contactText} />
     </main>
   );
 }

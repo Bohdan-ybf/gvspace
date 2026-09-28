@@ -58,7 +58,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
         items={[{ label: locale === "uk" ? "Про компанію" : "About us" }]}
         visible
       />
-      <ContactSection text={text.contact} />
+      <ContactSection locale={locale} text={text.contact} />
     </main>
   );
 }

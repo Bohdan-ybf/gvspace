@@ -251,7 +251,7 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
         $socials = gvspace_contacts_decode_list($post->ID, 'socials', $locale);
         while (count($channels) < 3) $channels[] = ['kind' => '', 'label' => '', 'value' => '', 'hint' => '', 'url' => ''];
         while (count($offices) < 3) $offices[] = ['title' => '', 'address' => '', 'phone' => '', 'email' => ''];
-        while (count($socials) < 4) $socials[] = ['name' => '', 'handle' => '', 'url' => '', 'network' => ''];
+        while (count($socials) < 6) $socials[] = ['name' => '', 'handle' => '', 'url' => '', 'network' => ''];
 
         echo '<div data-gvspace-language-panel="contacts-page-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
         echo '<hr><h3>' . esc_html($label) . '</h3>';
@@ -321,7 +321,7 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
             echo '<p><label>Підпис / нік<br><input type="text" name="gvspace_contacts_social_handle_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($social['handle'] ?? '')) . '" style="width:100%"></label></p>';
             echo '<p><label>Посилання<br><input type="url" name="gvspace_contacts_social_url_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($social['url'] ?? '')) . '" style="width:100%"></label></p>';
             echo '<p><label>Іконка<br><select name="gvspace_contacts_social_network_' . esc_attr($locale) . '[]">';
-            foreach (['linkedin' => 'LinkedIn', 'instagram' => 'Instagram', 'facebook' => 'Facebook', 'telegram' => 'Telegram'] as $network => $network_label) {
+            foreach (['facebook' => 'Facebook', 'instagram' => 'Instagram', 'linkedin' => 'LinkedIn', 'clutch' => 'Clutch', 'x' => 'X', 'telegram' => 'Telegram'] as $network => $network_label) {
                 echo '<option value="' . esc_attr($network) . '"' . selected(($social['network'] ?? '') === $network, true, false) . '>' . esc_html($network_label) . '</option>';
             }
             echo '</select></label></p>';
@@ -401,7 +401,7 @@ add_action('save_post_gv_contacts_page', function (int $post_id): void {
             $name = sanitize_text_field((string) ($social_names[$index] ?? ''));
             if ($name === '') continue;
             $network = sanitize_key((string) ($social_networks[$index] ?? 'linkedin'));
-            if (!in_array($network, ['linkedin', 'instagram', 'facebook', 'telegram'], true)) $network = 'linkedin';
+            if (!in_array($network, ['linkedin', 'instagram', 'facebook', 'clutch', 'x', 'telegram'], true)) $network = 'linkedin';
             $socials[] = [
                 'name' => $name,
                 'handle' => sanitize_text_field((string) ($social_handles[$index] ?? '')),

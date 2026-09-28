@@ -69,6 +69,7 @@ export function Header({
     return getLocalizedUrl(language, pathname);
   };
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [areDesktopMenusDismissed, setAreDesktopMenusDismissed] = useState(false);
@@ -123,6 +124,24 @@ export function Header({
           },
         ];
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
+  const isMenuOpenRef = useRef(isMenuOpen);
+  isMenuOpenRef.current = isMenuOpen;
+  const isSectionActive = (index: number) => {
+    const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+    const prefix = `/${locale}`;
+    const section = path.startsWith(prefix) ? path.slice(prefix.length) || "/" : path;
+    const matches = (href: string) => section === href || section.startsWith(`${href}/`);
+
+    if (index === 0) return matches("/services");
+    if (index === 1) return matches("/cases");
+    if (index === 2) return matches("/technologies") || matches("/industries");
+    if (index === 3) {
+      return ["/about", "/reviews", "/team", "/partners", "/careers"].some(matches);
+    }
+    if (index === 4) return matches("/blog");
+    if (index === 5) return matches("/contacts");
+    return false;
+  };
 
   useEffect(() => {
     const updateHeader = () => setIsScrolled(window.scrollY > 24);
@@ -131,6 +150,29 @@ export function Header({
     window.addEventListener("scroll", updateHeader, { passive: true });
 
     return () => window.removeEventListener("scroll", updateHeader);
+  }, []);
+
+  useEffect(() => {
+    if (isMenuOpen) setIsCompact(false);
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    let idleTimer = 0;
+
+    const onScroll = () => {
+      if (isMenuOpenRef.current) return;
+
+      setIsCompact(true);
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => setIsCompact(false), 700);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(idleTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -162,7 +204,7 @@ export function Header({
 
   return (
     <header
-      className={`header${forceSolid || isScrolled || isMenuOpen ? " is-scrolled" : ""}${isMenuOpen ? " is-menu-open" : ""}${areDesktopMenusDismissed ? " desktop-menus-dismissed" : ""}`}
+      className={`header${forceSolid || isScrolled || isMenuOpen ? " is-scrolled" : ""}${isMenuOpen ? " is-menu-open" : ""}${isCompact && !isMenuOpen ? " is-compact" : ""}${areDesktopMenusDismissed ? " desktop-menus-dismissed" : ""}`}
     >
       <Link className="logo" href={`/${locale}`} aria-label="GVSPACE">
         <Logo variant="header" priority />
@@ -176,7 +218,11 @@ export function Header({
         {text.navigation.map((label, index) =>
           index === 0 ? (
             <div className="services-menu" key="services">
-              <Link href={`/${locale}/services`}>
+              <Link
+                className="nav-link"
+                href={`/${locale}/services`}
+                aria-current={isSectionActive(0) ? "page" : undefined}
+              >
                 {label.toUpperCase()}
                 <ChevronDown className="chevron" />
               </Link>
@@ -213,7 +259,11 @@ export function Header({
             </div>
           ) : index === 2 ? (
             <div className="expertise-menu" key="expertise">
-              <Link href={`/${locale}/technologies`}>
+              <Link
+                className="nav-link"
+                href={`/${locale}/technologies`}
+                aria-current={isSectionActive(2) ? "page" : undefined}
+              >
                 {label.toUpperCase()}
                 <ChevronDown className="chevron" />
               </Link>
@@ -233,7 +283,11 @@ export function Header({
             </div>
           ) : index === 3 ? (
             <div className="company-menu" key="about">
-              <Link href={`/${locale}/about`}>
+              <Link
+                className="nav-link"
+                href={`/${locale}/about`}
+                aria-current={isSectionActive(3) ? "page" : undefined}
+              >
                 {label.toUpperCase()}
                 <ChevronDown className="chevron" />
               </Link>
@@ -252,7 +306,12 @@ export function Header({
               </div>
             </div>
           ) : (
-            <Link key={routes[index]} href={`/${locale}/${routes[index]}`}>
+            <Link
+              className="nav-link"
+              key={routes[index]}
+              href={`/${locale}/${routes[index]}`}
+              aria-current={isSectionActive(index) ? "page" : undefined}
+            >
               {label.toUpperCase()}
               {index === 2 && <ChevronDown className="chevron" />}
             </Link>
@@ -357,6 +416,7 @@ export function Header({
                 <div className="mobile-nav-row">
                   <Link
                     href={`/${locale}/${routes[index]}`}
+                    aria-current={isSectionActive(index) ? "page" : undefined}
                     tabIndex={isMenuOpen ? 0 : -1}
                     onClick={() => setIsMenuOpen(false)}
                   >

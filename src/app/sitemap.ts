@@ -23,6 +23,9 @@ const staticPaths = [
   "/partners",
   "/blog",
   "/contacts",
+  "/sitemap",
+  "/privacy-policy",
+  "/terms-of-use",
 ] as const;
 
 type SitemapEntry = { pathname: string; lastModified?: string };

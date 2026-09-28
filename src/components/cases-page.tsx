@@ -67,7 +67,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
           items={[{ label: locale === "uk" ? "Кейси" : "Cases" }]}
           visible
         />
-        <ContactSection text={contactText} />
+        <ContactSection locale={locale} text={contactText} />
       </main>
     </>
   );

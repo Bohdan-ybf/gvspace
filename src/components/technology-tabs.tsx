@@ -20,7 +20,8 @@ export function TechnologyTabs({ locale, categories, items, emptyLabel }: Techno
     ? activeCategory
     : firstCategory;
   const visibleItems = useMemo(
-    () => items.filter(({ categorySlugs }) => categorySlugs.includes(selectedCategory)),
+    () =>
+      items.filter(({ categorySlugs }) => categorySlugs.includes(selectedCategory)).slice(0, 16),
     [items, selectedCategory],
   );
   const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {

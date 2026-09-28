@@ -138,7 +138,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
           items={[{ label: locale === "uk" ? "Послуги" : "Services" }]}
           visible
         />
-        <ContactSection text={text.contact} />
+        <ContactSection locale={locale} text={text.contact} />
       </main>
     </>
   );

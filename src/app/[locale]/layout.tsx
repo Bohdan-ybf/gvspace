@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/i18n";
 import { SiteShell } from "@/components/site-shell";
+import { getContactsPage, toFooterContacts } from "@/components/wordpress-contacts";
 import { getServiceOfferings } from "@/components/wordpress-services";
 import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
@@ -57,12 +58,15 @@ export default async function LocaleLayout({
 }>) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const services = await getServiceOfferings(locale);
+  const [services, contactsPage] = await Promise.all([
+    getServiceOfferings(locale),
+    getContactsPage(locale),
+  ]);
 
   return (
     <html lang={locale}>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SiteShell locale={locale} services={services}>
+        <SiteShell locale={locale} services={services} contacts={toFooterContacts(contactsPage)}>
           {children}
         </SiteShell>
       </body>
