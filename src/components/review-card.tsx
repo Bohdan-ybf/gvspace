@@ -16,15 +16,10 @@ export function ReviewCard({
   closeLabel?: string;
 }) {
   const [phase, setPhase] = useState<"closed" | "open" | "closing">("closed");
-  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const tag = (review.tagLabel || review.category).trim();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (phase === "closed") return;
@@ -111,7 +106,7 @@ export function ReviewCard({
           </span>
         </div>
       )}
-      {mounted && phase !== "closed"
+      {phase !== "closed"
         ? createPortal(
             <div
               className={`review-modal${phase === "closing" ? " is-closing" : ""}`}

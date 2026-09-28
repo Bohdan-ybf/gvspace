@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { Locale } from "@/i18n";
-import { ArrowRight } from "./icons/arrow-right";
 
 export type TechnologyMeetPerson = {
   name: string;
