@@ -48,5 +48,6 @@ export default {
     title: "Відгуки",
     allReviews: "Усі відгуки",
     readMore: "Читати повністю",
+    close: "Закрити",
   },
 } as const;

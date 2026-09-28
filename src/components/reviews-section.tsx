@@ -41,7 +41,7 @@ export async function ReviewsSection({
             compact
             key={review.slug}
             review={review}
-            readMoreHref={`/${locale}/reviews`}
+            closeLabel={t.close}
             readMoreLabel={t.readMore}
           />
         ))}

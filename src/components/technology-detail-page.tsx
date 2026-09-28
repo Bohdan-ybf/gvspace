@@ -17,7 +17,6 @@ import { getServiceOfferings } from "./wordpress-services";
 import { getTeamDirectory, type TeamMember } from "./wordpress-team";
 import {
   getTechnologyBySlug,
-  memberMatchesTechnology,
   pickTechnologyCase,
   technologyServiceDirection,
   type TechnologyItem,
@@ -52,20 +51,22 @@ function technologyPeople(
   members: TeamMember[],
 ): TechnologyMeetPerson[] {
   const meetName = technology.meet.name.trim().toLowerCase();
-  const matched = members.filter((member) => memberMatchesTechnology(member, technology));
-  const people = matched.map((member) => ({
+  const people = members.map((member) => ({
     name: member.name,
     role: member.role,
     quote: meetName && member.name.trim().toLowerCase() === meetName ? technology.meet.quote : "",
     years: member.years,
     projects: member.projects,
     tags: member.tags,
-    photo: member.image || technology.meet.photo || "/images/team/user-none.jpg",
+    photo: member.image || "/images/team/user-none.jpg",
   }));
-  if (
-    technology.meet.name &&
-    !people.some((person) => person.name.trim().toLowerCase() === meetName)
-  ) {
+  const featuredIndex = meetName
+    ? people.findIndex((person) => person.name.trim().toLowerCase() === meetName)
+    : -1;
+  if (featuredIndex > 0) {
+    const [featured] = people.splice(featuredIndex, 1);
+    people.unshift(featured);
+  } else if (featuredIndex === -1 && technology.meet.name) {
     people.unshift({
       name: technology.meet.name,
       role: technology.meet.role,
@@ -317,7 +318,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                       {relatedCase.catalogTitle}
                     </Link>
                   </h3>
-                  {relatedCase.excerpt ? <p>[{relatedCase.excerpt}]</p> : null}
+                  {relatedCase.excerpt ? <p>{relatedCase.excerpt}</p> : null}
                   <Link
                     className="technology-detail-case-arrow"
                     href={`/${locale}/cases/${relatedCase.slug}`}

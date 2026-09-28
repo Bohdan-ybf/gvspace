@@ -25,6 +25,8 @@ export default {
     title: "The right tool for every task",
     emptyState: "Add technologies in WordPress",
     allTechnologies: "All technologies",
+    moreTitle: "And that's not all",
+    moreText: "We choose the tool for the task, not the other way around.",
   },
   detail: {
     catalogLabel: "Technologies",

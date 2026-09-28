@@ -48,5 +48,6 @@ export default {
     title: "Reviews",
     allReviews: "All reviews",
     readMore: "Read in full",
+    close: "Close",
   },
 } as const;

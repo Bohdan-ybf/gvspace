@@ -53,6 +53,39 @@ function MobileMenuArrowIcon() {
   );
 }
 
+function PlusIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path
+        d="M6 0.75V11.25M0.75 6H11.25"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MobileBackArrowIcon() {
+  return (
+    <svg width="12" height="11" viewBox="0 0 12 11" fill="none" aria-hidden="true">
+      <path
+        d="M0.500023 5.16683L11.1667 5.16683M5.16669 0.50016L0.500023 5.16683L5.16669 9.8335"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+type MobilePanel =
+  | { level: "root" }
+  | { level: "services" }
+  | { level: "direction"; slug: string }
+  | { level: "expertise" }
+  | { level: "company" };
+
 export function Header({
   locale,
   forceSolid = false,
@@ -73,7 +106,7 @@ export function Header({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [areDesktopMenusDismissed, setAreDesktopMenusDismissed] = useState(false);
-  const [openMobileSection, setOpenMobileSection] = useState<number | null>(null);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>({ level: "root" });
   const staticServiceDirections = getTranslations("services", locale).directions;
   const cmsServiceDirections = services
     .filter((service) => !service.parentSlug)
@@ -91,7 +124,6 @@ export function Header({
         title: direction.title,
         services: direction.services.map((title) => ({ slug: "", title })),
       }));
-  const serviceDirections = serviceMenuDirections.map(({ slug, title }) => ({ slug, title }));
   const companyLinks = t.companyLinks;
   const expertiseLinks =
     locale === "uk"
@@ -123,6 +155,22 @@ export function Header({
               "Every industry has its own economics, decision cycle, and pain points. We do not transfer one niche's template to another.",
           },
         ];
+  const companyMenuLabel = locale === "uk" ? "Компанія" : "Company";
+  const backLabel = locale === "uk" ? "Назад" : "Back";
+  const companyOrder = ["/about", "/team", "/careers", "/reviews", "/partners"];
+  const orderedCompanyLinks = [
+    ...companyOrder.flatMap((href) => companyLinks.filter((item) => item.href === href)),
+    ...companyLinks.filter((item) => !companyOrder.includes(item.href)),
+  ];
+  const localeCode = (language: Locale) => (language === "uk" ? "UA" : language.toUpperCase());
+  const closeMobileMenu = () => {
+    setIsMenuOpen(false);
+    setMobilePanel({ level: "root" });
+  };
+  const activeDirection =
+    mobilePanel.level === "direction"
+      ? serviceMenuDirections.find((direction) => direction.slug === mobilePanel.slug)
+      : undefined;
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
   const isMenuOpenRef = useRef(isMenuOpen);
 
@@ -180,6 +228,7 @@ export function Header({
       if (event.key === "Escape") {
         setIsMenuOpen(false);
         setIsLanguageOpen(false);
+        setMobilePanel({ level: "root" });
       }
     };
 
@@ -331,12 +380,13 @@ export function Header({
           <button
             className="language-button"
             type="button"
+            aria-label={localeNames[locale]}
             aria-expanded={isLanguageOpen}
             aria-haspopup="menu"
             aria-controls="language-menu"
             onClick={() => setIsLanguageOpen((isOpen) => !isOpen)}
           >
-            {locale === "uk" ? "UA" : locale.toUpperCase()}
+            {localeCode(locale)}
             <ChevronDown className="chevron" />
           </button>
           <div
@@ -345,20 +395,22 @@ export function Header({
             role="menu"
             aria-hidden={!isLanguageOpen}
           >
-            {locales.map((language) => (
-              <Link
-                key={language}
-                href={languageHref(language)}
-                hrefLang={language}
-                role="menuitem"
-                aria-current={locale === language ? "page" : undefined}
-                tabIndex={isLanguageOpen ? 0 : -1}
-                onClick={() => setIsLanguageOpen(false)}
-              >
-                <span>{localeNames[language]}</span>
-                <span>{language.toUpperCase()}</span>
-              </Link>
-            ))}
+            {[...locales]
+              .sort((a, b) => localeCode(a).localeCompare(localeCode(b)))
+              .map((language) => (
+                <Link
+                  key={language}
+                  href={languageHref(language)}
+                  hrefLang={language}
+                  role="menuitem"
+                  aria-label={localeNames[language]}
+                  aria-current={locale === language ? "page" : undefined}
+                  tabIndex={isLanguageOpen ? 0 : -1}
+                  onClick={() => setIsLanguageOpen(false)}
+                >
+                  {localeCode(language)}
+                </Link>
+              ))}
           </div>
         </div>
         <button
@@ -369,6 +421,7 @@ export function Header({
           className="menu"
           onClick={() => {
             setIsMenuOpen((isOpen) => !isOpen);
+            setMobilePanel({ level: "root" });
             setIsCompact(false);
           }}
         >
@@ -391,83 +444,194 @@ export function Header({
               hrefLang={language}
               aria-current={locale === language ? "page" : undefined}
               tabIndex={isMenuOpen ? 0 : -1}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={closeMobileMenu}
             >
-              {language === "uk" ? "UA" : language.toUpperCase()}
+              {localeCode(language)}
             </Link>
           ))}
         </div>
         <div className="mobile-nav-links">
-          {text.navigation.map((label, index) => {
-            const submenu =
-              index === 0
-                ? serviceDirections.map((item) => ({
-                    href: `/services/${item.slug}`,
-                    label: item.title,
-                  }))
-                : index === 2
-                  ? expertiseLinks.map((item) => ({ href: item.href, label: item.title }))
-                  : index === 3
-                    ? companyLinks.map((item) => ({ href: item.href, label: item.title }))
-                    : [];
-            const hasSubmenu = submenu.length > 0;
-            const isSubmenuOpen = openMobileSection === index;
-
-            return (
-              <div className="mobile-nav-item" key={routes[index]}>
-                <div className="mobile-nav-row">
-                  <Link
-                    href={`/${locale}/${routes[index]}`}
-                    aria-current={isSectionActive(index) ? "page" : undefined}
-                    tabIndex={isMenuOpen ? 0 : -1}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {label}
-                  </Link>
-                  {hasSubmenu && (
-                    <button
-                      type="button"
-                      aria-label={`${label}: ${isSubmenuOpen ? "close" : "open"}`}
-                      aria-expanded={isSubmenuOpen}
-                      onClick={() => setOpenMobileSection(isSubmenuOpen ? null : index)}
-                    >
-                      <MobileMenuArrowIcon />
-                    </button>
-                  )}
-                </div>
-                {hasSubmenu && (
-                  <div className={`mobile-submenu${isSubmenuOpen ? " is-open" : ""}`}>
-                    {submenu.map((item) => (
-                      <Link
-                        href={`/${locale}${item.href}`}
-                        tabIndex={isMenuOpen && isSubmenuOpen ? 0 : -1}
-                        onClick={() => setIsMenuOpen(false)}
-                        key={item.href}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+          {mobilePanel.level === "root" && (
+            <>
+              <button
+                type="button"
+                className="mobile-root-row"
+                onClick={() => setMobilePanel({ level: "services" })}
+              >
+                <span>{text.navigation[0]}</span>
+                <PlusIcon />
+              </button>
+              <Link
+                className="mobile-root-row"
+                href={`/${locale}/cases`}
+                aria-current={isSectionActive(1) ? "page" : undefined}
+                tabIndex={isMenuOpen ? 0 : -1}
+                onClick={closeMobileMenu}
+              >
+                {text.navigation[1]}
+              </Link>
+              <button
+                type="button"
+                className="mobile-root-row"
+                onClick={() => setMobilePanel({ level: "expertise" })}
+              >
+                <span>{text.navigation[2]}</span>
+                <PlusIcon />
+              </button>
+              <button
+                type="button"
+                className="mobile-root-row"
+                onClick={() => setMobilePanel({ level: "company" })}
+              >
+                <span>{companyMenuLabel}</span>
+                <PlusIcon />
+              </button>
+              <Link
+                className="mobile-root-row"
+                href={`/${locale}/blog`}
+                aria-current={isSectionActive(4) ? "page" : undefined}
+                tabIndex={isMenuOpen ? 0 : -1}
+                onClick={closeMobileMenu}
+              >
+                {text.navigation[4]}
+              </Link>
+              <Link
+                className="mobile-root-row"
+                href={`/${locale}/contacts`}
+                aria-current={isSectionActive(5) ? "page" : undefined}
+                tabIndex={isMenuOpen ? 0 : -1}
+                onClick={closeMobileMenu}
+              >
+                {text.navigation[5]}
+              </Link>
+            </>
+          )}
+          {mobilePanel.level === "services" && (
+            <>
+              <div className="mobile-panel-heading">
+                <button
+                  type="button"
+                  aria-label={backLabel}
+                  onClick={() => setMobilePanel({ level: "root" })}
+                >
+                  <MobileBackArrowIcon />
+                </button>
+                <p>{text.navigation[0]}</p>
               </div>
-            );
-          })}
+              {serviceMenuDirections.map((direction) =>
+                direction.services.length ? (
+                  <button
+                    type="button"
+                    className="mobile-drill-row"
+                    key={direction.slug}
+                    onClick={() => setMobilePanel({ level: "direction", slug: direction.slug })}
+                  >
+                    <span>{direction.title}</span>
+                    <MobileMenuArrowIcon />
+                  </button>
+                ) : (
+                  <Link
+                    className="mobile-sub-link"
+                    href={`/${locale}/services/${direction.slug}`}
+                    key={direction.slug}
+                    tabIndex={isMenuOpen ? 0 : -1}
+                    onClick={closeMobileMenu}
+                  >
+                    {direction.title}
+                  </Link>
+                ),
+              )}
+            </>
+          )}
+          {mobilePanel.level === "direction" && activeDirection && (
+            <>
+              <div className="mobile-panel-heading">
+                <button
+                  type="button"
+                  aria-label={backLabel}
+                  onClick={() => setMobilePanel({ level: "services" })}
+                >
+                  <MobileBackArrowIcon />
+                </button>
+                <p>{activeDirection.title}</p>
+              </div>
+              {activeDirection.services.map((service) => (
+                <Link
+                  className="mobile-sub-link"
+                  href={
+                    service.slug
+                      ? `/${locale}/services/${activeDirection.slug}/${service.slug}`
+                      : `/${locale}/services/${activeDirection.slug}`
+                  }
+                  key={service.slug || service.title}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={closeMobileMenu}
+                >
+                  {service.title}
+                </Link>
+              ))}
+            </>
+          )}
+          {mobilePanel.level === "expertise" && (
+            <>
+              <div className="mobile-panel-heading">
+                <button
+                  type="button"
+                  aria-label={backLabel}
+                  onClick={() => setMobilePanel({ level: "root" })}
+                >
+                  <MobileBackArrowIcon />
+                </button>
+                <p>{text.navigation[2]}</p>
+              </div>
+              {expertiseLinks.map((item) => (
+                <Link
+                  className="mobile-sub-link"
+                  href={`/${locale}${item.href}`}
+                  key={item.href}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={closeMobileMenu}
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </>
+          )}
+          {mobilePanel.level === "company" && (
+            <>
+              <div className="mobile-panel-heading">
+                <button
+                  type="button"
+                  aria-label={backLabel}
+                  onClick={() => setMobilePanel({ level: "root" })}
+                >
+                  <MobileBackArrowIcon />
+                </button>
+                <p>{companyMenuLabel}</p>
+              </div>
+              {orderedCompanyLinks.map((item) => (
+                <Link
+                  className="mobile-sub-link"
+                  href={`/${locale}${item.href}`}
+                  key={item.href}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={closeMobileMenu}
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </>
+          )}
         </div>
         <div className="mobile-menu-footer">
           <Link
             className="btn btn-primary mobile-menu-cta"
             href={`/${locale}/contacts`}
             tabIndex={isMenuOpen ? 0 : -1}
-            onClick={() => setIsMenuOpen(false)}
+            onClick={closeMobileMenu}
           >
             {text.common.buildSystem}
           </Link>
-          <a href="tel:+380123456789" tabIndex={isMenuOpen ? 0 : -1}>
-            +38 012 345 67 89
-          </a>
-          <a href="mailto:e-mail@gvspace.com" tabIndex={isMenuOpen ? 0 : -1}>
-            e-mail@gvspace.com
-          </a>
           <div
             className="mobile-menu-socials"
             aria-label={locale === "uk" ? "Соціальні мережі" : "Social media"}

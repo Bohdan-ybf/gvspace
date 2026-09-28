@@ -14,8 +14,7 @@ export function CaseArrow({ className }: CaseArrowProps) {
     >
       <path
         d="M19.2498 0H0V8.75025H17.1412C13.9526 14.9773 7.46693 19.2498 0 19.2498V28C7.45508 28 14.231 25.0859 19.2498 20.3317V28H28V0H19.2498Z"
-        fill="#000080"
-        fillOpacity="0.7"
+        fill="currentColor"
       />
     </svg>
   );

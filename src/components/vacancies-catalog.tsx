@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
-import { ChevronDown } from "./icons/chevron-down";
+import { FilterSelect } from "./filter-select";
 import { VacancyCard } from "./vacancy-card";
 import type { VacancySummary } from "./wordpress-vacancies";
 
@@ -58,30 +58,18 @@ export function VacanciesCatalog({
     <section className="vacancies-section">
       <span className="mono">{t.vacanciesEyebrow}</span>
       <div className="vacancies-filters">
-        <label>
-          <span className="sr-only">{t.directionLabel}</span>
-          <select value={direction} onChange={(event) => setDirection(event.target.value)}>
-            <option value="all">{t.directionLabel}</option>
-            {directionOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <ChevronDown />
-        </label>
-        <label>
-          <span className="sr-only">{t.employmentLabel}</span>
-          <select value={employment} onChange={(event) => setEmployment(event.target.value)}>
-            <option value="all">{t.employmentLabel}</option>
-            {employmentOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <ChevronDown />
-        </label>
+        <FilterSelect
+          label={t.directionLabel}
+          value={direction}
+          options={directionOptions.map((option) => ({ value: option, label: option }))}
+          onChange={setDirection}
+        />
+        <FilterSelect
+          label={t.employmentLabel}
+          value={employment}
+          options={employmentOptions.map((option) => ({ value: option, label: option }))}
+          onChange={setEmployment}
+        />
       </div>
       {visibleVacancies.length ? (
         <div className="vacancies-grid">

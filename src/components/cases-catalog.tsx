@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Locale } from "@/i18n";
 import { CaseCard } from "./case-card";
-import { ChevronDown } from "./icons/chevron-down";
+import { FilterSelect } from "./filter-select";
 import type { CaseStudy } from "./wordpress-cases";
 import { getTranslations } from "@/i18n/pages";
 
@@ -75,36 +75,18 @@ export function CasesCatalog({ locale, projects }: { locale: Locale; projects: C
   return (
     <section className="cases-catalog section container">
       <div className="cases-filters">
-        <label>
-          <span className="sr-only">{t.directionLabel}</span>
-          <select
-            value={direction}
-            onChange={(event) => changeFilter(setDirection, event.target.value)}
-          >
-            <option value="all">{t.directionLabel}</option>
-            {directionOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <ChevronDown />
-        </label>
-        <label>
-          <span className="sr-only">{t.typeLabel}</span>
-          <select
-            value={projectType}
-            onChange={(event) => changeFilter(setProjectType, event.target.value)}
-          >
-            <option value="all">{t.typeLabel}</option>
-            {typeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <ChevronDown />
-        </label>
+        <FilterSelect
+          label={t.directionLabel}
+          value={direction}
+          options={directionOptions.map((option) => ({ value: option, label: option }))}
+          onChange={(value) => changeFilter(setDirection, value)}
+        />
+        <FilterSelect
+          label={t.typeLabel}
+          value={projectType}
+          options={typeOptions.map((option) => ({ value: option, label: option }))}
+          onChange={(value) => changeFilter(setProjectType, value)}
+        />
       </div>
 
       {visibleProjects.length ? (

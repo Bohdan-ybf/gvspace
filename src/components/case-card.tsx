@@ -44,14 +44,14 @@ export function CaseCard({
           <h3>
             <Link href={href}>{project.catalogTitle}</Link>
           </h3>
-          {project.result ? <p className="home-case-result">[{project.result}]</p> : null}
+          {project.result ? <p className="home-case-result">{project.result}</p> : null}
           {metrics.length > 0 && (
             <dl className="home-case-metrics">
               {metrics.map((metric) => {
                 const unit = metricUnit(metric.label);
                 return (
                   <div key={`${metric.value}-${metric.label}`}>
-                    <dt>{catalog.metricLabel}</dt>
+                    <dt>{unit ? catalog.metricLabel : metric.label}</dt>
                     <dd>
                       {metric.value}
                       {unit ? <small> {unit}</small> : null}
@@ -106,14 +106,14 @@ export function CaseCard({
           <h3>
             <Link href={href}>{project.catalogTitle}</Link>
           </h3>
-          {project.result ? <p>[{project.result}]</p> : null}
+          {project.result ? <p>{project.result}</p> : null}
           {metrics.length > 0 && (
             <dl>
               {metrics.map((metric) => {
                 const unit = metricUnit(metric.label);
                 return (
                   <div key={`${metric.value}-${metric.label}`}>
-                    <dt>{catalog.metricLabel}</dt>
+                    <dt>{unit ? catalog.metricLabel : metric.label}</dt>
                     <dd>
                       {metric.value}
                       {unit ? <small> {unit}</small> : null}
@@ -149,7 +149,7 @@ export function CaseCard({
         <h3>
           <Link href={href}>{project.catalogTitle}</Link>
         </h3>
-        {project.result ? <p>[{project.result}]</p> : null}
+        {project.result ? <p>{project.result}</p> : null}
         <Link aria-hidden="true" className="catalog-case-arrow" href={href} tabIndex={-1}>
           <CaseArrow />
         </Link>

@@ -309,10 +309,16 @@ export async function getTechnologyStack(locale: Locale): Promise<TechnologyStac
   };
 }
 
+const serviceParentByCategory: Record<string, string> = {
+  development: "web-development",
+  systems: "it-development",
+  marketing: "digital-marketing",
+  content: "content-production",
+};
+
 export function technologyServiceDirection(categorySlugs: string[]): string {
   const primary = categorySlugs[0] ?? "development";
-  if (primary === "systems") return "development";
-  return primary;
+  return serviceParentByCategory[primary] ?? primary;
 }
 
 export function caseMatchesTechnology(

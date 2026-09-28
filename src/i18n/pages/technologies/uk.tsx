@@ -25,6 +25,8 @@ export default {
     title: "Правильний інструмент для кожної задачі",
     emptyState: "Додайте технології у WordPress",
     allTechnologies: "Усі технології",
+    moreTitle: "І це ще не все",
+    moreText: "Обираємо інструмент під задачу, не навпаки.",
   },
   detail: {
     catalogLabel: "Технології",

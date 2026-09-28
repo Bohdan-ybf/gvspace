@@ -42,10 +42,13 @@ export async function TechnologyShowcaseSection({
           emptyLabel={t.emptyState}
           initialCategory={initialCategory}
         />
-        <div className="technology-showcase-fade" aria-hidden="true" />
-        <Link className="btn technology-showcase-more" href={`/${locale}/technologies`}>
-          {t.allTechnologies}
-          <ArrowRight />
+        <Link className="technology-showcase-more" href={`/${locale}/technologies`}>
+          <strong>{t.moreTitle}</strong>
+          <p>{t.moreText}</p>
+          <span className="technology-showcase-more-action">
+            {t.allTechnologies}
+            <ArrowRight />
+          </span>
         </Link>
       </div>
     </section>

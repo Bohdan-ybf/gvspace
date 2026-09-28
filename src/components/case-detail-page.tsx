@@ -46,7 +46,6 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
   const brief = data.challenge || data.excerpt;
   const processItems = data.tasks.map(splitLine);
   const lead = data.team[0];
-  const tags = [data.projectType, data.direction].filter(Boolean);
   const caseSchema = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -78,13 +77,12 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
           <div className="container case-detail-hero-content">
             <div className="case-detail-hero-body">
               <div>
-                {tags.length > 0 && (
+                {(data.projectType || data.direction) && (
                   <div className="case-detail-hero-tags">
-                    {tags.map((tag) => (
-                      <span className="mono" key={tag}>
-                        [ {tag} ]
-                      </span>
-                    ))}
+                    {data.projectType ? (
+                      <span className="mono is-light">{data.projectType}</span>
+                    ) : null}
+                    {data.direction ? <span className="mono">{data.direction}</span> : null}
                   </div>
                 )}
                 <h1>{seo?.h1 || data.title}</h1>
@@ -172,8 +170,11 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
               />
               {data.gallery.length > 0 && (
                 <div className="case-gallery">
-                  {data.gallery.slice(0, 2).map((image) => (
-                    <div key={image} style={{ backgroundImage: `url(${image})` }} />
+                  {data.gallery.map((image) => (
+                    <figure key={image}>
+                      <img alt="" aria-hidden="true" className="case-gallery-fill" src={image} />
+                      <img alt="" className="case-gallery-photo" src={image} />
+                    </figure>
                   ))}
                 </div>
               )}

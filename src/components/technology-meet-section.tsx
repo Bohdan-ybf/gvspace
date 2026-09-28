@@ -58,7 +58,7 @@ export function TechnologyMeetSection({
         </article>
         {person ? (
           <>
-            <div className="technology-meet-photo">
+            <div className="technology-meet-photo" key={`${person.name}-photo`}>
               <Image
                 src={person.photo || "/images/team/user-none.jpg"}
                 alt={person.name}
@@ -67,7 +67,7 @@ export function TechnologyMeetSection({
                 unoptimized={!person.photo || person.photo.startsWith("http")}
               />
             </div>
-            <article className="technology-meet-profile">
+            <article className="technology-meet-profile" key={`${person.name}-profile`}>
               {canCycle ? (
                 <div className="technology-meet-nav">
                   <button type="button" aria-label={previousLabel} onClick={() => go(-1)}>
