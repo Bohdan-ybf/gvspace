@@ -125,7 +125,10 @@ export function Header({
         ];
   const languageSwitcherRef = useRef<HTMLDivElement>(null);
   const isMenuOpenRef = useRef(isMenuOpen);
-  isMenuOpenRef.current = isMenuOpen;
+
+  useEffect(() => {
+    isMenuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
   const isSectionActive = (index: number) => {
     const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
     const prefix = `/${locale}`;
@@ -151,10 +154,6 @@ export function Header({
 
     return () => window.removeEventListener("scroll", updateHeader);
   }, []);
-
-  useEffect(() => {
-    if (isMenuOpen) setIsCompact(false);
-  }, [isMenuOpen]);
 
   useEffect(() => {
     let idleTimer = 0;
@@ -368,7 +367,10 @@ export function Header({
           aria-expanded={isMenuOpen}
           aria-controls="mobile-navigation"
           className="menu"
-          onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+          onClick={() => {
+            setIsMenuOpen((isOpen) => !isOpen);
+            setIsCompact(false);
+          }}
         >
           <span />
           <span />
