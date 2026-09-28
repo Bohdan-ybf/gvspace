@@ -40,6 +40,8 @@ function gvspace_tech_import_field_map(): array
         'open graph title' => ['seo', 'og_title'],
         'open graph description' => ['seo', 'og_description'],
         'open graph image url' => ['seo', 'og_image'],
+        'головне зображення — файл логотипа' => 'icon_file',
+        'головне зображення' => 'icon_file',
     ];
 }
 
@@ -68,6 +70,7 @@ function gvspace_tech_import_empty_record(): array
         'tabs' => '',
         'related_case' => '',
         'order' => '',
+        'icon_file' => '',
         'icon_only' => false,
         'seo' => [
             'title' => '',
@@ -85,6 +88,7 @@ function gvspace_tech_import_map_heading(string $heading): string|array|null
 {
     $normalized = gvspace_l3_import_normalize_heading($heading);
     $normalized = str_replace("'", '’', $normalized);
+    $normalized = str_replace([' – ', ' - ', ' − '], ' — ', $normalized);
     $map = gvspace_tech_import_field_map();
     if (isset($map[$normalized])) {
         return $map[$normalized];
@@ -146,6 +150,7 @@ function gvspace_tech_import_parse_markdown(string $markdown, string $filename):
         }
         $record[$target] = $value;
     }
+    $record['icon_file'] = gvspace_tech_import_icon_basename((string) $record['icon_file']);
 
     $field_locale = gvspace_l3_import_normalize_locale((string) $record['locale']);
     if ($parts['locale'] !== '') {
@@ -180,6 +185,55 @@ function gvspace_tech_import_parse_markdown(string $markdown, string $filename):
 function gvspace_tech_import_icon_extensions(): array
 {
     return ['svg', 'png', 'webp', 'jpg', 'jpeg'];
+}
+
+function gvspace_tech_import_icon_basename(string $value): string
+{
+    $value = trim($value);
+    if ($value === '') {
+        return '';
+    }
+    $lines = preg_split('/\r\n|\r|\n/', $value) ?: [];
+    foreach ($lines as $line) {
+        $line = trim($line, " \t`*_");
+        if ($line === '' || $line === '---' || str_starts_with($line, '#')) {
+            continue;
+        }
+        if (preg_match('/^(порожнє|залишити порожнім)/iu', $line)) {
+            return '';
+        }
+        if (preg_match('/([a-z0-9][a-z0-9._+\-]*\.(?:svg|png|jpe?g|webp))/i', $line, $match)) {
+            return strtolower($match[1]);
+        }
+    }
+    return '';
+}
+
+function gvspace_tech_import_post_slug(int $post_id): string
+{
+    $group = (string) get_post_meta($post_id, '_gvspace_translation_group', true);
+    if ($group !== '') {
+        return $group;
+    }
+    return (string) get_post_field('post_name', $post_id);
+}
+
+function gvspace_tech_import_find_post_by_icon_filename(string $filename): int
+{
+    $key = gvspace_tech_import_icon_basename($filename);
+    if ($key === '') {
+        return 0;
+    }
+    $found = get_posts([
+        'post_type' => 'gv_technology',
+        'post_status' => 'any',
+        'numberposts' => 1,
+        'fields' => 'ids',
+        'suppress_filters' => true,
+        'meta_key' => '_gvspace_technology_icon_filename',
+        'meta_value' => $key,
+    ]);
+    return $found ? (int) $found[0] : 0;
 }
 
 function gvspace_tech_import_icon_rank(string $extension): int
@@ -246,7 +300,7 @@ function gvspace_tech_import_path_is_inside(string $path, string $dir): bool
 function gvspace_tech_import_read_zip(string $tmp_path): array
 {
     if (!class_exists(ZipArchive::class)) {
-        return ['files' => [], 'error' => 'На сервері немає ZipArchive. Завантажте .md та іконки окремими файлами.'];
+        return ['files' => [], 'error' => 'На сервері немає ZipArchive. Завантажте .md та логотипи окремими файлами.'];
     }
     $zip = new ZipArchive();
     if ($zip->open($tmp_path) !== true) {
@@ -269,9 +323,13 @@ function gvspace_tech_import_read_zip(string $tmp_path): array
             continue;
         }
         $total += strlen($contents);
-        if ($total > 20 * 1024 * 1024 || count($files) >= 300) {
+        if (count($files) >= 4000) {
             $zip->close();
-            return ['files' => [], 'error' => 'Архів завеликий. Розбийте імпорт на менші пакети.'];
+            return ['files' => [], 'error' => 'В архіві більше ніж 4000 файлів .md і логотипів. Приберіть зайве і завантажте знову.'];
+        }
+        if ($total > 128 * 1024 * 1024) {
+            $zip->close();
+            return ['files' => [], 'error' => 'Після розпакування архів більший за 128 МБ. Залиште в ньому лише .md і логотипи.'];
         }
         $files[] = [
             'name' => basename($name),
@@ -285,7 +343,7 @@ function gvspace_tech_import_read_zip(string $tmp_path): array
 function gvspace_tech_import_collect_uploads(string $field = 'gvspace_tech_files'): array
 {
     if (empty($_FILES[$field]) || !is_array($_FILES[$field]['name'])) {
-        return ['files' => [], 'error' => 'Додайте .md, іконки або .zip.'];
+        return ['files' => [], 'error' => 'Додайте .md, логотипи або .zip.'];
     }
 
     $bag = $_FILES[$field];
@@ -315,7 +373,7 @@ function gvspace_tech_import_collect_uploads(string $field = 'gvspace_tech_files
         }
         $allowed = $extension === 'md' || in_array($extension, gvspace_tech_import_icon_extensions(), true);
         if (!$allowed) {
-            $errors[] = esc_html($name) . ' — потрібен .md, іконка (svg, png, jpg, webp) або .zip.';
+            $errors[] = esc_html($name) . ' — потрібен .md, логотип (svg, png, jpg, webp) або .zip.';
             continue;
         }
         $contents = (string) file_get_contents($tmp);
@@ -331,7 +389,7 @@ function gvspace_tech_import_collect_uploads(string $field = 'gvspace_tech_files
     }
 
     if (!$files && !$errors) {
-        $errors[] = 'Додайте .md, іконки або .zip.';
+        $errors[] = 'Додайте .md, логотипи або .zip.';
     }
 
     return ['files' => $files, 'error' => implode(' ', $errors)];
@@ -349,33 +407,118 @@ function gvspace_tech_import_store_icons(array $files): array
         if (!in_array($extension, gvspace_tech_import_icon_extensions(), true)) {
             continue;
         }
-        $parts = gvspace_tech_import_filename_parts($name);
-        if ($parts['slug'] === '') {
-            $errors[] = $name . ': не вдалося визначити slug іконки.';
-            continue;
-        }
         $contents = (string) $file['contents'];
         if ($extension === 'svg' && !gvspace_tech_import_svg_is_safe($contents)) {
             $errors[] = $name . ': SVG містить скрипти або інший активний вміст і пропущений.';
             continue;
         }
-        $slug = $parts['slug'];
-        if (isset($icons[$slug]) && gvspace_tech_import_icon_rank($icons[$slug]['extension']) <= gvspace_tech_import_icon_rank($extension)) {
-            $errors[] = $name . ': для «' . $slug . '» уже є іконка ' . $icons[$slug]['name'] . '.';
+        $key = gvspace_tech_import_icon_basename($name);
+        if ($key === '') {
+            $errors[] = $name . ': не вдалося прочитати назву файлу логотипа.';
             continue;
         }
-        $path = trailingslashit($dir) . $slug . '.' . $extension;
+        $parts = gvspace_tech_import_filename_parts($name);
+        if (isset($icons[$key]) && gvspace_tech_import_icon_rank($icons[$key]['extension']) <= gvspace_tech_import_icon_rank($extension)) {
+            $errors[] = $name . ': файл «' . $key . '» уже є в пакеті (' . $icons[$key]['name'] . ').';
+            continue;
+        }
+        $safe = sanitize_file_name($key);
+        if ($safe === '') {
+            $safe = 'logo-' . md5($key) . '.' . $extension;
+        }
+        $path = trailingslashit($dir) . $safe;
         if (file_put_contents($path, $contents) === false) {
-            $errors[] = $name . ': не вдалося зберегти іконку.';
+            $errors[] = $name . ': не вдалося зберегти логотип.';
             continue;
         }
-        $icons[$slug] = [
-            'name' => $name,
+        $icons[$key] = [
+            'name' => basename($name),
             'path' => $path,
             'extension' => $extension,
+            'slug' => (string) $parts['slug'],
         ];
     }
     return ['icons' => $icons, 'errors' => $errors];
+}
+
+function gvspace_tech_import_pick_icon(string $slug, string $wanted, array $icons_by_name): ?array
+{
+    if ($wanted !== '' && isset($icons_by_name[$wanted])) {
+        return $icons_by_name[$wanted];
+    }
+    if ($slug === '') {
+        return null;
+    }
+    $best = null;
+    foreach ($icons_by_name as $icon) {
+        if ((string) ($icon['slug'] ?? '') !== $slug) {
+            continue;
+        }
+        if ($best === null || gvspace_tech_import_icon_rank((string) $icon['extension']) < gvspace_tech_import_icon_rank((string) $best['extension'])) {
+            $best = $icon;
+        }
+    }
+    return $best;
+}
+
+function gvspace_tech_import_resolve_icons(array $records, array $icons_by_name): array
+{
+    $preferred_file = [];
+    foreach ($records as $record) {
+        $slug = (string) $record['slug'];
+        $wanted = (string) ($record['icon_file'] ?? '');
+        if ($slug === '' || $wanted === '') {
+            continue;
+        }
+        $from_uk = (string) $record['locale'] === 'uk';
+        if (!isset($preferred_file[$slug]) || $from_uk) {
+            $preferred_file[$slug] = $wanted;
+        }
+    }
+
+    $resolved = [];
+    $used_names = [];
+    $errors = [];
+    foreach ($records as $index => $record) {
+        $slug = (string) $record['slug'];
+        if ($slug === '' || isset($resolved[$slug])) {
+            continue;
+        }
+        $wanted = $preferred_file[$slug] ?? '';
+        $icon = gvspace_tech_import_pick_icon($slug, $wanted, $icons_by_name);
+        if ($icon) {
+            $name_key = strtolower((string) $icon['name']);
+            if (isset($used_names[$name_key]) && $used_names[$name_key] !== $slug) {
+                $errors[] = $icon['name'] . ': цей файл уже призначено технології «' . $used_names[$name_key] . '».';
+                $icon = null;
+            } else {
+                $used_names[$name_key] = $slug;
+                $resolved[$slug] = $icon;
+                if ($wanted !== '' && $name_key !== $wanted) {
+                    $records[$index]['warnings'][] = 'Файл «' . $wanted . '» не знайдено, прив’язано «' . $icon['name'] . '».';
+                }
+            }
+        }
+        if ($icon) {
+            continue;
+        }
+        $existing = gvspace_find_technology_post_id($slug);
+        if ($existing && has_post_thumbnail($existing)) {
+            continue;
+        }
+        if ($wanted !== '') {
+            $records[$index]['warnings'][] = 'Немає логотипа «' . $wanted . '». Додайте файл з цією назвою до імпорту.';
+        } else {
+            $records[$index]['warnings'][] = 'Немає іконки. Додайте файл з поля «Головне зображення — файл логотипа» або gvspace-tech-' . $slug . '.svg.';
+        }
+    }
+
+    return [
+        'records' => $records,
+        'icons' => $resolved,
+        'used_names' => $used_names,
+        'errors' => $errors,
+    ];
 }
 
 function gvspace_tech_import_preview_payload(array $files, bool $replace_catalog): array
@@ -387,7 +530,7 @@ function gvspace_tech_import_preview_payload(array $files, bool $replace_catalog
         }
     }
     $stored = gvspace_tech_import_store_icons($files);
-    $icons = $stored['icons'];
+    $icons_by_name = $stored['icons'];
     $errors = $stored['errors'];
 
     $records = [];
@@ -408,46 +551,47 @@ function gvspace_tech_import_preview_payload(array $files, bool $replace_catalog
     }
 
     $slugs_with_copy = [];
-    foreach ($records as $index => $record) {
-        $slug = (string) $record['slug'];
-        $slugs_with_copy[$slug] = true;
-        if (isset($icons[$slug])) {
-            continue;
-        }
-        $existing = gvspace_find_technology_post_id($slug);
-        if ($existing && has_post_thumbnail($existing)) {
-            continue;
-        }
-        if (!isset($records[$index]['warnings'])) {
-            $records[$index]['warnings'] = [];
-        }
-        $records[$index]['warnings'][] = 'Немає іконки. Покладіть поряд файл gvspace-tech-' . $slug . '.svg (або png, jpg, webp).';
+    foreach ($records as $record) {
+        $slugs_with_copy[(string) $record['slug']] = true;
     }
 
-    foreach ($icons as $slug => $icon) {
-        if (isset($slugs_with_copy[$slug])) {
+    $matched = gvspace_tech_import_resolve_icons($records, $icons_by_name);
+    $records = $matched['records'];
+    $icons = $matched['icons'];
+    $errors = array_merge($errors, $matched['errors']);
+
+    foreach ($icons_by_name as $icon) {
+        $name_key = strtolower((string) $icon['name']);
+        if (isset($matched['used_names'][$name_key])) {
             continue;
         }
-        $existing = gvspace_find_technology_post_id($slug);
-        if (!$existing) {
-            $errors[] = $icon['name'] . ': немає файлу gvspace-tech-' . $slug . '.md і технології з таким slug в адмінці.';
-            unset($icons[$slug]);
+        $existing = gvspace_tech_import_find_post_by_icon_filename((string) $icon['name']);
+        $slug = $existing ? gvspace_tech_import_post_slug($existing) : (string) ($icon['slug'] ?? '');
+        if ($slug !== '' && (isset($slugs_with_copy[$slug]) || isset($icons[$slug]))) {
             continue;
         }
+        if (!$existing && $slug !== '') {
+            $existing = gvspace_find_technology_post_id($slug);
+        }
+        if (!$existing || $slug === '') {
+            $errors[] = $icon['name'] . ': не знайдено технологію з логотипом «' . $icon['name'] . '». Назва має збігатися з полем «Головне зображення — файл логотипа».';
+            continue;
+        }
+        $icons[$slug] = $icon;
         $records[] = array_merge(gvspace_tech_import_empty_record(), [
             'filename' => $icon['name'],
             'slug' => $slug,
             'locale' => '—',
             'title' => get_the_title($existing),
             'icon_only' => true,
-            'warnings' => ['Лише іконка: тексти цієї технології не зміняться.'],
+            'warnings' => ['Лише логотип: тексти цієї технології не зміняться.'],
         ]);
     }
 
     if (!$markdown) {
         $replace_catalog = false;
         if ($icons) {
-            $errors[] = 'Без .md файлів каталог не замінюється, оновлюються лише іконки існуючих технологій.';
+            $errors[] = 'Без .md файлів каталог не замінюється, оновлюються лише логотипи існуючих технологій.';
         }
     }
 
@@ -592,6 +736,10 @@ function gvspace_tech_import_apply_shared(int $post_id, array $shared): void
     if ($shared['related_case'] !== '') {
         update_post_meta($post_id, '_gvspace_technology_related_case', sanitize_title((string) $shared['related_case']));
     }
+    $icon_file = (string) ($shared['icon_file'] ?? '');
+    if ($icon_file !== '') {
+        update_post_meta($post_id, '_gvspace_technology_icon_filename', $icon_file);
+    }
 }
 
 function gvspace_tech_import_attach_icon(int $post_id, array $icon): bool
@@ -685,7 +833,7 @@ function gvspace_tech_import_shared_fields(array $records): array
         }
         $slug = (string) $record['slug'];
         if (!isset($shared[$slug])) {
-            $shared[$slug] = ['tabs' => '', 'related_case' => '', 'from_uk' => false];
+            $shared[$slug] = ['tabs' => '', 'related_case' => '', 'icon_file' => '', 'from_uk' => false];
         }
         $from_uk = (string) $record['locale'] === 'uk';
         if ($record['tabs'] !== '' && ($shared[$slug]['tabs'] === '' || ($from_uk && !$shared[$slug]['from_uk']))) {
@@ -693,6 +841,10 @@ function gvspace_tech_import_shared_fields(array $records): array
         }
         if ($record['related_case'] !== '' && ($shared[$slug]['related_case'] === '' || ($from_uk && !$shared[$slug]['from_uk']))) {
             $shared[$slug]['related_case'] = (string) $record['related_case'];
+        }
+        $icon_file = (string) ($record['icon_file'] ?? '');
+        if ($icon_file !== '' && ($shared[$slug]['icon_file'] === '' || ($from_uk && !$shared[$slug]['from_uk']))) {
+            $shared[$slug]['icon_file'] = $icon_file;
         }
         if ($from_uk) {
             $shared[$slug]['from_uk'] = true;
@@ -750,9 +902,9 @@ function gvspace_tech_import_apply(array $payload): array
     return [
         'ok' => true,
         'message' => sprintf(
-            'Імпорт технологій завершено: оновлено %d записів (%s), іконок встановлено %d. В архів перенесено %d.',
+            'Імпорт технологій завершено: оновлено %d записів (%s), логотипів встановлено %d. В архів перенесено %d.',
             $updated,
-            implode(', ', array_keys($locales)) ?: 'іконки',
+            implode(', ', array_keys($locales)) ?: 'логотипи',
             $icons_set,
             $archived
         ),
@@ -854,7 +1006,7 @@ function gvspace_render_tech_import_page(): void
     ?>
     <div class="wrap">
         <h1>Імпорт технологій</h1>
-        <p>Завантажте файли у форматі адмінки. Один <code>.md</code> = одна технологія однією мовою. Іконка — окремий файл з тим самим slug: <code>gvspace-tech-aws.md</code> і <code>gvspace-tech-aws.svg</code>. Українська вже залита не затирається, якщо в пакеті лише інші мови.</p>
+        <p>Завантажте файли у форматі адмінки. Один <code>.md</code> = одна технологія однією мовою. Логотип підтягується за назвою з поля «Головне зображення — файл логотипа»: якщо там <code>activecampaign.svg</code>, у пакеті має бути файл <code>activecampaign.svg</code>. Регістр не важливий (<code>AWS.svg</code> і <code>aws.svg</code> — той самий файл). Українська вже залита не затирається, якщо в пакеті лише інші мови.</p>
         <p><a class="button" href="<?php echo esc_url($template_url); ?>">Завантажити шаблон .md</a></p>
         <?php if ($notice !== '') : ?>
             <div class="notice notice-<?php echo esc_attr($notice_type); ?> is-dismissible"><p><?php echo esc_html($notice); ?></p></div>
@@ -874,7 +1026,7 @@ function gvspace_render_tech_import_page(): void
                         <th>Slug</th>
                         <th>Мова</th>
                         <th>Назва</th>
-                        <th>Іконка</th>
+                        <th>Логотип</th>
                         <th>Поля</th>
                     </tr>
                 </thead>
@@ -894,7 +1046,7 @@ function gvspace_render_tech_import_page(): void
                         <td>
                             <?php
                             if (!empty($record['icon_only'])) {
-                                echo 'лише іконка';
+                                echo 'лише логотип';
                             } else {
                                 $filled = [];
                                 foreach ([
@@ -948,7 +1100,7 @@ function gvspace_render_tech_import_page(): void
                         <th scope="row"><label for="gvspace_tech_files">Файли</label></th>
                         <td>
                             <input id="gvspace_tech_files" name="gvspace_tech_files[]" type="file" accept=".md,.zip,.svg,.png,.jpg,.jpeg,.webp,text/markdown,application/zip,image/svg+xml,image/png,image/jpeg,image/webp" multiple required>
-                            <p class="description">Кілька файлів або один .zip. Текст: <code>gvspace-tech-aws.md</code> = uk, <code>gvspace-tech-aws.en.md</code> = en. Іконка: <code>gvspace-tech-aws.svg</code> (png, jpg, webp теж підходять) — одна на технологію, для всіх мов.</p>
+                            <p class="description">Кілька файлів або один .zip. Текст: <code>gvspace-tech-aws.md</code> = uk, <code>gvspace-tech-aws.en.md</code> = en. Логотип — файл з тією назвою, що в полі «Головне зображення — файл логотипа» (<code>activecampaign.svg</code>, <code>AWS.svg</code>, <code>FastAPI.svg</code>). Один файл на технологію, для всіх мов. Підійдуть svg, png, jpg, webp.</p>
                         </td>
                     </tr>
                     <tr>
