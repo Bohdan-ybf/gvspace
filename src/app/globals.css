@@ -117,6 +117,70 @@ h2 {
   background: var(--purple);
   border-color: var(--purple);
 }
+.header .actions > .btn-primary,
+.header .mobile-header-cta,
+.header .mobile-menu-cta {
+  background-color: var(--violet);
+  background-image: linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 0;
+  transition:
+    background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s ease 0.14s,
+    border-color 0.35s ease;
+}
+.header .actions > .btn-primary:hover,
+.header .mobile-header-cta:hover,
+.header .mobile-menu-cta:hover {
+  color: var(--violet);
+  border-color: #fff;
+  background-color: var(--violet);
+  background-image: linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 100%;
+}
+.technologies-hero-content .btn-primary,
+.team-hero-content .btn-primary,
+.about-hero-content .btn-primary,
+.cases-hero-content .btn-primary,
+.reviews-hero-heading .btn-primary,
+.services-hero-copy .btn-primary,
+.industries-hero-content .btn-primary,
+.partners-hero-content .btn-primary,
+.service-detail-hero .btn-primary,
+.open-application .btn-primary,
+.careers-banner .btn-primary {
+  background-color: var(--violet);
+  background-image: linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0 100%;
+  transition:
+    background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s ease 0.14s,
+    border-color 0.35s ease;
+}
+.technologies-hero-content .btn-primary:hover,
+.team-hero-content .btn-primary:hover,
+.about-hero-content .btn-primary:hover,
+.cases-hero-content .btn-primary:hover,
+.reviews-hero-heading .btn-primary:hover,
+.services-hero-copy .btn-primary:hover,
+.industries-hero-content .btn-primary:hover,
+.partners-hero-content .btn-primary:hover,
+.service-detail-hero .btn-primary:hover,
+.open-application .btn-primary:hover,
+.careers-banner .btn-primary:hover {
+  color: var(--violet);
+  border-color: #fff;
+  background-color: var(--violet);
+  background-image: linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 100% 100%;
+}
 .btn:active {
   transform: translateY(1px);
 }
@@ -7665,14 +7729,26 @@ h2 {
   padding: 16px 30px;
   justify-content: center;
   color: var(--violet);
-  background: #fff;
+  background-color: #fff;
+  background-image: linear-gradient(var(--violet), var(--violet));
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0 100%;
   border-color: #fff;
   font-size: 16px;
+  transition:
+    background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s ease 0.14s,
+    border-color 0.35s ease;
 }
 .hero-cta:hover {
-  color: var(--violet);
-  background: var(--pastel);
-  border-color: var(--pastel);
+  color: #fff;
+  border-color: var(--violet);
+  background-color: #fff;
+  background-image: linear-gradient(var(--violet), var(--violet));
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 100% 100%;
 }
 .intro {
   display: flex;
