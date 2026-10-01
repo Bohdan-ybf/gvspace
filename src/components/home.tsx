@@ -276,7 +276,7 @@ function Faq({ text, locale, items }: { text: Messages; locale: Locale; items: F
       </div>
       <div className="faq-list">
         {items.map((item, index) => (
-          <details key={item.id} open={index === 1}>
+          <details key={item.id} name="home-faq" open={index === 1}>
             <summary>
               {item.question}
               <span>+</span>

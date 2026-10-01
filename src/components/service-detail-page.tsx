@@ -212,7 +212,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             </div>
             <div>
               {faqs.map((faq, index) => (
-                <details key={faq.question} open={index === 1}>
+                <details key={faq.question} name="service-faq" open={index === 1}>
                   <summary>
                     {faq.question}
                     <span>+</span>

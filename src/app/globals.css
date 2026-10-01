@@ -5796,9 +5796,9 @@ h2 {
   padding-top: 280px;
   padding-bottom: 52px;
   display: grid;
-  grid-template-columns: minmax(0, 720px) 1fr;
+  grid-template-columns: minmax(0, 845px) 1fr;
   align-content: end;
-  gap: 12px 70px;
+  gap: 16px 116px;
 }
 .services-hero-copy > span {
   width: max-content;
@@ -5809,14 +5809,15 @@ h2 {
 }
 .services-hero-copy h1 {
   grid-column: 1;
-  max-width: 720px;
-  font-size: clamp(48px, 4vw, 56px);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  max-width: 845px;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1.68px;
 }
 .services-hero-copy p {
   grid-column: 1;
-  max-width: 700px;
+  max-width: 845px;
   font-size: 18px;
   line-height: 1.5;
 }

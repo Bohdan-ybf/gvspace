@@ -368,7 +368,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
             </div>
             <div className="faq-list">
               {faqs.map((item, index) => (
-                <details key={item.id} open={index === 1}>
+                <details key={item.id} name="technology-faq" open={index === 1}>
                   <summary>
                     {item.question}
                     <span>+</span>
