@@ -53,6 +53,28 @@ function MobileMenuArrowIcon() {
   );
 }
 
+function ServicesMenuArrow() {
+  return (
+    <svg
+      className="services-menu-arrow"
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.75 9H14.25M10.5 5.25L14.25 9L10.5 12.75"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function PlusIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -106,6 +128,7 @@ export function Header({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [areDesktopMenusDismissed, setAreDesktopMenusDismissed] = useState(false);
+  const [hoveredServiceSlug, setHoveredServiceSlug] = useState<string | null>(null);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>({ level: "root" });
   const staticServiceDirections = getTranslations("services", locale).directions;
   const cmsServiceDirections = services
@@ -124,6 +147,16 @@ export function Header({
         title: direction.title,
         services: direction.services.map((title) => ({ slug: "", title })),
       }));
+  const pathWithoutLocale = pathname.startsWith(`/${locale}`)
+    ? pathname.slice(locale.length + 1)
+    : pathname;
+  const currentServiceSlug = pathWithoutLocale.startsWith("/services/")
+    ? pathWithoutLocale.split("/")[2]
+    : undefined;
+  const activeServiceDirection =
+    serviceMenuDirections.find((direction) => direction.slug === hoveredServiceSlug) ??
+    serviceMenuDirections.find((direction) => direction.slug === currentServiceSlug) ??
+    serviceMenuDirections[0];
   const companyLinks = t.companyLinks;
   const expertiseLinks =
     locale === "uk"
@@ -265,7 +298,11 @@ export function Header({
       >
         {text.navigation.map((label, index) =>
           index === 0 ? (
-            <div className="services-menu" key="services">
+            <div
+              className="services-menu"
+              key="services"
+              onPointerLeave={() => setHoveredServiceSlug(null)}
+            >
               <Link
                 className="nav-link"
                 href={`/${locale}/services`}
@@ -275,33 +312,42 @@ export function Header({
                 <ChevronDown className="chevron" />
               </Link>
               <div className="services-dropdown">
-                <div className="services-dropdown-grid">
-                  {serviceMenuDirections.map((direction) => (
-                    <section className="services-dropdown-group" key={direction.slug}>
-                      <Link
-                        className="services-dropdown-title"
-                        href={`/${locale}/services/${direction.slug}`}
-                      >
-                        <MenuArrowIcon />
-                        {direction.title}
-                      </Link>
-                      <ul>
-                        {direction.services.map((service) => (
-                          <li key={service.slug || service.title}>
-                            <Link
-                              href={
-                                service.slug
-                                  ? `/${locale}/services/${direction.slug}/${service.slug}`
-                                  : `/${locale}/services/${direction.slug}`
-                              }
-                            >
-                              {service.title}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  ))}
+                <div className="services-dropdown-columns">
+                  <ul className="services-dropdown-parents">
+                    {serviceMenuDirections.map((direction) => (
+                      <li key={direction.slug}>
+                        <Link
+                          href={`/${locale}/services/${direction.slug}`}
+                          className={
+                            direction.slug === activeServiceDirection?.slug
+                              ? "is-active"
+                              : undefined
+                          }
+                          aria-current={direction.slug === currentServiceSlug ? "page" : undefined}
+                          onPointerEnter={() => setHoveredServiceSlug(direction.slug)}
+                          onFocus={() => setHoveredServiceSlug(direction.slug)}
+                        >
+                          <span>{direction.title}</span>
+                          <ServicesMenuArrow />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <ul className="services-dropdown-children">
+                    {activeServiceDirection?.services.map((service) => (
+                      <li key={service.slug || service.title}>
+                        <Link
+                          href={
+                            service.slug
+                              ? `/${locale}/services/${activeServiceDirection.slug}/${service.slug}`
+                              : `/${locale}/services/${activeServiceDirection.slug}`
+                          }
+                        >
+                          {service.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>

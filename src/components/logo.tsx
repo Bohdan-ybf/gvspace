@@ -4,7 +4,7 @@ type LogoVariant = "header" | "footer";
 
 const dimensions: Record<LogoVariant, { width: number; height: number }> = {
   header: { width: 217, height: 40 },
-  footer: { width: 519, height: 96 },
+  footer: { width: 411, height: 76 },
 };
 
 type LogoProps = {

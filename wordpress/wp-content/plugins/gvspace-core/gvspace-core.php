@@ -4499,6 +4499,7 @@ require_once __DIR__ . '/cases-seed.php';
 require_once __DIR__ . '/technologies-seed.php';
 require_once __DIR__ . '/l3-import.php';
 require_once __DIR__ . '/l2-import.php';
+require_once __DIR__ . '/service-icons.php';
 require_once __DIR__ . '/technology-import.php';
 require_once __DIR__ . '/blog-admin.php';
 require_once __DIR__ . '/page-seo.php';
