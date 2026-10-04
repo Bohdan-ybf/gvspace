@@ -1,56 +1,30 @@
-"use client";
-
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import type { Locale } from "@/i18n";
 import { Footer } from "./footer";
 import { Header } from "./header";
-import { PagePreloader } from "./page-preloader";
-import type { FooterContactDetails } from "./wordpress-contacts";
-import type { ServiceOffering } from "./wordpress-services";
+import { getContactsPage, toFooterContacts } from "./wordpress-contacts";
+import { getServiceOfferings } from "./wordpress-services";
 
-export function SiteShell({
-  children,
-  locale,
-  services,
-  contacts,
-}: {
-  children: React.ReactNode;
-  locale: Locale;
-  services: ServiceOffering[];
-  contacts: FooterContactDetails;
-}) {
-  const pathname = usePathname();
-  const localizedPathname = pathname.startsWith(`/${locale}`)
-    ? pathname
-    : `/${locale}${pathname === "/" ? "" : pathname}`;
-  const pathSegments = localizedPathname.split("/").filter(Boolean);
-  const isHomePage = localizedPathname === `/${locale}` || localizedPathname === `/${locale}/`;
-  const isServiceDetail = pathSegments[1] === "services" && pathSegments.length >= 3;
-  const isTechnologyCatalog = localizedPathname === `/${locale}/technologies`;
-  const hasDarkHero =
-    isHomePage ||
-    localizedPathname === `/${locale}/services` ||
-    isServiceDetail ||
-    localizedPathname === `/${locale}/cases` ||
-    localizedPathname === `/${locale}/reviews` ||
-    localizedPathname.startsWith(`/${locale}/cases/`) ||
-    localizedPathname === `/${locale}/about` ||
-    localizedPathname === `/${locale}/team` ||
-    isTechnologyCatalog ||
-    localizedPathname === `/${locale}/industries` ||
-    localizedPathname === `/${locale}/partners` ||
-    localizedPathname === `/${locale}/blog` ||
-    (localizedPathname.startsWith(`/${locale}/blog/`) &&
-      !localizedPathname.startsWith(`/${locale}/blog/author/`)) ||
-    localizedPathname === `/${locale}/careers` ||
-    localizedPathname.startsWith(`/${locale}/careers/`);
+async function HeaderSlot({ locale }: { locale: Locale }) {
+  const services = await getServiceOfferings(locale);
+  return <Header locale={locale} services={services} />;
+}
 
+async function FooterSlot({ locale }: { locale: Locale }) {
+  const contactsPage = await getContactsPage(locale);
+  return <Footer locale={locale} contacts={toFooterContacts(contactsPage)} />;
+}
+
+export function SiteShell({ children, locale }: { children: React.ReactNode; locale: Locale }) {
   return (
     <>
-      <PagePreloader locale={locale} />
-      <Header locale={locale} forceSolid={!hasDarkHero} services={services} />
+      <Suspense fallback={<Header locale={locale} services={[]} />}>
+        <HeaderSlot locale={locale} />
+      </Suspense>
       {children}
-      <Footer locale={locale} contacts={contacts} />
+      <Suspense fallback={null}>
+        <FooterSlot locale={locale} />
+      </Suspense>
     </>
   );
 }

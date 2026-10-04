@@ -2,13 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/i18n";
 import { SiteShell } from "@/components/site-shell";
-import { getContactsPage, toFooterContacts } from "@/components/wordpress-contacts";
-import { getServiceOfferings } from "@/components/wordpress-services";
 import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
-const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -18,14 +15,7 @@ export const metadata: Metadata = {
   authors: [{ name: "GVSPACE", url: siteUrl }],
   creator: "GVSPACE",
   publisher: "GVSPACE",
-  robots: indexingEnabled
-    ? { index: true, follow: true }
-    : {
-        index: false,
-        follow: false,
-        noarchive: true,
-        nosnippet: true,
-      },
+  robots: { index: true, follow: true },
   openGraph: {
     title: "GVSPACE",
     description: "Простір вашого масштабування",
@@ -58,17 +48,11 @@ export default async function LocaleLayout({
 }>) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const [services, contactsPage] = await Promise.all([
-    getServiceOfferings(locale),
-    getContactsPage(locale),
-  ]);
 
   return (
     <html lang={locale}>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SiteShell locale={locale} services={services} contacts={toFooterContacts(contactsPage)}>
-          {children}
-        </SiteShell>
+        <SiteShell locale={locale}>{children}</SiteShell>
       </body>
     </html>
   );

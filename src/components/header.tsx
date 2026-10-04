@@ -108,6 +108,35 @@ type MobilePanel =
   | { level: "expertise" }
   | { level: "company" };
 
+function hasDarkHero(pathname: string, locale: Locale) {
+  const localizedPathname = pathname.startsWith(`/${locale}`)
+    ? pathname
+    : `/${locale}${pathname === "/" ? "" : pathname}`;
+  const pathSegments = localizedPathname.split("/").filter(Boolean);
+  const isHomePage = localizedPathname === `/${locale}` || localizedPathname === `/${locale}/`;
+  const isServiceDetail = pathSegments[1] === "services" && pathSegments.length >= 3;
+  const isTechnologyCatalog = localizedPathname === `/${locale}/technologies`;
+
+  return (
+    isHomePage ||
+    localizedPathname === `/${locale}/services` ||
+    isServiceDetail ||
+    localizedPathname === `/${locale}/cases` ||
+    localizedPathname === `/${locale}/reviews` ||
+    localizedPathname.startsWith(`/${locale}/cases/`) ||
+    localizedPathname === `/${locale}/about` ||
+    localizedPathname === `/${locale}/team` ||
+    isTechnologyCatalog ||
+    localizedPathname === `/${locale}/industries` ||
+    localizedPathname === `/${locale}/partners` ||
+    localizedPathname === `/${locale}/blog` ||
+    (localizedPathname.startsWith(`/${locale}/blog/`) &&
+      !localizedPathname.startsWith(`/${locale}/blog/author/`)) ||
+    localizedPathname === `/${locale}/careers` ||
+    localizedPathname.startsWith(`/${locale}/careers/`)
+  );
+}
+
 export function Header({
   locale,
   forceSolid = false,
@@ -285,7 +314,7 @@ export function Header({
 
   return (
     <header
-      className={`header${forceSolid || isScrolled || isMenuOpen ? " is-scrolled" : ""}${isMenuOpen ? " is-menu-open" : ""}${isCompact && !isMenuOpen ? " is-compact" : ""}${areDesktopMenusDismissed ? " desktop-menus-dismissed" : ""}`}
+      className={`header${forceSolid || !hasDarkHero(pathname, locale) || isScrolled || isMenuOpen ? " is-scrolled" : ""}${isMenuOpen ? " is-menu-open" : ""}${isCompact && !isMenuOpen ? " is-compact" : ""}${areDesktopMenusDismissed ? " desktop-menus-dismissed" : ""}`}
     >
       <Link className="logo" href={`/${locale}`} aria-label="GVSPACE">
         <Logo variant="header" priority />

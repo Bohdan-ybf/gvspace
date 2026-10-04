@@ -9,17 +9,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const requestedMarket = getMarket(requestHeaders.get("host") ?? "");
   const market = requestedMarket?.enabled ? requestedMarket : getMarketById("international");
   const siteUrl = market.origin;
-  const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
-
-  if (!indexingEnabled) {
-    return {
-      rules: {
-        userAgent: "*",
-        disallow: "/",
-      },
-    };
-  }
-
   return {
     rules: {
       userAgent: "*",

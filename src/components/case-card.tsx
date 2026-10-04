@@ -41,9 +41,9 @@ export function CaseCard({
     return (
       <article className="home-case-card">
         <div className="home-case-copy">
-          <h3>
+          <h2>
             <Link href={href}>{project.catalogTitle}</Link>
-          </h3>
+          </h2>
           {project.result ? <p className="home-case-result">{project.result}</p> : null}
           {metrics.length > 0 && (
             <dl className="home-case-metrics">
@@ -103,9 +103,9 @@ export function CaseCard({
           </span>
         </Link>
         <div className="showcase-case-copy">
-          <h3>
+          <h2>
             <Link href={href}>{project.catalogTitle}</Link>
-          </h3>
+          </h2>
           {project.result ? <p>{project.result}</p> : null}
           {metrics.length > 0 && (
             <dl>
@@ -146,9 +146,9 @@ export function CaseCard({
         </span>
       </Link>
       <div className="catalog-case-copy">
-        <h3>
+        <h2>
           <Link href={href}>{project.catalogTitle}</Link>
-        </h3>
+        </h2>
         {project.result ? <p>{project.result}</p> : null}
         <Link aria-hidden="true" className="catalog-case-arrow" href={href} tabIndex={-1}>
           <CaseArrow />

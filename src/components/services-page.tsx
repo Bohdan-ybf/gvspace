@@ -97,6 +97,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
                     alt=""
                     fill
                     sizes="92px"
+                    unoptimized={Boolean(direction.image?.startsWith("http"))}
                   />
                 </div>
                 <div>

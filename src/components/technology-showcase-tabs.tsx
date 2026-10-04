@@ -49,7 +49,7 @@ export function TechnologyShowcaseTabs({
           <Link href={`/${locale}/technologies/${item.slug}`} key={item.id}>
             <div>
               {item.image ? (
-                <Image src={item.image} alt={item.imageAlt} fill sizes="70px" unoptimized />
+                <Image src={item.image} alt="" fill sizes="70px" unoptimized />
               ) : (
                 <span aria-hidden="true">[ icon ]</span>
               )}

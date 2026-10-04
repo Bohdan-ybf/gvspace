@@ -10,7 +10,7 @@ export function VacancyCard({ locale, vacancy }: { locale: Locale; vacancy: Vaca
   return (
     <article className="vacancy-card">
       <div className="vacancy-card-heading">
-        <h3>{vacancy.title}</h3>
+        <h2>{vacancy.title}</h2>
         {vacancy.hot && <span className="mono">{t.hotLabel}</span>}
       </div>
       <p>{vacancy.excerpt}</p>

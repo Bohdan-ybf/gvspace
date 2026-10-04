@@ -67,7 +67,7 @@ export function TeamDirectorySection({
             </div>
             <div>
               <span className="mono">{member.role}</span>
-              <h3>{member.name}</h3>
+              <h2>{member.name}</h2>
               <div className="team-member-tags mono">
                 {member.tags.map((item) => (
                   <small key={item}>{item}</small>
@@ -86,7 +86,7 @@ export function TeamDirectorySection({
               <i aria-hidden="true" />
               <div>
                 <span className="mono">{partner}</span>
-                <h3>{t.partnerName}</h3>
+                <h2>{t.partnerName}</h2>
                 <p>{t.partnerDescription}</p>
               </div>
             </article>

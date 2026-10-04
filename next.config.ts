@@ -7,17 +7,7 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
-const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
 const wordpressUrl = new URL(process.env.WORDPRESS_URL ?? "http://localhost:8080");
-
-const indexingHeaders = indexingEnabled
-  ? []
-  : [
-      {
-        key: "X-Robots-Tag",
-        value: "noindex, nofollow, noarchive, nosnippet",
-      },
-    ];
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -36,7 +26,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/(.*)", headers: [...securityHeaders, ...indexingHeaders] }];
+    return [{ source: "/(.*)", headers: securityHeaders }];
   },
 };
 

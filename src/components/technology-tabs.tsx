@@ -81,7 +81,7 @@ export function TechnologyTabs({ locale, categories, items, emptyLabel }: Techno
           >
             <div className="technology-stack-icon">
               {item.image ? (
-                <Image src={item.image} alt={item.imageAlt} fill sizes="84px" unoptimized />
+                <Image src={item.image} alt="" fill sizes="84px" unoptimized />
               ) : (
                 <span aria-hidden="true">[ icon ]</span>
               )}

@@ -65,8 +65,6 @@ async function getLocalePaths(locale: Locale): Promise<SitemapEntry[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  if (process.env.SITE_INDEXING_ENABLED !== "true") return [];
-
   const enabledMarkets = getEnabledMarkets();
   const requestHeaders = await headers();
   const requestedMarket = getMarket(requestHeaders.get("host") ?? "");

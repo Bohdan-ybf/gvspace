@@ -53,13 +53,13 @@ export function TechnologiesCatalog({
             <Link href={`/${locale}/technologies/${item.slug}`}>
               <div className="technology-logo">
                 {item.image ? (
-                  <Image src={item.image} alt={item.imageAlt} fill sizes="72px" unoptimized />
+                  <Image src={item.image} alt="" fill sizes="72px" unoptimized />
                 ) : (
                   <span aria-hidden="true">[ icon ]</span>
                 )}
               </div>
               <div>
-                <h3>{item.title}</h3>
+                <h2>{item.title}</h2>
                 {item.description ? <p>{item.description}</p> : null}
                 {item.tag ? <span className="mono">{item.tag}</span> : null}
               </div>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import type { Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
@@ -19,16 +20,8 @@ import { getTranslations } from "@/i18n/pages";
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
 const approachIcons = ["clarity", "system", "scale"] as const;
 
-export async function Home({ locale }: { locale: Locale }) {
+export function Home({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
-  const [blogPostsResult, services, partners, faqs, homeSeoText] = await Promise.all([
-    getBlogPosts(locale),
-    getServiceOfferings(locale),
-    getPartners(locale),
-    getHomeFaqs(locale),
-    getHomeSeoText(locale),
-  ]);
-  const blogPosts = blogPostsResult.slice(0, 4);
 
   return (
     <>
@@ -38,7 +31,6 @@ export async function Home({ locale }: { locale: Locale }) {
           alt=""
           fill
           priority
-          quality={90}
           sizes="100vw"
           className="hero-img"
         />
@@ -58,31 +50,78 @@ export async function Home({ locale }: { locale: Locale }) {
       <main>
         <Problems text={text} />
         <Approach text={text} locale={locale} />
-        <ServiceVectors
-          text={text.vectors}
-          clarity={text.clarity}
-          locale={locale}
-          services={services}
-        />
+        <Suspense fallback={null}>
+          <HomeServices text={text} locale={locale} />
+        </Suspense>
         <MobileClarity text={text} locale={locale} />
-        <TechnologySection locale={locale} title={text.technology.title} />
-        <CasesSection text={text.cases} locale={locale} />
+        <Suspense fallback={null}>
+          <TechnologySection locale={locale} title={text.technology.title} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <CasesSection text={text.cases} locale={locale} />
+        </Suspense>
         <People text={text} locale={locale} />
-        <PartnersSlider
-          title={text.partners.title}
-          description={text.partners.description}
-          partners={partners}
-        />
-        <ReviewsSection locale={locale} />
-        <Blog text={text} locale={locale} posts={blogPosts} />
-        <Faq text={text} locale={locale} items={faqs} />
-        <section className="mission container">
-          <b>{homeSeoText?.title ?? text.mission.statement}</b>
-          <p>{homeSeoText?.content ?? text.mission.description}</p>
-        </section>
+        <Suspense fallback={null}>
+          <HomePartners text={text} locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ReviewsSection locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <HomeBlog text={text} locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <HomeFaq text={text} locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <HomeMission text={text} locale={locale} />
+        </Suspense>
         <ContactSection locale={locale} text={text.contact} />
       </main>
     </>
+  );
+}
+
+async function HomeServices({ text, locale }: { text: Messages; locale: Locale }) {
+  const services = await getServiceOfferings(locale);
+  return (
+    <ServiceVectors
+      text={text.vectors}
+      clarity={text.clarity}
+      locale={locale}
+      services={services}
+    />
+  );
+}
+
+async function HomePartners({ text, locale }: { text: Messages; locale: Locale }) {
+  const partners = await getPartners(locale);
+  return (
+    <PartnersSlider
+      title={text.partners.title}
+      description={text.partners.description}
+      partners={partners}
+    />
+  );
+}
+
+async function HomeBlog({ text, locale }: { text: Messages; locale: Locale }) {
+  const posts = (await getBlogPosts(locale)).slice(0, 4);
+  return <Blog text={text} locale={locale} posts={posts} />;
+}
+
+async function HomeFaq({ text, locale }: { text: Messages; locale: Locale }) {
+  const items = await getHomeFaqs(locale);
+  return <Faq text={text} locale={locale} items={items} />;
+}
+
+async function HomeMission({ text, locale }: { text: Messages; locale: Locale }) {
+  const homeSeoText = await getHomeSeoText(locale);
+  return (
+    <section className="mission container">
+      <b>{homeSeoText?.title ?? text.mission.statement}</b>
+      <p>{homeSeoText?.content ?? text.mission.description}</p>
+    </section>
   );
 }
 

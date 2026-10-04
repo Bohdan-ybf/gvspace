@@ -50,7 +50,7 @@ export function ReviewCard({
       {!compact && (
         <div className="review-card-top mono">
           <span>{tag || "GVSPACE"}</span>
-          <span className="review-stars" aria-label={`${review.rating} / 5`}>
+          <span className="review-stars" role="img" aria-label={`${review.rating} / 5`}>
             <span aria-hidden="true">{"★".repeat(Math.min(5, review.rating))}</span>
             <span className="is-muted" aria-hidden="true">
               {"★".repeat(Math.max(0, 5 - review.rating))}

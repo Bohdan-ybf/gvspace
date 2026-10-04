@@ -95,6 +95,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
                       alt={client.company || client.name}
                       width={140}
                       height={36}
+                      unoptimized={client.logo.startsWith("http")}
                     />
                   </span>
                 ) : (
