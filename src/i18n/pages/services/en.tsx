@@ -15,6 +15,7 @@ export default {
     includesEyebrow: "WHAT IS INCLUDED",
     serviceIncludesEyebrow: "WHAT IS INCLUDED",
     processEyebrow: "OUR APPROACH",
+    serviceProcessEyebrow: "PROCESS",
     directionProcessTitle: "Three steps to managed growth",
     serviceProcessTitle: "From request to result",
     resultsEyebrow: "CLIENT RESULT",

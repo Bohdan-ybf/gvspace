@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -7,6 +8,7 @@ import { localeNames, locales, type Locale } from "@/i18n";
 import { getLocalizedUrl } from "@/markets";
 import { ChevronDown } from "./icons/chevron-down";
 import { ClutchIcon, FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
+import { LeadModalButton } from "./lead-modal";
 import { Logo } from "./logo";
 import type { ServiceOffering } from "./wordpress-services";
 
@@ -165,6 +167,7 @@ export function Header({
     .map((direction) => ({
       slug: direction.slug,
       title: direction.title,
+      image: direction.image,
       services: services
         .filter((service) => service.parentSlug === direction.slug)
         .map((service) => ({ slug: service.slug, title: service.title })),
@@ -174,6 +177,7 @@ export function Header({
     : staticServiceDirections.map((direction) => ({
         slug: direction.slug,
         title: direction.title,
+        image: undefined,
         services: direction.services.map((title) => ({ slug: "", title })),
       }));
   const pathWithoutLocale = pathname.startsWith(`/${locale}`)
@@ -356,7 +360,19 @@ export function Header({
                           onPointerEnter={() => setHoveredServiceSlug(direction.slug)}
                           onFocus={() => setHoveredServiceSlug(direction.slug)}
                         >
-                          <span>{direction.title}</span>
+                          <span className="services-menu-label">
+                            {direction.image ? (
+                              <Image
+                                className="services-menu-icon"
+                                src={direction.image}
+                                alt=""
+                                width={25}
+                                height={25}
+                                unoptimized={direction.image.startsWith("http://")}
+                              />
+                            ) : null}
+                            <span>{direction.title}</span>
+                          </span>
                           <ServicesMenuArrow />
                         </Link>
                       </li>
@@ -445,12 +461,12 @@ export function Header({
         <a className="header-phone desktop-only" href="tel:+380123456789">
           +38 012 345 67 89
         </a>
-        <Link className="btn btn-primary desktop-only" href={`/${locale}/contacts`}>
+        <LeadModalButton className="btn btn-primary desktop-only">
           {text.common.buildSystem}
-        </Link>
-        <Link className="btn btn-primary mobile-header-cta" href={`/${locale}/contacts`}>
+        </LeadModalButton>
+        <LeadModalButton className="btn btn-primary mobile-header-cta">
           {t.mobileAction}
-        </Link>
+        </LeadModalButton>
         <div className="language-switcher" ref={languageSwitcherRef}>
           <button
             className="language-button"
@@ -699,14 +715,13 @@ export function Header({
           )}
         </div>
         <div className="mobile-menu-footer">
-          <Link
+          <LeadModalButton
             className="btn btn-primary mobile-menu-cta"
-            href={`/${locale}/contacts`}
             tabIndex={isMenuOpen ? 0 : -1}
             onClick={closeMobileMenu}
           >
             {text.common.buildSystem}
-          </Link>
+          </LeadModalButton>
           <div
             className="mobile-menu-socials"
             aria-label={locale === "uk" ? "Соціальні мережі" : "Social media"}

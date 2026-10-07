@@ -75,7 +75,9 @@ export default {
     description:
       "We compare working models commonly found in the market. Choose the one that matches your experience.",
     agencyLabel: "Typical agency",
+    agencyTab: "Agency",
     freelancerLabel: "Freelancer",
+    freelancerTab: "Freelancer",
   },
   stats: {
     items: [

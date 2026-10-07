@@ -15,6 +15,7 @@ export default {
     includesEyebrow: "ЩО ВХОДИТЬ У НАПРЯМОК",
     serviceIncludesEyebrow: "ЩО ВХОДИТЬ",
     processEyebrow: "НАШ ПІДХІД",
+    serviceProcessEyebrow: "ПРОЦЕС",
     directionProcessTitle: "Три кроки до керованого зростання",
     serviceProcessTitle: "Від запиту до результату",
     resultsEyebrow: "РЕЗУЛЬТАТ КЛІЄНТА",

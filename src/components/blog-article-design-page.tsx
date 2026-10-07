@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
 import { Breadcrumbs } from "./breadcrumbs";
+import { LeadModalButton } from "./lead-modal";
 import { ContactSection } from "./contact-section";
 import { StructuredData } from "./structured-data";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
@@ -94,7 +95,7 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
           <section className="article-project-card">
             <h2>{t.projectTitle}</h2>
             <p>{t.projectDescription}</p>
-            <Link href={`/${locale}/contacts`}>{t.projectCta}</Link>
+            <LeadModalButton>{t.projectCta}</LeadModalButton>
           </section>
         </aside>
 

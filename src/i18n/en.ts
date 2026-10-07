@@ -150,6 +150,18 @@ export const en: Messages = {
     submit: "Send request",
     consent: 'By clicking "Send request", you consent to the processing of your personal data.',
     consentMore: "Learn more",
+    interestLabel: "I'm interested in",
+    interests: [
+      { value: "strategy", label: "Strategy" },
+      { value: "marketing", label: "Marketing" },
+      { value: "development", label: "IT development" },
+      { value: "content", label: "Content" },
+    ],
+    phoneShort: "+38 0__",
+    close: "Close",
+    successTitle: "Thank you, your request\nwill be reviewed",
+    successLead: "Our manager will contact you",
+    successDetail: "to discuss the details",
   },
   footer: {
     services: {

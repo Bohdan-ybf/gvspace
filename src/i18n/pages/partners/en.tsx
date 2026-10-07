@@ -195,4 +195,15 @@ export default {
       },
     ],
   },
+  form: {
+    title: "Want to become a partner?",
+    direction: "Choose a direction",
+    name: "Name*",
+    company: "Company",
+    email: "Email*",
+    website: "Website or portfolio",
+    about: "Tell us about yourself and your approach",
+    attachment: "ATTACH A PRESENTATION (PDF UP TO ?? MB)",
+    submit: "Send request",
+  },
 } as const;

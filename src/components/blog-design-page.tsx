@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
 import type { BlogPostSummary } from "./wordpress-posts";
 import { Breadcrumbs } from "./breadcrumbs";
+import { Pagination, scrollToBlockTop } from "./pagination";
 
 const POSTS_PER_PAGE = 6;
 
@@ -24,6 +25,7 @@ export function BlogDesignPage({
   const text = getTranslations("blog", locale).content;
   const [activeCategory, setActiveCategory] = useState("all");
   const [page, setPage] = useState(1);
+  const catalogRef = useRef<HTMLElement>(null);
   const categories = useMemo(() => {
     const unique = new Map<string, string>();
     posts.forEach((post) => unique.set(post.categorySlug, post.category));
@@ -43,7 +45,7 @@ export function BlogDesignPage({
   };
   const selectPage = (next: number) => {
     setPage(Math.min(totalPages, Math.max(1, next)));
-    document.querySelector(".blog-catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollToBlockTop(catalogRef.current);
   };
 
   return (
@@ -94,7 +96,7 @@ export function BlogDesignPage({
         </div>
       </section>
 
-      <section className="container blog-catalog" aria-live="polite">
+      <section className="container blog-catalog" aria-live="polite" ref={catalogRef}>
         {featured ? (
           <>
             <article className="blog-featured">
@@ -154,37 +156,15 @@ export function BlogDesignPage({
                 {text.more} ↓
               </button>
             )}
-            {totalPages > 1 && (
-              <nav className="blog-pagination" aria-label={text.paginationLabel}>
-                <button
-                  type="button"
-                  onClick={() => selectPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  aria-label={text.previousPage}
-                >
-                  ‹
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-                  <button
-                    type="button"
-                    key={number}
-                    className={number === currentPage ? "is-active" : ""}
-                    onClick={() => selectPage(number)}
-                    aria-current={number === currentPage ? "page" : undefined}
-                  >
-                    {number}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => selectPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  aria-label={text.nextPage}
-                >
-                  ›
-                </button>
-              </nav>
-            )}
+            <Pagination
+              className="blog-pagination"
+              page={currentPage}
+              pageCount={totalPages}
+              label={text.paginationLabel}
+              previousLabel={text.previousPage}
+              nextLabel={text.nextPage}
+              onPageChange={selectPage}
+            />
           </>
         ) : (
           <p className="blog-empty">{t.emptyState}</p>

@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 
 import { getTranslations } from "@/i18n/pages";
 export function SystemTransitionSection({ locale }: { locale: Locale }) {
@@ -9,7 +9,7 @@ export function SystemTransitionSection({ locale }: { locale: Locale }) {
 
   return (
     <section className="services-method">
-      <Image src="/images/services/system-background.webp" alt="" fill sizes="100vw" />
+      <Image src="/images/services/system-background.png" alt="" fill sizes="100vw" />
       <div className="container">
         <span className="mono">{t.eyebrow}</span>
         <h2>{t.title}</h2>
@@ -29,10 +29,10 @@ export function SystemTransitionSection({ locale }: { locale: Locale }) {
             <p>{t.afterDescription}</p>
           </article>
         </div>
-        <Link className="btn btn-primary method-cta" href={`/${locale}/contacts`}>
+        <LeadModalButton className="btn btn-primary method-cta">
           {t.action}
           <ArrowRight />
-        </Link>
+        </LeadModalButton>
       </div>
     </section>
   );

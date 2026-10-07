@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { LeadModalButton } from "./lead-modal";
 import type { Locale } from "@/i18n";
 
 export type TechnologyMeetPerson = {
@@ -51,9 +52,7 @@ export function TechnologyMeetSection({
         <article className="technology-meet-clarity">
           <h3>{clarityTitle}</h3>
           <p>{clarityDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-            {clarityAction}
-          </Link>
+          <LeadModalButton className="btn btn-primary">{clarityAction}</LeadModalButton>
         </article>
         {person ? (
           <>

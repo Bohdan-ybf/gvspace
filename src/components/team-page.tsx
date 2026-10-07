@@ -1,9 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { CareersBanner } from "./careers-banner";
 import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 import { TeamDirectorySection } from "./team-directory-section";
 import { TeamFounderSection } from "./team-founder-section";
 import { Breadcrumbs } from "./breadcrumbs";
@@ -39,10 +39,10 @@ export async function TeamPage({ locale }: { locale: Locale }) {
           <span className="mono">TEAM</span>
           <h1>{t.heroTitle}</h1>
           <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+          <LeadModalButton className="btn btn-primary">
             {text.common.buildSystem}
             <ArrowRight />
-          </Link>
+          </LeadModalButton>
         </div>
       </section>
       <TeamFounderSection locale={locale} />

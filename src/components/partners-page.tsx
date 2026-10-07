@@ -1,9 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 
 export function PartnersPage({ locale }: { locale: Locale }) {
   const t = getTranslations("partners", locale).page;
@@ -35,10 +35,10 @@ export function PartnersPage({ locale }: { locale: Locale }) {
             {t.heroTitleSecond}
           </h1>
           <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+          <LeadModalButton className="btn btn-primary" variant="partner">
             {t.heroAction}
             <ArrowRight />
-          </Link>
+          </LeadModalButton>
         </div>
       </section>
 
@@ -178,10 +178,10 @@ export function PartnersPage({ locale }: { locale: Locale }) {
               <br />
               {t.ctaDescription}
             </p>
-            <Link className="btn" href={`/${locale}/contacts`}>
+            <LeadModalButton className="btn" variant="partner">
               {t.ctaAction}
               <ArrowRight />
-            </Link>
+            </LeadModalButton>
           </div>
         </div>
         <div className="partners-cta-cards">

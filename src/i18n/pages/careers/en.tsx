@@ -37,6 +37,7 @@ export default {
     vacanciesEyebrow: "OPEN POSITIONS",
     directionLabel: "Choose a direction",
     employmentLabel: "Employment type",
+    resetFilters: "Reset",
     emptyVacancies: "No vacancies match these filters.",
   },
   banner: {

@@ -43,6 +43,16 @@ export default {
     emptyState: "Цей автор ще не опублікував статей.",
     readMore: "Читати",
   },
+  questionForm: {
+    title: "Поставити питання автору",
+    name: "Ім'я*",
+    company: "Компанія",
+    email: "Email*",
+    question: "Питання*",
+    submit: "Відправити",
+    consent: 'Натискаючи кнопку "Відправити", ви даєте згоду на обробку персональних даних.',
+    consentMore: "Детальніше",
+  },
   content: {
     eyebrow: "INSIGHTS & CASES",
     title: "Простір для тих, хто думає про ріст",

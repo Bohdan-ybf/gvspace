@@ -12,6 +12,7 @@ import {
   XIcon,
 } from "./icons/social-icons";
 import type { FooterContactDetails } from "./wordpress-contacts";
+import type { ServiceOffering } from "./wordpress-services";
 
 const socialIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   facebook: FacebookIcon,
@@ -52,10 +53,29 @@ function SocialLinks({
   );
 }
 
-export function Footer({ locale, contacts }: { locale: Locale; contacts: FooterContactDetails }) {
+export function Footer({
+  locale,
+  contacts,
+  services = [],
+}: {
+  locale: Locale;
+  contacts: FooterContactDetails;
+  services?: ServiceOffering[];
+}) {
   const t = getTranslations("common", locale).footer;
   const { footer } = getTranslations("global", locale);
-  const columns = [footer.services, footer.company, footer.resources];
+  const serviceLinks = services
+    .filter((service) => !service.parentSlug)
+    .slice(0, 6)
+    .map((service) => ({ label: service.title, href: `/services/${service.slug}` }));
+  const columns = [
+    {
+      ...footer.services,
+      links: serviceLinks.length ? serviceLinks : footer.services.links,
+    },
+    footer.company,
+    footer.resources,
+  ];
 
   return (
     <footer>

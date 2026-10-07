@@ -43,6 +43,16 @@ export default {
     emptyState: "This author has not published any articles yet.",
     readMore: "Read",
   },
+  questionForm: {
+    title: "Ask the author a question",
+    name: "Name*",
+    company: "Company",
+    email: "Email*",
+    question: "Question*",
+    submit: "Send",
+    consent: 'By clicking "Send", you consent to the processing of your personal data.',
+    consentMore: "Learn more",
+  },
   content: {
     eyebrow: "INSIGHTS & CASES",
     title: "A space for those who think about growth",

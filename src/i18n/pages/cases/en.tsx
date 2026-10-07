@@ -22,9 +22,10 @@ export default {
   catalog: {
     directionLabel: "Choose a direction",
     typeLabel: "Project type",
+    resetFilters: "Reset",
     empty: "No cases match these filters.",
     dateLocale: "en-US",
-    more: "More",
+    more: "Load more",
     metricLabel: "Key figure",
     openCase: "View case",
     paginationLabel: "Case pages",

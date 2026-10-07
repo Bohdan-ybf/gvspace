@@ -31,6 +31,7 @@ export function VacanciesCatalog({
   const t = getTranslations("careers", locale).page;
   const [direction, setDirection] = useState("all");
   const [employment, setEmployment] = useState("all");
+  const filtersActive = direction !== "all" || employment !== "all";
 
   const directionOptions = useMemo(
     () => uniqueTags(vacancies.map((vacancy) => vacancy.direction).filter(Boolean)),
@@ -70,6 +71,18 @@ export function VacanciesCatalog({
           options={employmentOptions.map((option) => ({ value: option, label: option }))}
           onChange={setEmployment}
         />
+        {filtersActive ? (
+          <button
+            type="button"
+            className="filters-reset"
+            onClick={() => {
+              setDirection("all");
+              setEmployment("all");
+            }}
+          >
+            {t.resetFilters}
+          </button>
+        ) : null}
       </div>
       {visibleVacancies.length ? (
         <div className="vacancies-grid">

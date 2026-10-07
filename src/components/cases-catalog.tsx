@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Locale } from "@/i18n";
 import { CaseCard } from "./case-card";
 import { FilterSelect } from "./filter-select";
+import { Pagination, scrollToBlockTop } from "./pagination";
 import type { CaseStudy } from "./wordpress-cases";
 import { getTranslations } from "@/i18n/pages";
 
@@ -19,27 +20,13 @@ function uniqueValues(values: string[]) {
   });
 }
 
-function paginationItems(current: number, total: number) {
-  if (total <= 7) return Array.from({ length: total }, (_, index) => index);
-  const items: Array<number | "ellipsis"> = [];
-  const pushRange = (from: number, to: number) => {
-    for (let index = from; index <= to; index += 1) items.push(index);
-  };
-  items.push(0);
-  if (current > 2) items.push("ellipsis");
-  const start = Math.max(1, current - 1);
-  const end = Math.min(total - 2, current + 1);
-  pushRange(start, end);
-  if (current < total - 3) items.push("ellipsis");
-  items.push(total - 1);
-  return items.filter((item, index, list) => item !== list[index - 1]);
-}
-
 export function CasesCatalog({ locale, projects }: { locale: Locale; projects: CaseStudy[] }) {
   const t = getTranslations("cases", locale).catalog;
   const [direction, setDirection] = useState("all");
   const [projectType, setProjectType] = useState("all");
   const [page, setPage] = useState(0);
+  const catalogRef = useRef<HTMLElement>(null);
+  const filtersActive = direction !== "all" || projectType !== "all";
 
   const directionOptions = useMemo(
     () => uniqueValues(projects.map((project) => project.direction)),
@@ -73,7 +60,7 @@ export function CasesCatalog({ locale, projects }: { locale: Locale; projects: C
   };
 
   return (
-    <section className="cases-catalog section container">
+    <section className="cases-catalog section container" ref={catalogRef}>
       <div className="cases-filters">
         <FilterSelect
           label={t.directionLabel}
@@ -87,6 +74,19 @@ export function CasesCatalog({ locale, projects }: { locale: Locale; projects: C
           options={typeOptions.map((option) => ({ value: option, label: option }))}
           onChange={(value) => changeFilter(setProjectType, value)}
         />
+        {filtersActive ? (
+          <button
+            type="button"
+            className="filters-reset"
+            onClick={() => {
+              setDirection("all");
+              setProjectType("all");
+              setPage(0);
+            }}
+          >
+            {t.resetFilters}
+          </button>
+        ) : null}
       </div>
 
       {visibleProjects.length ? (
@@ -103,47 +103,27 @@ export function CasesCatalog({ locale, projects }: { locale: Locale; projects: C
         <button
           className="btn cases-more"
           type="button"
-          onClick={() => setPage((value) => value + 1)}
+          onClick={() => {
+            setPage((value) => value + 1);
+            scrollToBlockTop(catalogRef.current);
+          }}
         >
-          {t.more} <span aria-hidden="true">+</span>
+          {t.more} <span aria-hidden="true">↓</span>
         </button>
       )}
 
-      {pageCount > 1 && (
-        <nav aria-label={t.paginationLabel} className="cases-pagination">
-          <button
-            aria-label={t.prevPage}
-            disabled={currentPage === 0}
-            type="button"
-            onClick={() => setPage((value) => Math.max(0, value - 1))}
-          >
-            ‹
-          </button>
-          {paginationItems(currentPage, pageCount).map((item, index) =>
-            item === "ellipsis" ? (
-              <span key={`ellipsis-${index}`}>…</span>
-            ) : (
-              <button
-                aria-current={item === currentPage ? "page" : undefined}
-                className={item === currentPage ? "is-active" : undefined}
-                key={item}
-                type="button"
-                onClick={() => setPage(item)}
-              >
-                {item + 1}
-              </button>
-            ),
-          )}
-          <button
-            aria-label={t.nextPage}
-            disabled={currentPage >= pageCount - 1}
-            type="button"
-            onClick={() => setPage((value) => Math.min(pageCount - 1, value + 1))}
-          >
-            ›
-          </button>
-        </nav>
-      )}
+      <Pagination
+        className="cases-pagination"
+        page={currentPage + 1}
+        pageCount={pageCount}
+        label={t.paginationLabel}
+        previousLabel={t.prevPage}
+        nextLabel={t.nextPage}
+        onPageChange={(nextPage) => {
+          setPage(nextPage - 1);
+          scrollToBlockTop(catalogRef.current);
+        }}
+      />
     </section>
   );
 }

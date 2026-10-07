@@ -22,9 +22,10 @@ export default {
   catalog: {
     directionLabel: "Оберіть напрям",
     typeLabel: "Тип проєкту",
+    resetFilters: "Скинути",
     empty: "Кейсів за цими фільтрами немає.",
     dateLocale: "uk-UA",
-    more: "Більше",
+    more: "Завантажити ще",
     metricLabel: "Головна цифра",
     openCase: "Переглянути кейс",
     paginationLabel: "Сторінки кейсів",

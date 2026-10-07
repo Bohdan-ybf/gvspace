@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import type { Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 import { ServiceVectors } from "./service-vectors";
 import { CasesSection } from "./cases-section";
 import { ContactSection } from "./contact-section";
@@ -42,10 +43,10 @@ export function Home({ locale }: { locale: Locale }) {
           </h1>
         </div>
         <p className="hero-note">{text.hero.description}</p>
-        <Link href={`/${locale}/contacts`} className="hero-cta btn btn-primary">
+        <LeadModalButton className="hero-cta btn btn-primary">
           <span>{text.common.buildSystem}</span>
           <ArrowRight />
-        </Link>
+        </LeadModalButton>
       </section>
       <main>
         <Problems text={text} />
@@ -53,7 +54,7 @@ export function Home({ locale }: { locale: Locale }) {
         <Suspense fallback={null}>
           <HomeServices text={text} locale={locale} />
         </Suspense>
-        <MobileClarity text={text} locale={locale} />
+        <MobileClarity text={text} />
         <Suspense fallback={null}>
           <TechnologySection locale={locale} title={text.technology.title} />
         </Suspense>
@@ -185,15 +186,15 @@ function Approach({ text, locale }: { text: Messages; locale: Locale }) {
   );
 }
 
-function MobileClarity({ text, locale }: { text: Messages; locale: Locale }) {
+function MobileClarity({ text }: { text: Messages }) {
   return (
     <section className="mobile-clarity container">
       <h2>{text.clarity.title}</h2>
       <p>{text.clarity.description}</p>
-      <Link className="btn" href={`/${locale}/contacts`}>
+      <LeadModalButton className="btn">
         <span>{text.clarity.action}</span>
         <ArrowRight />
-      </Link>
+      </LeadModalButton>
     </section>
   );
 }

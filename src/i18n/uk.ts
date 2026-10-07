@@ -149,6 +149,18 @@ export const uk = {
     submit: "Відправити заявку",
     consent: 'Натискаючи кнопку "Відправити заявку", ви даєте згоду на обробку персональних даних.',
     consentMore: "Детальніше",
+    interestLabel: "Мене цікавить",
+    interests: [
+      { value: "strategy", label: "Стратегія" },
+      { value: "marketing", label: "Маркетинг" },
+      { value: "development", label: "IT-розробка" },
+      { value: "content", label: "Контент" },
+    ],
+    phoneShort: "+38 0__",
+    close: "Закрити",
+    successTitle: "Дякуємо, ваша заявка\nбуде розглянута",
+    successLead: "Наш менеджер зв'яжеться з Вами",
+    successDetail: "щоб обговорити деталі",
   },
   footer: {
     services: {

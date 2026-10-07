@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { AboutPrinciplesSection } from "./about-principles-section";
 import { AboutStatsSection } from "./about-stats-section";
@@ -7,6 +6,7 @@ import { AgencyComparisonSection } from "./agency-comparison-section";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ContactSection } from "./contact-section";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 import { SystemTransitionSection } from "./system-transition-section";
 import { getTeamDirectory } from "./wordpress-team";
 
@@ -36,6 +36,14 @@ export async function AboutPage({ locale }: { locale: Locale }) {
           sizes="100vw"
           unoptimized
         />
+        <Image
+          className="about-hero-mobile"
+          src="/images/about/about-mob.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+        />
         <div className="container about-hero-content">
           <span className="mono">ABOUT US</span>
           <h1>
@@ -43,10 +51,10 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             <span>{t.heroTitle}</span>
           </h1>
           <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+          <LeadModalButton className="btn btn-primary">
             {text.common.buildSystem}
             <ArrowRight />
-          </Link>
+          </LeadModalButton>
         </div>
       </section>
       <AboutStatsSection locale={locale} />

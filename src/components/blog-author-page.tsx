@@ -6,6 +6,7 @@ import { getBlogAuthor } from "./wordpress-authors";
 import { getBlogPostsByAuthor } from "./wordpress-posts";
 
 import { getTranslations } from "@/i18n/pages";
+import { LeadModalButton } from "./lead-modal";
 import { StructuredData } from "./structured-data";
 export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: string }) {
   const author = await getBlogAuthor(slug, locale);
@@ -60,7 +61,7 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
           <aside>
             <h2>{t.questionTitle}</h2>
             <p>{t.questionDescription}</p>
-            <Link href={`/${locale}/contacts`}>{t.askAuthor} →</Link>
+            <LeadModalButton variant="question">{t.askAuthor} →</LeadModalButton>
           </aside>
         </section>
         <section className="container author-posts">

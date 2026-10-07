@@ -9,8 +9,20 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
 
   const copy =
     locale === "uk"
-      ? { eyebrow: "ЧИТАЙТЕ ТАКОЖ", title: "Інсайти", all: "Усі статті" }
-      : { eyebrow: "READ ALSO", title: "Insights", all: "All articles" };
+      ? {
+          eyebrow: "ЧИТАЙТЕ ТАКОЖ",
+          title: "Інсайти",
+          all: "Усі статті",
+          author: "Автор",
+          minutes: "хв",
+        }
+      : {
+          eyebrow: "READ ALSO",
+          title: "Insights",
+          all: "All articles",
+          author: "Author",
+          minutes: "min",
+        };
 
   return (
     <section className="section container service-insights">
@@ -34,13 +46,18 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
               style={post.image ? { backgroundImage: `url(${post.image})` } : undefined}
             />
             <div className="service-insights-copy">
-              <small className="mono">
-                {post.category} · {post.publishedAt} · {post.readingTime} min
-              </small>
+              <div className="service-insights-meta">
+                <span className="service-insights-category">{post.category}</span>
+                <small>
+                  {post.publishedAt} · {post.readingTime} {copy.minutes}
+                </small>
+              </div>
               <h3>
                 <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
               </h3>
-              <p>{post.authorName}</p>
+              <p>
+                {copy.author}: {post.authorName}
+              </p>
             </div>
           </article>
         ))}

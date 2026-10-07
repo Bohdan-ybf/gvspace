@@ -34,6 +34,7 @@ export default {
     vacanciesEyebrow: "НАШІ ВАКАНСІЇ",
     directionLabel: "Оберіть напрям",
     employmentLabel: "Вид зайнятості",
+    resetFilters: "Скинути",
     emptyVacancies: "За цими фільтрами вакансій немає.",
   },
   banner: {

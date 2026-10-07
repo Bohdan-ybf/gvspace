@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 import type { ServiceOffering } from "./wordpress-services";
 
 type ServiceVectorsProps = {
@@ -76,10 +77,10 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
           <div className="vectors-clarity-card">
             <h3>{clarity.title}</h3>
             <p>{clarity.description}</p>
-            <Link href={`/${locale}/contacts`}>
+            <LeadModalButton>
               <span>{clarity.action}</span>
               <ArrowRight />
-            </Link>
+            </LeadModalButton>
           </div>
         </aside>
         <div className="vectors-accordion">

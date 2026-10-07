@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
+import { LeadModalButton } from "./lead-modal";
 import { Breadcrumbs } from "./breadcrumbs";
 import { CasesCatalog } from "./cases-catalog";
 import { ContactSection } from "./contact-section";
@@ -53,10 +53,10 @@ export async function CasesPage({ locale }: { locale: Locale }) {
             <span className="mono">{t.heroEyebrow}</span>
             <h1>{t.heroTitle}</h1>
             <p>{t.heroDescription}</p>
-            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+            <LeadModalButton className="btn btn-primary">
               {t.heroAction}
               <ArrowRight />
-            </Link>
+            </LeadModalButton>
           </div>
         </section>
 

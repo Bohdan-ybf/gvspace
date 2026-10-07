@@ -147,7 +147,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
 
         <section className={`section service-steps${isDirection ? " container" : " is-process"}`}>
           <div className={isDirection ? "" : "container"}>
-            <span className="mono">{t.processEyebrow}</span>
+            <span className="mono">{isDirection ? t.processEyebrow : t.serviceProcessEyebrow}</span>
             <h2>{isDirection ? t.directionProcessTitle : t.serviceProcessTitle}</h2>
             <div>
               {steps.map((step, index) => (

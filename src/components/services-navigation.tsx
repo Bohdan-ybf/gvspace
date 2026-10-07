@@ -42,6 +42,20 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
 
   useEffect(() => {
     const scroller = scrollerRef.current;
+    if (!scroller || !activeSlug) return;
+    const link = scroller.querySelector<HTMLAnchorElement>(`a[href="#${CSS.escape(activeSlug)}"]`);
+    if (!link) return;
+
+    const linkCenter = link.getBoundingClientRect().left + link.offsetWidth / 2;
+    const scrollerCenter = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
+    scroller.scrollTo({
+      left: scroller.scrollLeft + linkCenter - scrollerCenter,
+      behavior: "smooth",
+    });
+  }, [activeSlug]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
     if (!scroller) return;
 
     const update = () => {
