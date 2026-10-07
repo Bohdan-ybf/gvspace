@@ -91,7 +91,10 @@ function LeadModal({
   const [submitted, setSubmitted] = useState(false);
 
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
