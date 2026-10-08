@@ -81,7 +81,7 @@ export function AboutTeamSlider({
             src={member.image || "/images/team/user-none.jpg"}
             alt={member.imageAlt}
             fill
-            sizes="(max-width: 600px) 100vw, 302px"
+            sizes="(max-width: 768px) 180px, 302px"
             unoptimized={!member.image || isLocalUpload(member.image)}
           />
         </div>

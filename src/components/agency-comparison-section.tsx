@@ -18,20 +18,30 @@ export function AgencyComparisonSection({ locale }: { locale: Locale }) {
           <label htmlFor="comparison-freelancer">{t.freelancerTab}</label>
         </div>
         <div className="comparison-table">
-          <div className="comparison-head mono">
-            <span />
-            <span className="is-agency">{t.agencyLabel}</span>
-            <span className="is-freelancer">{t.freelancerLabel}</span>
-            <strong>GVSPACE</strong>
+          <div className="comparison-col comparison-col-labels">
+            <span className="comparison-col-head" />
+            {rows.map((row) => (
+              <strong key={row[0]}>{row[0]}</strong>
+            ))}
           </div>
-          {rows.map((row) => (
-            <div className="comparison-row" key={row[0]}>
-              <strong>{row[0]}</strong>
-              <span className="is-agency">{row[1]}</span>
-              <span className="is-freelancer">{row[2]}</span>
-              <b>{row[3]}</b>
-            </div>
-          ))}
+          <div className="comparison-col is-agency">
+            <span className="comparison-col-head">{t.agencyLabel}</span>
+            {rows.map((row) => (
+              <span key={row[0]}>{row[1]}</span>
+            ))}
+          </div>
+          <div className="comparison-col is-freelancer">
+            <span className="comparison-col-head">{t.freelancerLabel}</span>
+            {rows.map((row) => (
+              <span key={row[0]}>{row[2]}</span>
+            ))}
+          </div>
+          <div className="comparison-col comparison-col-gvspace">
+            <strong className="comparison-col-head">GVSPACE</strong>
+            {rows.map((row) => (
+              <b key={row[0]}>{row[3]}</b>
+            ))}
+          </div>
         </div>
       </div>
     </section>

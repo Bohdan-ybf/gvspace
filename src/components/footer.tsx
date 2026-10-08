@@ -88,7 +88,9 @@ export function Footer({
         </div>
         {columns.map((column) => (
           <div key={column.title}>
-            <b>{column.title}</b>
+            <Link className="footer-column-title" href={`/${locale}${column.href}`}>
+              {column.title}
+            </Link>
             {column.links.map((item) => (
               <Link key={item.href} href={`/${locale}${item.href}`}>
                 {item.label}
@@ -97,7 +99,9 @@ export function Footer({
           </div>
         ))}
         <div>
-          <b>{footer.contactsTitle}</b>
+          <Link className="footer-column-title" href={`/${locale}${footer.contactsHref}`}>
+            {footer.contactsTitle}
+          </Link>
           {contacts.phone ? <a href={contacts.phone.href}>{contacts.phone.value}</a> : null}
           {contacts.email ? <a href={contacts.email.href}>{contacts.email.value}</a> : null}
           {contacts.offices.map((office) => (

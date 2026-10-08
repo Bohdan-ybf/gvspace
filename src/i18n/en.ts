@@ -166,6 +166,7 @@ export const en: Messages = {
   footer: {
     services: {
       title: "SERVICES",
+      href: "/services",
       links: [
         { label: "Strategy", href: "/services/strategy" },
         { label: "IT Development", href: "/services/development" },
@@ -175,6 +176,7 @@ export const en: Messages = {
     },
     company: {
       title: "COMPANY",
+      href: "/about",
       links: [
         { label: "About us", href: "/about" },
         { label: "Team", href: "/team" },
@@ -186,6 +188,7 @@ export const en: Messages = {
     },
     resources: {
       title: "RESOURCES",
+      href: "/blog",
       links: [
         { label: "Blog", href: "/blog" },
         { label: "Technologies", href: "/technologies" },
@@ -193,6 +196,7 @@ export const en: Messages = {
       ],
     },
     contactsTitle: "CONTACTS",
+    contactsHref: "/contacts",
     copyright: "All rights reserved.",
     sitemap: "Sitemap",
     privacy: "Privacy policy",

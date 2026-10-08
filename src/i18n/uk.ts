@@ -165,6 +165,7 @@ export const uk = {
   footer: {
     services: {
       title: "ПОСЛУГИ",
+      href: "/services",
       links: [
         { label: "Стратегія", href: "/services/strategy" },
         { label: "IT-розробка", href: "/services/development" },
@@ -174,6 +175,7 @@ export const uk = {
     },
     company: {
       title: "КОМПАНІЯ",
+      href: "/about",
       links: [
         { label: "Про нас", href: "/about" },
         { label: "Команда", href: "/team" },
@@ -185,6 +187,7 @@ export const uk = {
     },
     resources: {
       title: "РЕСУРСИ",
+      href: "/blog",
       links: [
         { label: "Блог", href: "/blog" },
         { label: "Технології", href: "/technologies" },
@@ -192,6 +195,7 @@ export const uk = {
       ],
     },
     contactsTitle: "КОНТАКТИ",
+    contactsHref: "/contacts",
     copyright: "Всі права захищені.",
     sitemap: "Мапа сайту",
     privacy: "Політика конфіденційності",

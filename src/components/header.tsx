@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -72,19 +71,6 @@ function ServicesMenuArrow() {
         strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path
-        d="M6 0.75V11.25M0.75 6H11.25"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
       />
     </svg>
   );
@@ -167,7 +153,6 @@ export function Header({
     .map((direction) => ({
       slug: direction.slug,
       title: direction.title,
-      image: direction.image,
       services: services
         .filter((service) => service.parentSlug === direction.slug)
         .map((service) => ({ slug: service.slug, title: service.title })),
@@ -177,7 +162,6 @@ export function Header({
     : staticServiceDirections.map((direction) => ({
         slug: direction.slug,
         title: direction.title,
-        image: undefined,
         services: direction.services.map((title) => ({ slug: "", title })),
       }));
   const pathWithoutLocale = pathname.startsWith(`/${locale}`)
@@ -223,6 +207,7 @@ export function Header({
         ];
   const companyMenuLabel = locale === "uk" ? "Компанія" : "Company";
   const backLabel = locale === "uk" ? "Назад" : "Back";
+  const openSubmenuLabel = locale === "uk" ? "Відкрити підменю" : "Open submenu";
   const companyOrder = ["/about", "/team", "/careers", "/reviews", "/partners"];
   const orderedCompanyLinks = [
     ...companyOrder.flatMap((href) => companyLinks.filter((item) => item.href === href)),
@@ -361,16 +346,6 @@ export function Header({
                           onFocus={() => setHoveredServiceSlug(direction.slug)}
                         >
                           <span className="services-menu-label">
-                            {direction.image ? (
-                              <Image
-                                className="services-menu-icon"
-                                src={direction.image}
-                                alt=""
-                                width={25}
-                                height={25}
-                                unoptimized={direction.image.startsWith("http://")}
-                              />
-                            ) : null}
                             <span>{direction.title}</span>
                           </span>
                           <ServicesMenuArrow />
@@ -544,14 +519,24 @@ export function Header({
         <div className="mobile-nav-links">
           {mobilePanel.level === "root" && (
             <>
-              <button
-                type="button"
-                className="mobile-root-row"
-                onClick={() => setMobilePanel({ level: "services" })}
-              >
-                <span>{text.navigation[0]}</span>
-                <PlusIcon />
-              </button>
+              <div className="mobile-root-row">
+                <Link
+                  href={`/${locale}/services`}
+                  aria-current={isSectionActive(0) ? "page" : undefined}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={closeMobileMenu}
+                >
+                  {text.navigation[0]}
+                </Link>
+                <button
+                  type="button"
+                  aria-label={openSubmenuLabel}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={() => setMobilePanel({ level: "services" })}
+                >
+                  <MobileMenuArrowIcon />
+                </button>
+              </div>
               <Link
                 className="mobile-root-row"
                 href={`/${locale}/cases`}
@@ -561,22 +546,42 @@ export function Header({
               >
                 {text.navigation[1]}
               </Link>
-              <button
-                type="button"
-                className="mobile-root-row"
-                onClick={() => setMobilePanel({ level: "expertise" })}
-              >
-                <span>{text.navigation[2]}</span>
-                <PlusIcon />
-              </button>
-              <button
-                type="button"
-                className="mobile-root-row"
-                onClick={() => setMobilePanel({ level: "company" })}
-              >
-                <span>{companyMenuLabel}</span>
-                <PlusIcon />
-              </button>
+              <div className="mobile-root-row">
+                <Link
+                  href={`/${locale}/technologies`}
+                  aria-current={isSectionActive(2) ? "page" : undefined}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={closeMobileMenu}
+                >
+                  {text.navigation[2]}
+                </Link>
+                <button
+                  type="button"
+                  aria-label={openSubmenuLabel}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={() => setMobilePanel({ level: "expertise" })}
+                >
+                  <MobileMenuArrowIcon />
+                </button>
+              </div>
+              <div className="mobile-root-row">
+                <Link
+                  href={`/${locale}/about`}
+                  aria-current={isSectionActive(3) ? "page" : undefined}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={closeMobileMenu}
+                >
+                  {companyMenuLabel}
+                </Link>
+                <button
+                  type="button"
+                  aria-label={openSubmenuLabel}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                  onClick={() => setMobilePanel({ level: "company" })}
+                >
+                  <MobileMenuArrowIcon />
+                </button>
+              </div>
               <Link
                 className="mobile-root-row"
                 href={`/${locale}/blog`}
@@ -611,15 +616,23 @@ export function Header({
               </div>
               {serviceMenuDirections.map((direction) =>
                 direction.services.length ? (
-                  <button
-                    type="button"
-                    className="mobile-drill-row"
-                    key={direction.slug}
-                    onClick={() => setMobilePanel({ level: "direction", slug: direction.slug })}
-                  >
-                    <span>{direction.title}</span>
-                    <MobileMenuArrowIcon />
-                  </button>
+                  <div className="mobile-drill-row" key={direction.slug}>
+                    <Link
+                      href={`/${locale}/services/${direction.slug}`}
+                      tabIndex={isMenuOpen ? 0 : -1}
+                      onClick={closeMobileMenu}
+                    >
+                      {direction.title}
+                    </Link>
+                    <button
+                      type="button"
+                      aria-label={openSubmenuLabel}
+                      tabIndex={isMenuOpen ? 0 : -1}
+                      onClick={() => setMobilePanel({ level: "direction", slug: direction.slug })}
+                    >
+                      <MobileMenuArrowIcon />
+                    </button>
+                  </div>
                 ) : (
                   <Link
                     className="mobile-sub-link"
@@ -715,13 +728,15 @@ export function Header({
           )}
         </div>
         <div className="mobile-menu-footer">
-          <LeadModalButton
-            className="btn btn-primary mobile-menu-cta"
-            tabIndex={isMenuOpen ? 0 : -1}
-            onClick={closeMobileMenu}
-          >
-            {text.common.buildSystem}
-          </LeadModalButton>
+          {mobilePanel.level === "root" ? (
+            <LeadModalButton
+              className="btn btn-primary mobile-menu-cta"
+              tabIndex={isMenuOpen ? 0 : -1}
+              onClick={closeMobileMenu}
+            >
+              {text.common.buildSystem}
+            </LeadModalButton>
+          ) : null}
           <div
             className="mobile-menu-socials"
             aria-label={locale === "uk" ? "Соціальні мережі" : "Social media"}

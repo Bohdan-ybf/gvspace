@@ -46,10 +46,15 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
     const link = scroller.querySelector<HTMLAnchorElement>(`a[href="#${CSS.escape(activeSlug)}"]`);
     if (!link) return;
 
-    const linkCenter = link.getBoundingClientRect().left + link.offsetWidth / 2;
-    const scrollerCenter = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
+    const isFirst = link === scroller.querySelector("a");
+    const inset = isFirst ? 0 : 40;
+    const left =
+      scroller.scrollLeft +
+      link.getBoundingClientRect().left -
+      scroller.getBoundingClientRect().left -
+      inset;
     scroller.scrollTo({
-      left: scroller.scrollLeft + linkCenter - scrollerCenter,
+      left: Math.max(0, left),
       behavior: "smooth",
     });
   }, [activeSlug]);
