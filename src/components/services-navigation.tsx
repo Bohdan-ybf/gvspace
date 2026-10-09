@@ -12,7 +12,9 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
   const [activeSlug, setActiveSlug] = useState(items[0]?.slug);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
 
   useEffect(() => {
@@ -39,6 +41,50 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, [items]);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    let frame = 0;
+    let previousY = window.scrollY;
+
+    const update = () => {
+      const directions = nav.nextElementSibling;
+      if (!(directions instanceof HTMLElement)) return;
+
+      const header = document.querySelector(".header");
+      const headerBottom = header?.getBoundingClientRect().bottom ?? 80;
+      const currentY = window.scrollY;
+      const delta = currentY - previousY;
+      previousY = currentY;
+
+      const passedLastBlock =
+        directions.getBoundingClientRect().bottom <= headerBottom + nav.offsetHeight + 8;
+
+      if (!passedLastBlock || delta < -2) {
+        setIsHidden(false);
+        return;
+      }
+
+      if (delta > 2) setIsHidden(true);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -124,8 +170,10 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
 
   return (
     <nav
-      className={`services-tabs${canPrev || canNext ? " is-overflowing" : ""}`}
+      ref={navRef}
+      className={`services-tabs${canPrev || canNext ? " is-overflowing" : ""}${isHidden ? " is-hidden" : ""}`}
       aria-label="Service directions"
+      aria-hidden={isHidden}
     >
       <button
         type="button"

@@ -54,7 +54,9 @@ function technologyPeople(
   const people = members.map((member) => ({
     name: member.name,
     role: member.role,
-    quote: meetName && member.name.trim().toLowerCase() === meetName ? technology.meet.quote : "",
+    quote:
+      member.quote ||
+      (meetName && member.name.trim().toLowerCase() === meetName ? technology.meet.quote : ""),
     years: member.years,
     projects: member.projects,
     tags: member.tags,
@@ -287,7 +289,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                     <article key={`${metric.value}-${metric.label}`}>
                       <strong>
                         {metric.value}
-                        {metric.label ? <span> {metric.label}</span> : null}
+                        {metric.label ? <span>{metric.label}</span> : null}
                       </strong>
                     </article>
                   ))}
@@ -348,6 +350,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
           eyebrow={t.page.reviewsEyebrow}
           title={t.page.reviewsTitle}
           tags={[...technology.categorySlugs, directionSlug, technology.slug]}
+          slugs={technology.relatedReviews}
         />
 
         <TechnologyShowcaseSection

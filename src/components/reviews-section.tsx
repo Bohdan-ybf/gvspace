@@ -10,18 +10,24 @@ export async function ReviewsSection({
   eyebrow,
   title,
   tags = [],
+  slugs = [],
   limit = 3,
 }: {
   locale: Locale;
   eyebrow?: string;
   title?: string;
   tags?: string[];
+  slugs?: string[];
   limit?: number;
 }) {
   const t = getTranslations("reviews", locale).summary;
-  const reviews = (await getClientReviews(locale))
-    .filter((review) => reviewMatchesTags(review, tags))
-    .slice(0, limit);
+  const allReviews = await getClientReviews(locale);
+  const selected = new Map(slugs.map((slug, index) => [slug, index]));
+  const reviews = selected.size
+    ? allReviews
+        .filter((review) => selected.has(review.slug))
+        .sort((left, right) => (selected.get(left.slug) ?? 0) - (selected.get(right.slug) ?? 0))
+    : allReviews.filter((review) => reviewMatchesTags(review, tags)).slice(0, limit);
   if (!reviews.length) return null;
   return (
     <section className="section container home-reviews-section">

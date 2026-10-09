@@ -60,7 +60,7 @@ export function TechnologyMeetSection({
                 src={person.photo || "/images/team/user-none.jpg"}
                 alt={person.name}
                 fill
-                sizes="(max-width: 900px) 100vw, 320px"
+                sizes="(max-width: 900px) 100vw, 300px"
                 unoptimized={!person.photo || person.photo.startsWith("http")}
               />
             </div>
@@ -77,7 +77,13 @@ export function TechnologyMeetSection({
               ) : null}
               {person.role ? <span>{person.role}</span> : null}
               <strong>{person.name}</strong>
-              {person.quote ? <blockquote>{person.quote}</blockquote> : null}
+              {person.quote ? (
+                <blockquote>
+                  <QuoteMark />
+                  <p>{person.quote}</p>
+                  <QuoteMark />
+                </blockquote>
+              ) : null}
               {person.years || person.projects ? (
                 <dl>
                   {person.years ? (
@@ -106,6 +112,17 @@ export function TechnologyMeetSection({
         ) : null}
       </div>
     </section>
+  );
+}
+
+function QuoteMark() {
+  return (
+    <svg width="22" height="18" viewBox="0 0 22 18" fill="none" aria-hidden="true">
+      <path
+        d="M8.456 0L5.432 8.848H9.128V17.472H0V9.8L3.92 0H8.456ZM20.552 0L17.528 8.848H21.168V17.472H12.04V9.8L15.96 0H20.552Z"
+        fill="#E2DFF0"
+      />
+    </svg>
   );
 }
 

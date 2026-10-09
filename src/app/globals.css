@@ -511,18 +511,25 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 .technology-detail-why > .container > span {
   display: block;
   margin-bottom: 16px;
-  color: rgba(255, 255, 255, 0.62);
+  color: #e2dff0;
   font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.6px;
 }
 .technology-detail-why p {
-  max-width: 58ch;
+  max-width: none;
   color: #fff;
-  font-size: clamp(24px, 2.6vw, 34px);
-  line-height: 1.28;
-  letter-spacing: -0.03em;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.28px;
 }
 .technology-detail-why strong {
+  font-size: 28px;
   font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.28px;
 }
 .technology-detail-triggers > span {
   display: block;
@@ -544,18 +551,26 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   box-shadow: 0 12px 28px rgba(25, 12, 84, 0.05);
 }
 .technology-detail-triggers small {
-  color: #6b6494;
-  font-size: 10px;
+  color: #5500ff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 .technology-detail-triggers h2 {
   margin: 18px 0 10px;
-  color: var(--navy);
-  font-size: 28px;
+  color: #00003d;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0;
 }
 .technology-detail-triggers p {
-  color: var(--muted);
+  color: #6b6494;
   font-size: 15px;
-  line-height: 1.5;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: 0;
 }
 .technology-detail-uses > span {
   display: block;
@@ -581,22 +596,29 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   background: #fff;
 }
 .technology-detail-uses article > span {
-  color: var(--violet);
-  font-size: 13px;
-  line-height: 1.4;
+  align-self: end;
+  color: #5500ff;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 .technology-detail-uses h2 {
   margin: 0;
-  color: var(--navy);
-  font-size: 18px;
-  line-height: 1.35;
+  color: #000080;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
 }
 .technology-detail-uses p {
   grid-column: 2;
   margin: 8px 0 0;
-  color: var(--muted);
+  color: #6b6494;
   font-size: 15px;
-  line-height: 1.5;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: 0;
 }
 .technology-detail-services {
   display: grid;
@@ -632,9 +654,11 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
-  color: #00003d;
-  font-size: 18px;
-  font-weight: 600;
+  color: #000080;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;
@@ -689,6 +713,9 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+}
+.technology-detail-case-metrics strong span {
+  margin-left: 0.3em;
 }
 .technology-detail-case-card {
   display: flex;
@@ -762,12 +789,16 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 }
 .technology-meet-block > h2 {
   margin-bottom: 28px;
-  font-size: clamp(32px, 3.4vw, 48px);
+  color: #000080;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
 }
 .technology-meet-nav {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 0;
+  right: 0;
   z-index: 1;
   display: flex;
   gap: 2px;
@@ -780,7 +811,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   align-items: center;
   justify-content: center;
   border: 0;
-  color: #b9a6ff;
+  color: #5500ff;
   background: transparent;
   cursor: pointer;
 }
@@ -789,39 +820,51 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 }
 .technology-meet-grid {
   display: grid;
-  grid-template-columns: minmax(240px, 0.9fr) minmax(200px, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(260px, 1fr) 300px minmax(280px, 1.15fr);
   gap: 16px;
-  align-items: stretch;
+  align-items: start;
 }
 .technology-meet-clarity {
-  padding: 32px 28px;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
   color: #fff;
-  background: #16007a;
-  border-radius: 16px;
+  background: linear-gradient(165deg, #2b00bf 0%, #00003d 100%);
+  border-radius: 12px;
 }
 .technology-meet-clarity h3 {
-  max-width: 12ch;
-  font-size: 32px;
-  line-height: 1.1;
+  max-width: 270px;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
 }
 .technology-meet-clarity p {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 15px;
-  line-height: 1.5;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: 0;
 }
 .technology-meet-clarity .btn {
   width: max-content;
-  margin-top: auto;
+  min-height: 41px;
+  margin-top: 12px;
+  padding: 12px 24px;
+  background-color: #5500ff;
+  border-color: #5500ff;
+  font-size: 14px;
+  line-height: 1;
 }
 .technology-meet-photo {
   position: relative;
-  min-height: 360px;
+  width: 300px;
+  height: 450px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 12px;
   background: #1b1633;
   animation: technology-meet-swap 280ms ease;
 }
@@ -834,18 +877,14 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background: #3d22a8;
-  mix-blend-mode: color;
-  opacity: 0.72;
+  background: rgb(43 0 191 / 20%);
+  mix-blend-mode: normal;
   pointer-events: none;
 }
 .technology-meet-profile {
   position: relative;
-  padding: 28px 24px 22px;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
-  background: #f4f2fb;
   animation: technology-meet-swap 280ms ease;
 }
 @keyframes technology-meet-swap {
@@ -863,64 +902,68 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   }
 }
 .technology-meet-profile > span {
-  color: var(--violet);
+  color: #5500ff;
   font-family: var(--font-geist-mono), "Courier New", monospace;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  line-height: 1.5;
+  letter-spacing: 0.88px;
   text-transform: uppercase;
 }
 .technology-meet-profile strong {
   margin-top: 8px;
-  color: var(--navy);
-  font-size: 32px;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  color: #000080;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.72px;
 }
 .technology-meet-profile blockquote {
-  position: relative;
-  margin: 18px 28px 0 0;
-  color: #6f6a8c;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  color: #2e2a50;
+  background: #f1eff8;
   font-size: 16px;
+  font-weight: 400;
   line-height: 1.45;
+  letter-spacing: 0;
 }
-.technology-meet-profile blockquote::before,
-.technology-meet-profile blockquote::after {
-  color: #ddd8f0;
-  font-size: 42px;
-  line-height: 1;
+.technology-meet-profile blockquote p {
+  margin: 0;
 }
-.technology-meet-profile blockquote::before {
-  content: "“";
+.technology-meet-profile blockquote svg {
   display: block;
-  margin-bottom: 4px;
+  flex: none;
 }
-.technology-meet-profile blockquote::after {
-  content: "”";
-  position: absolute;
-  right: -24px;
-  bottom: -12px;
+.technology-meet-profile blockquote svg:last-child {
+  align-self: flex-end;
 }
 .technology-meet-profile dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  margin: auto 0 0;
-  padding-top: 22px;
+  margin: 28px 0 0;
 }
 .technology-meet-profile dt {
   color: #6b6494;
-  font-size: 13px;
-  line-height: 1.3;
+  font-family: var(--font-geist-mono), "Courier New", monospace;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
 }
 .technology-meet-profile dd {
   margin: 6px 0 0;
   color: #5500ff;
   font-family: var(--font-geist-mono), "Courier New", monospace;
-  font-size: 42px;
+  font-size: 56px;
   font-weight: 600;
-  letter-spacing: -1.2px;
-  line-height: 1;
+  letter-spacing: -1.68px;
+  line-height: 1.05;
 }
 .technology-meet-tags {
   display: flex;
@@ -1028,6 +1071,8 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
     padding: 22px 20px;
   }
   .technology-meet-photo {
+    width: auto;
+    height: auto;
     min-height: 280px;
   }
   .technology-detail-benefits article,
@@ -1055,19 +1100,295 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
     padding: 28px 20px;
   }
   .technologies-philosophy p {
-    font-size: 20px;
+    color: #000080;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: 0;
   }
-  .technologies-stats,
+  .technologies-philosophy p b {
+    font-weight: 600;
+  }
+  .technology-detail-hero {
+    padding: 112px 0 36px;
+  }
+  .technology-detail-logo {
+    order: -1;
+    width: 128px;
+    height: 128px;
+    justify-self: start;
+  }
+  .technology-detail-hero-copy h1 {
+    color: #000080;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .technology-detail-hero-copy p {
+    color: #6b6494;
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .technology-detail-why > .container > span {
+    color: #e2dff0;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.6px;
+  }
+  .technology-detail-why p {
+    max-width: none;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+  .technology-detail-why strong {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .technology-detail-triggers small {
+    color: #5500ff;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  .technology-detail-triggers h2 {
+    margin: 8px 0 6px;
+    color: #00003d;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  .technology-detail-triggers p {
+    color: #6b6494;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .technology-detail-uses article > span {
+    align-self: end;
+    color: #5500ff;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  .technology-detail-uses h2 {
+    color: #000080;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .technology-detail-uses p {
+    color: #6b6494;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .technology-detail-services a {
+    color: #000080;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .technologies-stats {
+    grid-template-columns: 1fr 1fr;
+  }
   .technology-tools-grid {
     grid-template-columns: 1fr;
   }
+  .technology-meet-block > h2 {
+    margin-bottom: 16px;
+    color: #000080;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .technology-meet-grid {
+    grid-template-columns: 160px minmax(0, 1fr);
+    grid-template-rows: 24px minmax(148px, auto) auto;
+    gap: 12px 16px;
+    align-items: start;
+  }
+  .technology-meet-clarity {
+    grid-column: 1 / -1;
+    grid-row: 7;
+    padding: 24px;
+    gap: 24px;
+    border-radius: 0;
+    background: linear-gradient(165deg, #2b00bf 0%, #00003d 100%);
+  }
+  .technology-meet-clarity h3 {
+    max-width: none;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+  .technology-meet-clarity p {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .technology-meet-clarity .btn {
+    align-self: center;
+    min-height: 41px;
+    margin-top: 0;
+    padding: 12px 24px;
+    background-color: #5500ff;
+    border-color: #5500ff;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.39px;
+  }
+  .technology-meet-photo {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: 160px;
+    height: 212px;
+    min-height: 0;
+    align-self: start;
+    border-radius: 12px;
+  }
+  .technology-meet-photo::after {
+    background: rgb(43 0 191 / 20%);
+    mix-blend-mode: normal;
+    opacity: 1;
+  }
+  .technology-meet-profile {
+    display: contents;
+  }
+  .technology-meet-nav {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+  }
+  .technology-meet-nav button {
+    color: #5500ff;
+  }
+  .technology-meet-profile > span {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: end;
+    color: #5500ff;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.6px;
+  }
+  .technology-meet-profile strong {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+    margin-top: 4px;
+    color: #000080;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .technology-meet-profile blockquote {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 4px 0 0;
+    padding: 8px;
+    border-radius: 12px;
+    color: #2e2a50;
+    background: #f1eff8;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  .technology-meet-profile blockquote p {
+    margin: 0;
+  }
   .technology-meet-profile dl {
-    grid-template-columns: 1fr;
+    grid-column: 1 / -1;
+    grid-row: 5;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 8px 0 0;
+    padding-top: 0;
+  }
+  .technology-meet-profile dt {
+    color: #6b6494;
+    font-family: var(--font-geist-mono), "Courier New", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  .technology-meet-profile dd {
+    color: #5500ff;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -1.68px;
+  }
+  .technology-meet-tags {
+    grid-column: 1 / -1;
+    grid-row: 6;
+    gap: 10px;
+    margin-top: 4px;
+    margin-bottom: 13px;
+  }
+  .technology-meet-tags li {
+    padding: 4px 8px;
+    color: #000080;
+    background: rgb(0 0 128 / 10%);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0;
   }
   .technologies-stats article {
-    min-height: 125px;
-    border-right: 0;
+    min-height: 132px;
+    padding: 22px 18px;
+    border-right: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
+  }
+  .technologies-stats article:nth-child(even) {
+    border-right: 0;
+  }
+  .technologies-stats article:nth-last-child(-n + 2),
+  .technologies-stats article:last-child {
+    border-bottom: 0;
+  }
+  .technologies-stats strong {
+    color: #5500ff;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  .technologies-stats span {
+    color: #00003d;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.6px;
   }
   .technology-tools-grid article,
   .technology-tools-grid article:nth-child(even),
@@ -6360,10 +6681,18 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   position: sticky;
   top: calc(80px * var(--header-scale));
   z-index: 20;
-  transition: top 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    top 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 320ms;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
+}
+.services-tabs.is-hidden {
+  transform: translateY(calc(-100% - 12px));
+  visibility: hidden;
+  pointer-events: none;
 }
 .services-tabs > div {
   min-height: 60px;
@@ -6472,7 +6801,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   min-height: 43px;
   padding: 13px 25px;
   color: #00003d;
-  border-color: #00003d;
+  border-color: #c5c0dc;
   font-size: 13px;
   font-weight: 500;
   line-height: 1;
@@ -6917,6 +7246,31 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   box-shadow:
     0 8px 24px rgb(241 229 237 / 8%),
     0 24px 64px rgb(241 229 237 / 12%);
+}
+.service-steps.container article::before,
+.service-steps.is-process article::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 50%;
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
+  background: linear-gradient(to top, rgb(155 214 255 / 15%), rgb(155 214 255 / 0%));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+.service-steps.container article:hover::before,
+.service-steps.is-process article:hover::before {
+  opacity: 1;
+}
+.service-steps.container article > *,
+.service-steps.is-process article > * {
+  position: relative;
+  z-index: 1;
 }
 .service-steps.is-process article:nth-child(2) {
   background: linear-gradient(180deg, rgb(85 0 255 / 55%), rgb(85 0 255 / 0%)), #000074;
@@ -9817,6 +10171,15 @@ footer {
   width: 411px;
   max-width: 100%;
   height: auto;
+}
+.footer-grid a.footer-home-link,
+.footer-mobile-wordmark a.footer-home-link {
+  width: 100%;
+  transform: none;
+}
+.footer-grid a.footer-home-link:hover,
+.footer-mobile-wordmark a.footer-home-link:hover {
+  transform: none;
 }
 .footer-grid > div {
   display: flex;
@@ -13013,6 +13376,59 @@ footer {
     grid-template-columns: 1fr;
     gap: 28px;
   }
+  .technologies-page .cases-showcase {
+    display: flex;
+    flex-direction: column;
+  }
+  .technologies-page .cases-showcase > header {
+    display: contents;
+  }
+  .technologies-page .cases-showcase > header > div {
+    order: 1;
+    margin-bottom: 16px;
+  }
+  .technologies-page .cases-showcase-grid {
+    order: 2;
+  }
+  .technologies-page .cases-showcase > header .btn,
+  .service-detail-page .cases-showcase > header .btn {
+    order: 3;
+    align-self: center;
+    margin-top: 20px;
+  }
+  .service-detail-page .cases-showcase {
+    display: flex;
+    flex-direction: column;
+  }
+  .service-detail-page .cases-showcase > header {
+    display: contents;
+  }
+  .service-detail-page .cases-showcase > header > div {
+    order: 1;
+    margin-bottom: 16px;
+  }
+  .service-detail-page .cases-showcase-grid {
+    order: 2;
+  }
+  .technology-detail-case {
+    display: flex;
+    flex-direction: column;
+  }
+  .technology-detail-case-head {
+    display: contents;
+  }
+  .technology-detail-case-head > span {
+    order: 1;
+    margin-bottom: 16px;
+  }
+  .technology-detail-case-grid {
+    order: 2;
+  }
+  .technology-detail-case-head .btn {
+    order: 3;
+    align-self: center;
+    margin-top: 20px;
+  }
   .showcase-case-card,
   .showcase-case-card:last-child {
     display: block;
@@ -13272,9 +13688,11 @@ footer {
     align-items: flex-start;
     flex-direction: column;
   }
-  .service-detail-page .cases-showcase > header .btn,
   .service-detail-page .service-insights > header .btn {
     margin: 4px 0 0 auto;
+  }
+  .service-detail-page .cases-showcase > header .btn {
+    margin: 20px auto 0;
   }
   .service-insights-image {
     min-height: 180px;
@@ -13527,6 +13945,33 @@ footer {
   }
   .vacancy-title-row h1 {
     font-size: 38px;
+  }
+  .open-application h2 {
+    max-width: none;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+  .open-application p {
+    max-width: none;
+    color: #f8f8fc;
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  .open-application .btn {
+    align-self: center;
+    width: max-content;
+    min-width: 0;
+    min-height: 47px;
+    padding: 12px 24px;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0;
   }
 }
 
@@ -14368,6 +14813,77 @@ footer {
   line-height: 1;
   letter-spacing: 0.6px;
 }
+.technology-detail-triggers > span,
+.technology-detail-uses > span,
+.technology-detail-services > div > span {
+  color: #9690b8;
+}
+
+@media (max-width: 600px) {
+  .technologies-philosophy > span,
+  .technology-detail-triggers > span {
+    color: #9690b8;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.6px;
+  }
+  .technology-detail-uses > span {
+    color: #9690b8;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.6px;
+  }
+  .technology-detail-services > div > span {
+    color: #9690b8;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.6px;
+  }
+  .technology-detail-case-head > span {
+    color: #9690b8;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.6px;
+  }
+  .technology-detail-case-metrics strong {
+    font-family: var(--font-geist-mono), "Courier New", monospace;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-align: center;
+  }
+  .technology-detail-case-metrics strong span {
+    display: block;
+    margin-left: 0;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+  .technology-detail-case-copy h3 {
+    color: #000080;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.28px;
+  }
+  .technology-detail-case-copy p {
+    color: #6b6494;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+  .technology-detail-case-labels {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
 
 .seo-breadcrumbs > span:last-child > span[aria-current="page"] {
   color: #2b00bf;
@@ -14702,5 +15218,60 @@ footer {
   }
   .lead-modal-success p {
     font-size: 15px;
+  }
+}
+
+nav.seo-breadcrumbs.mono {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 28px;
+  padding-bottom: 40px;
+  color: #6b6494;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+nav.seo-breadcrumbs.mono > span,
+nav.seo-breadcrumbs.mono a,
+nav.seo-breadcrumbs.mono > span > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  line-height: 1;
+  letter-spacing: inherit;
+}
+nav.seo-breadcrumbs.mono > span {
+  gap: 8px;
+}
+nav.seo-breadcrumbs.mono a {
+  color: #6b6494;
+  text-decoration: none;
+}
+nav.seo-breadcrumbs.mono a:hover {
+  color: #2b00bf;
+}
+nav.seo-breadcrumbs.mono > span > span[aria-hidden="true"] {
+  color: #000080;
+}
+nav.seo-breadcrumbs.mono > span > span[aria-current="page"] {
+  color: #2b00bf;
+}
+@media (max-width: 600px) {
+  nav.seo-breadcrumbs.mono {
+    flex-wrap: nowrap;
+    padding-top: 20px;
+    padding-bottom: 28px;
+    overflow-x: auto;
+    font-size: 12px;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  nav.seo-breadcrumbs.mono > span {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 }

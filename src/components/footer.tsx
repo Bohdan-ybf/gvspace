@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { FooterHomeLink } from "./footer-home-link";
 import { Logo } from "./logo";
 import {
   ClutchIcon,
@@ -82,7 +83,9 @@ export function Footer({
       <div className="footer-grid container">
         <div>
           <div className="footer-logo">
-            <Logo variant="footer" />
+            <FooterHomeLink locale={locale}>
+              <Logo variant="footer" />
+            </FooterHomeLink>
           </div>
           <SocialLinks socials={contacts.socials} label={t.socialNavigationLabel} />
         </div>
@@ -112,7 +115,9 @@ export function Footer({
         </div>
       </div>
       <div className="footer-mobile-wordmark">
-        <Logo variant="footer" />
+        <FooterHomeLink locale={locale}>
+          <Logo variant="footer" />
+        </FooterHomeLink>
         <SocialLinks socials={contacts.socials} label={t.socialNavigationLabel} />
       </div>
       <div className="legal container">

@@ -368,6 +368,7 @@ function toItem(item: FallbackTechnology, locale: Locale): TechnologyItem {
       photo: "",
     },
     relatedCase: item.relatedCase ?? "",
+    relatedReviews: [],
     visual: "",
     image: item.image,
     imageAlt: title,

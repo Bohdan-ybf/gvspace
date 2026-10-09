@@ -9,6 +9,7 @@ export type TeamMember = {
   tags: string[];
   years: string;
   projects: string;
+  quote: string;
   categorySlugs: string[];
   image?: string;
   imageAlt: string;
@@ -33,6 +34,7 @@ type TeamNode = {
     tags?: string[];
     years?: string;
     projects?: string;
+    quote?: string;
   };
   teamMemberCategories?: { nodes?: TeamCategory[] };
   gvspaceLocalization?: ContentLocalization | null;
@@ -61,7 +63,7 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
         teamMembers(first: 100) { nodes {
           databaseId title menuOrder gvspaceLocalization { locale translationGroup status }
           featuredImage { node { sourceUrl altText } }
-          teamMemberDetails(locale: "${locale}") { name role tags years projects }
+          teamMemberDetails(locale: "${locale}") { name role tags years projects quote }
           teamMemberCategories { nodes { name slug } }
         } }
       }`,
@@ -85,6 +87,7 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
         tags: node.teamMemberDetails?.tags ?? [],
         years: node.teamMemberDetails?.years ?? "",
         projects: node.teamMemberDetails?.projects ?? "",
+        quote: node.teamMemberDetails?.quote ?? "",
         categorySlugs: node.teamMemberCategories?.nodes?.map(({ slug }) => slug) ?? [],
         image: node.featuredImage?.node?.sourceUrl,
         imageAlt: node.featuredImage?.node?.altText || node.teamMemberDetails?.name || node.title,

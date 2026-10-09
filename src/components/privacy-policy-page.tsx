@@ -58,7 +58,7 @@ export function PrivacyPolicyPage({
           })}
         </article>
       </div>
-      <Breadcrumbs locale={locale} visible homeLabel="HOME" items={[{ label: document.title }]} />
+      <Breadcrumbs locale={locale} visible items={[{ label: document.title }]} />
     </main>
   );
 }

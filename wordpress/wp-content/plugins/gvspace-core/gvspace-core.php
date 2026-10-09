@@ -68,6 +68,7 @@ const GVSPACE_TEAM_MEMBER_FIELDS = [
 
 const GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS = [
     'role' => ['label' => 'Посада / роль', 'type' => 'text'],
+    'quote' => ['label' => 'Цитата', 'type' => 'textarea'],
     'tags' => ['label' => 'Компетенції (кожна з нового рядка)', 'type' => 'textarea'],
 ];
 
@@ -2215,6 +2216,34 @@ function gvspace_render_technology_fields(WP_Post $post): void
     echo '<p><label for="gvspace_technology_related_case"><strong>Кейс на сторінці технології</strong></label><br>';
     echo '<input type="text" id="gvspace_technology_related_case" name="gvspace_technology_related_case" value="' . esc_attr($related_case) . '" placeholder="detox-new-year" style="width:100%;max-width:420px"></p>';
     echo '<p class="description">Публічний slug кейсу, спільний для всіх мов. Якщо порожньо — підтягнемо кейс за табом технології (наприклад, IT-кейс для розробки).</p>';
+    $selected_reviews = get_post_meta($post->ID, '_gvspace_technology_related_reviews', true);
+    if (!is_array($selected_reviews)) $selected_reviews = [];
+    $selected_reviews = array_map('intval', $selected_reviews);
+    $review_posts = get_posts([
+        'post_type' => 'gv_review',
+        'post_status' => 'publish',
+        'posts_per_page' => 100,
+        'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
+    ]);
+    echo '<input type="hidden" name="gvspace_technology_reviews_submitted" value="1">';
+    echo '<p><strong>Відгуки на сторінці технології</strong></p>';
+    if ($review_posts === []) {
+        echo '<p class="description">Опублікованих відгуків ще немає. Додайте їх у розділі «Відгуки».</p>';
+    } else {
+        echo '<div style="max-height:220px;overflow:auto;border:1px solid #c3c4c7;padding:8px 12px;max-width:520px">';
+        foreach ($review_posts as $review_post) {
+            $review_id = (int) $review_post->ID;
+            $company = gvspace_review_editor_value($review_id, 'company', 'uk');
+            $label = get_the_title($review_post);
+            if ($company !== '') $label .= ' — ' . $company;
+            echo '<label style="display:block;margin:0 0 6px"><input type="checkbox" name="gvspace_technology_related_reviews[]" value="'
+                . esc_attr((string) $review_id) . '"'
+                . checked(in_array($review_id, $selected_reviews, true), true, false)
+                . '> ' . esc_html($label) . '</label>';
+        }
+        echo '</div>';
+        echo '<p class="description">Позначте відгуки, які мають з’явитися в блоці «Чи задоволені клієнти?». Якщо нічого не обрано, підтягнуться відгуки за табом технології.</p>';
+    }
     gvspace_render_technology_meet_photo_field($post);
 
     echo '<p><label for="gvspace-technology-language"><strong>Редагувати мовну версію</strong></label> ';
@@ -2285,6 +2314,16 @@ add_action('save_post_gv_technology', function (int $post_id): void {
 
     if (isset($_POST['gvspace_technology_related_case'])) {
         update_post_meta($post_id, '_gvspace_technology_related_case', sanitize_title(wp_unslash($_POST['gvspace_technology_related_case'])));
+    }
+    if (isset($_POST['gvspace_technology_reviews_submitted'])) {
+        $review_ids = [];
+        if (isset($_POST['gvspace_technology_related_reviews']) && is_array($_POST['gvspace_technology_related_reviews'])) {
+            foreach ($_POST['gvspace_technology_related_reviews'] as $review_id) {
+                $clean_id = (int) $review_id;
+                if ($clean_id > 0 && get_post_type($clean_id) === 'gv_review') $review_ids[] = $clean_id;
+            }
+        }
+        update_post_meta($post_id, '_gvspace_technology_related_reviews', array_values(array_unique($review_ids)));
     }
     if (isset($_POST['gvspace_technology_meet_photo'])) {
         $meet_photo = sanitize_text_field(wp_unslash($_POST['gvspace_technology_meet_photo']));
@@ -3386,6 +3425,22 @@ add_action('graphql_register_types', function (): void {
             return (string) get_post_meta((int) $source->databaseId, '_gvspace_technology_related_case', true);
         },
     ]);
+    register_graphql_field('Technology', 'relatedReviews', [
+        'type' => ['list_of' => 'String'],
+        'resolve' => static function ($source): array {
+            $stored = get_post_meta((int) $source->databaseId, '_gvspace_technology_related_reviews', true);
+            if (!is_array($stored)) return [];
+            $slugs = [];
+            foreach ($stored as $review_id) {
+                $review = get_post((int) $review_id);
+                if (!$review instanceof WP_Post || $review->post_type !== 'gv_review' || $review->post_status !== 'publish') continue;
+                $locale = (string) get_post_meta($review->ID, '_gvspace_content_locale', true);
+                $group = trim((string) get_post_meta($review->ID, '_gvspace_translation_group', true));
+                $slugs[] = $locale !== '' && $locale !== 'legacy' && $group !== '' ? $group : $review->post_name;
+            }
+            return array_values(array_unique($slugs));
+        },
+    ]);
     register_graphql_field('Technology', 'visual', [
         'type' => 'String',
         'resolve' => static function ($source): string {
@@ -3426,6 +3481,7 @@ add_action('graphql_register_types', function (): void {
             'tags' => ['type' => ['list_of' => 'String']],
             'years' => ['type' => 'String'],
             'projects' => ['type' => 'String'],
+            'quote' => ['type' => 'String'],
         ],
     ]);
     register_graphql_field('TeamMember', 'teamMemberDetails', [
@@ -3438,15 +3494,18 @@ add_action('graphql_register_types', function (): void {
             $name = (string) get_post_meta($post_id, '_gvspace_team_member_title_' . $locale, true);
             $role = (string) get_post_meta($post_id, '_gvspace_team_member_role_' . $locale, true);
             $tags = (string) get_post_meta($post_id, '_gvspace_team_member_tags_' . $locale, true);
+            $quote = (string) get_post_meta($post_id, '_gvspace_team_member_quote_' . $locale, true);
             if ($name === '') $name = (string) get_the_title($post_id);
             if ($role === '') $role = (string) get_post_meta($post_id, '_gvspace_team_member_role', true);
             if ($tags === '') $tags = (string) get_post_meta($post_id, '_gvspace_team_member_tags', true);
+            if ($quote === '') $quote = (string) get_post_meta($post_id, '_gvspace_team_member_quote', true);
             return [
                 'name' => $name,
                 'role' => $role,
                 'tags' => gvspace_split_meta_lines($tags),
                 'years' => (string) get_post_meta($post_id, '_gvspace_team_member_years', true),
                 'projects' => (string) get_post_meta($post_id, '_gvspace_team_member_projects', true),
+                'quote' => $quote,
             ];
         },
     ]);

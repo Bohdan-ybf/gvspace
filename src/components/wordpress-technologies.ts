@@ -43,6 +43,7 @@ export type TechnologyItem = {
   seoText: string;
   meet: TechnologyMeet;
   relatedCase: string;
+  relatedReviews: string[];
   visual: string;
   image?: string;
   imageAlt: string;
@@ -87,6 +88,7 @@ type TechnologyNode = {
   menuOrder?: number;
   modified?: string;
   relatedCase?: string | null;
+  relatedReviews?: string[] | null;
   visual?: string | null;
   meetPhoto?: string | null;
   technologyDetails?: TechnologyDetails;
@@ -126,6 +128,7 @@ const technologyCardFields = `
 const technologyPageFields = `
   ${technologyBaseFields}
   relatedCase
+  relatedReviews
   visual
   meetPhoto
   technologyDetails(locale: $locale) {
@@ -238,6 +241,7 @@ function toItem(node: TechnologyNode): TechnologyItem {
       photo: node.meetPhoto ?? "",
     },
     relatedCase: node.relatedCase ?? "",
+    relatedReviews: (node.relatedReviews ?? []).filter(Boolean),
     visual: node.visual ?? "",
     image: node.featuredImage?.node?.sourceUrl,
     imageAlt: node.featuredImage?.node?.altText || title,
