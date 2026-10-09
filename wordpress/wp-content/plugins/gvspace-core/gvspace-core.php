@@ -137,22 +137,36 @@ const GVSPACE_CASE_FIELDS = [
 ];
 
 const GVSPACE_LOCALIZED_CASE_FIELDS = [
-    'catalog_title' => ['label' => 'Назва на картці в каталозі', 'type' => 'text'],
-    'excerpt' => ['label' => 'Короткий опис під заголовком на сторінці кейсу', 'type' => 'textarea'],
-    'metrics' => ['label' => 'Метрики: значення | назва (кожна з нового рядка)', 'type' => 'textarea'],
-    'problems' => ['label' => 'Проблеми клієнта (кожна з нового рядка)', 'type' => 'textarea'],
-    'step1' => ['label' => 'Крок 1: Пошук можливостей', 'type' => 'textarea'],
-    'step1_result' => ['label' => 'Результат кроку 1: заголовок | опис', 'type' => 'textarea'],
-    'step2' => ['label' => 'Крок 2: Побудова архітектури зростання', 'type' => 'textarea'],
-    'architecture' => ['label' => 'Картки послуг кроку 2: назва | опис', 'type' => 'textarea'],
-    'step3' => ['label' => 'Крок 3: Масштабування та контроль', 'type' => 'textarea'],
-    'step3_result' => ['label' => 'Результат кроку 3: заголовок | опис', 'type' => 'textarea'],
-    'tasks' => ['label' => 'Хід робіт — задачі (кожна з нового рядка)', 'type' => 'textarea'],
-    'documents' => ['label' => 'Хід робіт — документація (кожна з нового рядка)', 'type' => 'textarea'],
-    'team' => ['label' => 'Команда кейсу: ім’я | роль | URL фото', 'type' => 'textarea'],
-    'testimonial' => ['label' => 'Відгук після впровадження', 'type' => 'textarea'],
-    'testimonial_author' => ['label' => 'Автор відгуку', 'type' => 'text'],
-    'testimonial_company' => ['label' => 'Компанія автора відгуку', 'type' => 'text'],
+    'catalog_title' => ['label' => 'Назва на картці каталогу і в «Схожих кейсах»', 'type' => 'text'],
+    'excerpt' => ['label' => 'Результат на картці одним реченням', 'type' => 'textarea'],
+    'subtitle' => ['label' => 'Підзаголовок під назвою на першому екрані', 'type' => 'textarea'],
+    'metrics' => ['label' => 'Метрики: значення | підпис (один рядок = одна цифра)', 'type' => 'textarea'],
+    'media_label' => ['label' => 'Підпис на сірій картці, доки немає фото (наприклад, ДО НАС)', 'type' => 'text'],
+    'lead' => ['label' => 'Текст зліва під великим фото', 'type' => 'textarea'],
+    'industry' => ['label' => 'Факти — індустрія', 'type' => 'text'],
+    'market' => ['label' => 'Факти — ринок', 'type' => 'text'],
+    'period' => ['label' => 'Факти — період', 'type' => 'text'],
+    'status' => ['label' => 'Факти — статус', 'type' => 'text'],
+    'service_tags' => ['label' => 'Факти — послуги, один тег у рядку', 'type' => 'textarea'],
+    'tech_tags' => ['label' => 'Факти — технології, один тег у рядку', 'type' => 'textarea'],
+    'challenge' => ['label' => 'Бриф — текст «З чим прийшов клієнт?»', 'type' => 'textarea'],
+    'problems' => ['label' => 'Бриф — список проблем, один пункт у рядку', 'type' => 'textarea'],
+    'goals_title' => ['label' => 'Цілі — заголовок секції', 'type' => 'text'],
+    'goals' => ['label' => 'Цілі — заголовок | текст (один рядок = одна ціль)', 'type' => 'textarea'],
+    'process_title' => ['label' => 'Процес — заголовок секції', 'type' => 'text'],
+    'step1_title' => ['label' => 'Крок 1 — заголовок', 'type' => 'text'],
+    'step1' => ['label' => 'Крок 1 — текст', 'type' => 'textarea'],
+    'step1_result' => ['label' => 'Крок 1 — картка результату: заголовок | текст', 'type' => 'textarea'],
+    'step2_title' => ['label' => 'Крок 2 — заголовок', 'type' => 'text'],
+    'architecture' => ['label' => 'Крок 2 — картки векторів: назва | текст', 'type' => 'textarea'],
+    'step3_title' => ['label' => 'Крок 3 — заголовок', 'type' => 'text'],
+    'step3' => ['label' => 'Крок 3 — текст', 'type' => 'textarea'],
+    'step3_result' => ['label' => 'Крок 3 — картка результату: заголовок | текст', 'type' => 'textarea'],
+    'result_title' => ['label' => 'Результат — заголовок', 'type' => 'text'],
+    'result_lead' => ['label' => 'Результат — текст під заголовком', 'type' => 'textarea'],
+    'testimonial' => ['label' => 'Відгук — цитата', 'type' => 'textarea'],
+    'testimonial_author' => ['label' => 'Відгук — ім’я', 'type' => 'text'],
+    'testimonial_company' => ['label' => 'Відгук — посада і компанія', 'type' => 'text'],
 ];
 
 const GVSPACE_LOCALIZED_POST_TYPES = [
@@ -2393,9 +2407,10 @@ function gvspace_render_case_fields(WP_Post $post): void
     wp_nonce_field('gvspace_save_case', 'gvspace_case_nonce');
     $stored_locale = gvspace_get_content_locale($post);
     $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
-    echo '<p class="description"><strong>Один кейс — один запис.</strong> Оберіть мову та заповніть її переклад. Обкладинка картки й банера — у «Головному зображенні». Галерея спільна для всіх мов.</p>';
+    echo '<p class="description"><strong>Один кейс — один запис.</strong> Тексти змінюються перемикачем мови і не стираються. Фото й відео спільні для всіх мов: поки файл не завантажено, на сторінці сіра заглушка, після «Завантажити» на її місці стоїть картинка. Фото картки каталогу — у «Головному зображенні». «Схожі кейси» збираються самі.</p>';
     gvspace_render_case_filter_fields($post);
-    gvspace_render_case_gallery_field($post);
+    gvspace_render_case_brand_media($post);
+    gvspace_render_case_design_media($post);
     echo '<p><label for="gvspace-case-language"><strong>Редагувати мовну версію</strong></label> ';
     echo '<select id="gvspace-case-language" data-gvspace-language-select="case-language">';
     foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
@@ -2412,7 +2427,7 @@ function gvspace_render_case_fields(WP_Post $post): void
         echo '<hr><h3>' . esc_html($label) . '</h3>';
         echo '<p><label for="gvspace_case_title_' . esc_attr($locale) . '"><strong>Назва кейсу на сторінці</strong></label><br>';
         echo '<input type="text" id="gvspace_case_title_' . esc_attr($locale) . '" name="gvspace_case_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
-        gvspace_render_field_set($post, GVSPACE_LOCALIZED_CASE_FIELDS, 'gvspace_case_' . $locale . '_', '_gvspace_case_', '_' . $locale);
+        gvspace_render_case_language_sections($post, $locale);
         echo '</div>';
     }
     gvspace_render_language_switcher_script();
@@ -2582,6 +2597,8 @@ add_action('save_post_gv_case', function (int $post_id): void {
         }
         wp_set_object_terms($post_id, $type_slug !== '' ? [$type_slug] : [], 'gv_case_project_type', false);
     }
+
+    gvspace_save_case_page_fields($post_id);
 
     foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
         $title_field = 'gvspace_case_title_' . $locale;
@@ -3651,6 +3668,19 @@ add_action('graphql_register_types', function (): void {
         },
     ]);
 
+    register_graphql_object_type('GvspaceCaseMedia', ['fields' => [
+        'url' => ['type' => 'String'],
+        'kind' => ['type' => 'String'],
+    ]]);
+    register_graphql_object_type('GvspaceCaseBlock', ['fields' => [
+        'layout' => ['type' => 'String'],
+        'side' => ['type' => 'String'],
+        'tone' => ['type' => 'String'],
+        'heading' => ['type' => 'String'],
+        'body' => ['type' => 'String'],
+        'label' => ['type' => 'String'],
+        'media' => ['type' => ['list_of' => 'GvspaceCaseMedia']],
+    ]]);
     register_graphql_object_type('GvspaceCaseMetric', ['fields' => ['value' => ['type' => 'String'], 'label' => ['type' => 'String']]]);
     register_graphql_object_type('GvspaceCaseVector', ['fields' => ['title' => ['type' => 'String'], 'description' => ['type' => 'String']]]);
     register_graphql_object_type('GvspaceCasePerson', ['fields' => [
@@ -3687,6 +3717,33 @@ add_action('graphql_register_types', function (): void {
             'industry' => ['type' => 'String'],
             'direction' => ['type' => 'String'],
             'badge' => ['type' => 'String'],
+            'logo' => ['type' => 'String'],
+            'cover' => ['type' => 'String'],
+            'coverKind' => ['type' => 'String'],
+            'subtitle' => ['type' => 'String'],
+            'lead' => ['type' => 'String'],
+            'contextTitle' => ['type' => 'String'],
+            'contextBody' => ['type' => 'String'],
+            'blocks' => ['type' => ['list_of' => 'GvspaceCaseBlock']],
+            'market' => ['type' => 'String'],
+            'period' => ['type' => 'String'],
+            'status' => ['type' => 'String'],
+            'serviceTags' => ['type' => ['list_of' => 'String']],
+            'techTags' => ['type' => ['list_of' => 'String']],
+            'goalsTitle' => ['type' => 'String'],
+            'goals' => ['type' => ['list_of' => 'GvspaceCaseVector']],
+            'processTitle' => ['type' => 'String'],
+            'step1Title' => ['type' => 'String'],
+            'step2Title' => ['type' => 'String'],
+            'step3Title' => ['type' => 'String'],
+            'resultTitle' => ['type' => 'String'],
+            'resultLead' => ['type' => 'String'],
+            'mediaLabel' => ['type' => 'String'],
+            'briefMedia' => ['type' => ['list_of' => 'GvspaceCaseMedia']],
+            'stepMedia' => ['type' => ['list_of' => 'GvspaceCaseMedia']],
+            'resultLayout' => ['type' => 'String'],
+            'resultMedia' => ['type' => ['list_of' => 'GvspaceCaseMedia']],
+            'authorPhoto' => ['type' => 'String'],
         ],
     ]);
     register_graphql_field('ProjectCase', 'caseDetails', [
@@ -3717,6 +3774,9 @@ add_action('graphql_register_types', function (): void {
             $gallery = gvspace_case_gallery_urls($post_id);
             if (!$gallery) $gallery = $lines('gallery');
             $excerpt = $field('excerpt') ?: $field('result');
+            $brand = gvspace_case_brand_media($post_id);
+            $context_body = $field('context_body');
+            if ($context_body === '') $context_body = $field('challenge');
             return [
                 'title' => $field('title'),
                 'catalogTitle' => $field('catalog_title') ?: $field('title'),
@@ -3745,6 +3805,33 @@ add_action('graphql_register_types', function (): void {
                 'industry' => $field('industry'),
                 'direction' => $direction,
                 'badge' => $direction ?: $field('badge'),
+                'logo' => $brand['logo']['url'],
+                'cover' => $brand['cover']['url'],
+                'coverKind' => $brand['cover']['kind'],
+                'subtitle' => $field('subtitle') ?: $excerpt,
+                'lead' => $field('lead'),
+                'contextTitle' => $field('context_title'),
+                'contextBody' => $context_body,
+                'blocks' => gvspace_case_public_blocks($post_id, $locale),
+                'market' => $field('market'),
+                'period' => $field('period'),
+                'status' => $field('status'),
+                'serviceTags' => $lines('service_tags'),
+                'techTags' => $lines('tech_tags'),
+                'goalsTitle' => $field('goals_title'),
+                'goals' => $pairs('goals', 'title', 'description'),
+                'processTitle' => $field('process_title'),
+                'step1Title' => $field('step1_title'),
+                'step2Title' => $field('step2_title'),
+                'step3Title' => $field('step3_title'),
+                'resultTitle' => $field('result_title'),
+                'resultLead' => $field('result_lead'),
+                'mediaLabel' => $field('media_label'),
+                'briefMedia' => gvspace_case_named_media($post_id, ['_gvspace_case_brief_1', '_gvspace_case_brief_2']),
+                'stepMedia' => gvspace_case_named_media($post_id, ['_gvspace_case_step1_media', '_gvspace_case_step2_media', '_gvspace_case_step3_media']),
+                'resultLayout' => gvspace_case_result_layout($post_id),
+                'resultMedia' => gvspace_case_result_media($post_id, $gallery),
+                'authorPhoto' => gvspace_case_attachment_public(absint(get_post_meta($post_id, '_gvspace_case_author_photo', true)))['url'],
             ];
         },
     ]);
@@ -4555,6 +4642,8 @@ require_once __DIR__ . '/terms-of-use.php';
 require_once __DIR__ . '/contacts-page.php';
 require_once __DIR__ . '/vacancies-seed.php';
 require_once __DIR__ . '/cases-seed.php';
+require_once __DIR__ . '/case-blocks.php';
+require_once __DIR__ . '/case-import.php';
 require_once __DIR__ . '/technologies-seed.php';
 require_once __DIR__ . '/l3-import.php';
 require_once __DIR__ . '/l2-import.php';

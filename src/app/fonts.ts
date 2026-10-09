@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 export const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["cyrillic", "cyrillic-ext", "latin"],
+  style: ["normal", "italic"],
   display: "swap",
   fallback: ["Arial", "sans-serif"],
 });

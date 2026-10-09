@@ -111,7 +111,6 @@ function hasDarkHero(pathname: string, locale: Locale) {
     isServiceDetail ||
     localizedPathname === `/${locale}/cases` ||
     localizedPathname === `/${locale}/reviews` ||
-    localizedPathname.startsWith(`/${locale}/cases/`) ||
     localizedPathname === `/${locale}/about` ||
     localizedPathname === `/${locale}/team` ||
     isTechnologyCatalog ||
