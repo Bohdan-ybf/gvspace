@@ -68,7 +68,7 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
         } }
       }`,
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) throw new Error("Team request failed");
     const result = (await response.json()) as {

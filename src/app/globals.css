@@ -2979,7 +2979,10 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 326px);
   column-gap: 24px;
-  align-items: end;
+  align-items: center;
+}
+.case-sheet-hero-top.is-text-only {
+  grid-template-columns: minmax(0, 1fr);
 }
 .case-sheet-kicker {
   display: inline-flex;
@@ -3017,16 +3020,16 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 .case-sheet-logo {
   width: 326px;
   max-width: 100%;
-  height: 259px;
-  max-height: 259px;
+  height: auto;
   min-width: 0;
   min-height: 0;
   padding: 0;
   overflow: hidden;
   display: grid;
-  align-items: end;
-  justify-items: center;
+  align-items: center;
+  justify-items: end;
   justify-self: end;
+  align-self: center;
 }
 .case-sheet-logo img {
   display: block;
@@ -3116,14 +3119,25 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   aspect-ratio: 1280 / 549;
   border-radius: 24px;
 }
+.case-sheet-cover img,
+.case-sheet-cover video {
+  position: absolute;
+  inset: 0;
+}
 .case-sheet-intro {
   display: grid;
   grid-template-columns: minmax(0, 519px) minmax(280px, 1fr);
   gap: 48px 64px;
   margin-top: 48px;
 }
+.case-sheet-intro.is-text-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+.case-sheet-intro.is-text-only p {
+  max-width: none;
+}
 .case-sheet-brief {
-  margin-top: 48px;
+  margin-top: 80px;
   background: #f8f8fc;
 }
 .case-sheet-brief > .container {
@@ -3192,16 +3206,21 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   flex-wrap: wrap;
   gap: 10px;
 }
-.case-sheet-tags span {
+.case-sheet-tags span,
+.case-sheet-tags a {
   padding: 4px 8px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--navy) 10%, transparent);
-  color: var(--navy);
+  border-radius: 0;
+  background: color-mix(in srgb, #000080 10%, transparent);
+  color: #000080;
   font-family: var(--font-geist-mono), "Courier New", monospace;
   font-size: 13px;
   font-weight: 400;
-  line-height: 1;
+  line-height: 17px;
   letter-spacing: 0;
+}
+.case-sheet-tags a:hover {
+  background: var(--navy);
+  color: #fff;
 }
 .case-sheet .mono,
 .case-sheet-quote .mono {
@@ -3267,15 +3286,16 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   grid-template-columns: 1fr 1fr;
   gap: 24px;
 }
+.case-sheet-pair.is-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: calc((100% - 24px) / 2);
+}
 .case-sheet-pair .case-slot {
   aspect-ratio: 16 / 9;
 }
 .case-sheet-goals,
 .case-sheet-outcome {
-  margin-top: 72px;
-}
-.case-sheet-goals {
-  margin-top: 48px;
+  margin-top: 96px;
 }
 .case-sheet-outcome > h2 {
   max-width: none;
@@ -3287,7 +3307,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   letter-spacing: -0.28px;
 }
 .case-sheet-outcome > p {
-  max-width: 737px;
+  max-width: none;
   color: #6b6494;
   font-size: 17px;
   font-weight: 300;
@@ -3304,13 +3324,13 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   letter-spacing: -0.28px;
 }
 .case-sheet-process {
-  margin-top: 48px;
+  margin-top: 80px;
   background: #f8f8fc;
 }
 .case-sheet-process > .container {
   display: flex;
   flex-direction: column;
-  gap: 56px;
+  gap: 72px;
   padding-top: 36px;
   padding-bottom: 36px;
 }
@@ -3381,6 +3401,16 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 }
 .case-sheet-process article.is-media-left {
   grid-template-columns: 519px minmax(0, 1fr);
+}
+.case-sheet-process article.is-text-only,
+.case-sheet-process article.is-media-left.is-text-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+.case-sheet-process article.is-text-only > div > p {
+  max-width: none;
+}
+.case-sheet-process article.is-text-only .case-sheet-result-card {
+  width: 100%;
 }
 .case-sheet-process .case-slot {
   width: 100%;
@@ -3466,11 +3496,11 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   margin-top: 28px;
 }
 .case-sheet-gallery .case-slot {
-  border-radius: 0;
+  border-radius: 24px;
 }
 .case-sheet-gallery.is-wide-two .case-slot:first-child {
   grid-column: 1 / -1;
-  aspect-ratio: 16 / 8;
+  aspect-ratio: 16 / 9;
 }
 .case-sheet-gallery.is-wide-two .case-slot:nth-child(n + 2) {
   aspect-ratio: 16 / 9;
@@ -3509,7 +3539,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   aspect-ratio: 3 / 4;
 }
 .case-sheet-quote {
-  margin-top: 56px;
+  margin-top: 88px;
   padding: 72px 0;
   color: #fff;
   background: linear-gradient(90deg, #00003d 0%, #000080 48%, #2b00bf 100%);
@@ -3595,6 +3625,8 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   font-weight: 300;
   line-height: 1.5;
   letter-spacing: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 @media (max-width: 800px) {
   .case-sheet-hero {
@@ -3653,6 +3685,10 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   .case-sheet-metrics dt {
     font-size: 36px;
   }
+  .case-sheet-cover {
+    aspect-ratio: 335 / 223.34;
+    border-radius: 12px;
+  }
   .case-sheet-intro {
     gap: 28px;
   }
@@ -3705,12 +3741,37 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
     grid-template-columns: 1fr;
     grid-template-rows: none;
   }
+  .case-sheet-gallery .case-slot {
+    border-radius: 24px;
+  }
   .case-sheet-gallery .case-slot:first-child,
-  .case-sheet-gallery .case-slot:nth-child(n + 2) {
+  .case-sheet-gallery .case-slot:nth-child(n + 2),
+  .case-sheet-gallery.is-wide-two .case-slot:first-child,
+  .case-sheet-gallery.is-wide-two .case-slot:nth-child(n + 2),
+  .case-sheet-gallery.is-stack-tall .case-slot:nth-child(n),
+  .case-sheet-gallery.is-two-three .case-slot:nth-child(n) {
     grid-column: auto;
     grid-row: auto;
     height: auto;
-    aspect-ratio: 16 / 10;
+  }
+  .case-sheet-gallery .case-slot.is-empty,
+  .case-sheet-gallery.is-wide-two .case-slot.is-empty,
+  .case-sheet-gallery.is-stack-tall .case-slot.is-empty,
+  .case-sheet-gallery.is-two-three .case-slot.is-empty {
+    aspect-ratio: 335 / 188;
+  }
+  .case-sheet-gallery .case-slot:not(.is-empty),
+  .case-sheet-gallery.is-wide-two .case-slot:not(.is-empty),
+  .case-sheet-gallery.is-stack-tall .case-slot:not(.is-empty),
+  .case-sheet-gallery.is-two-three .case-slot:not(.is-empty) {
+    aspect-ratio: auto;
+  }
+  .case-sheet-gallery .case-slot img,
+  .case-sheet-gallery .case-slot video {
+    position: static;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
   }
   .case-sheet-quote {
     padding: 48px 0;
@@ -3736,6 +3797,51 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
     order: 3;
     align-self: center;
     margin-top: 24px;
+  }
+}
+
+@media (min-width: 801px) and (max-width: 1100px) {
+  .case-sheet-cover {
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+  }
+  .case-sheet-gallery,
+  .case-sheet-gallery.is-stack-tall,
+  .case-sheet-gallery.is-two-three {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+  .case-sheet-gallery .case-slot {
+    border-radius: 24px;
+  }
+  .case-sheet-gallery .case-slot:first-child,
+  .case-sheet-gallery .case-slot:nth-child(n + 2),
+  .case-sheet-gallery.is-wide-two .case-slot:first-child,
+  .case-sheet-gallery.is-wide-two .case-slot:nth-child(n + 2),
+  .case-sheet-gallery.is-stack-tall .case-slot:nth-child(n),
+  .case-sheet-gallery.is-two-three .case-slot:nth-child(n) {
+    grid-column: auto;
+    grid-row: auto;
+    height: auto;
+  }
+  .case-sheet-gallery .case-slot.is-empty,
+  .case-sheet-gallery.is-wide-two .case-slot.is-empty,
+  .case-sheet-gallery.is-stack-tall .case-slot.is-empty,
+  .case-sheet-gallery.is-two-three .case-slot.is-empty {
+    aspect-ratio: 335 / 188;
+  }
+  .case-sheet-gallery .case-slot:not(.is-empty),
+  .case-sheet-gallery.is-wide-two .case-slot:not(.is-empty),
+  .case-sheet-gallery.is-stack-tall .case-slot:not(.is-empty),
+  .case-sheet-gallery.is-two-three .case-slot:not(.is-empty) {
+    aspect-ratio: auto;
+  }
+  .case-sheet-gallery .case-slot img,
+  .case-sheet-gallery .case-slot video {
+    position: static;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
   }
 }
 
@@ -4352,6 +4458,13 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   font-weight: 300;
   line-height: 1.2;
   letter-spacing: 0;
+  text-decoration: none;
+}
+.vacancy-card-footer a span {
+  border-bottom: 1px solid transparent;
+}
+.vacancy-card-footer a:hover span {
+  border-bottom-color: currentColor;
 }
 .careers-values {
   margin-top: 70px;
@@ -9226,6 +9339,18 @@ body:has(.not-found-page) .header {
   )::after {
   opacity: 1;
   visibility: visible;
+}
+.header:not(.desktop-menus-dismissed):is(
+    :has(.services-menu:hover),
+    :has(.expertise-menu:hover),
+    :has(.company-menu:hover)
+  )::after {
+  transition-delay: 300ms;
+}
+.header:not(.desktop-menus-dismissed):is(
+    :has(.services-menu:focus-within),
+    :has(.expertise-menu:focus-within)
+  )::after {
   transition-delay: 0s;
 }
 .logo {
@@ -9642,6 +9767,11 @@ body:has(.not-found-page) .header .menu:hover {
   opacity: 1;
   transform: none;
   pointer-events: auto;
+}
+.expertise-menu:hover .expertise-dropdown {
+  transition-delay: 300ms;
+}
+.expertise-menu:focus-within .expertise-dropdown {
   transition-delay: 0s;
 }
 .expertise-dropdown-grid {
@@ -9738,6 +9868,11 @@ body:has(.not-found-page) .header .menu:hover {
   opacity: 1;
   transform: translate(-50%, 0);
   pointer-events: auto;
+}
+.services-menu:hover .services-dropdown {
+  transition-delay: 300ms;
+}
+.services-menu:focus-within .services-dropdown {
   transition-delay: 0s;
 }
 .services-dropdown-columns {
@@ -9857,7 +9992,22 @@ body:has(.not-found-page) .header .menu:hover {
   opacity: 1;
   transform: none;
   pointer-events: auto;
-  transition-delay: 0s;
+  transition-delay: 300ms;
+}
+.header:has(.services-menu:hover) .expertise-dropdown,
+.header:has(.services-menu:hover) .company-dropdown,
+.header:has(.expertise-menu:hover) .services-dropdown,
+.header:has(.expertise-menu:hover) .company-dropdown,
+.header:has(.company-menu:hover) .services-dropdown,
+.header:has(.company-menu:hover) .expertise-dropdown,
+.header:has(.services-menu:focus-within) .expertise-dropdown,
+.header:has(.services-menu:focus-within) .company-dropdown,
+.header:has(.expertise-menu:focus-within) .services-dropdown,
+.header:has(.expertise-menu:focus-within) .company-dropdown {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
 }
 
 /* Keep a hover-triggered dropdown closed after one of its links starts navigation. */

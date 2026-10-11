@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
 import { ContactSection } from "./contact-section";
 import { CasesShowcaseSection } from "./cases-showcase-section";
-import { getCaseStudy, type CaseMedia, type CaseMetric } from "./wordpress-cases";
+import { getCaseStudy, type CaseMedia, type CaseMetric, type CaseTagLink } from "./wordpress-cases";
 import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
 import { Breadcrumbs } from "./breadcrumbs";
@@ -15,37 +16,40 @@ function paragraphs(text: string) {
     .filter(Boolean);
 }
 
-function Slot({
-  media,
-  label,
-  hint,
-  className = "",
-}: {
-  media?: CaseMedia;
-  label?: string;
-  hint?: string;
-  className?: string;
-}) {
+function hasMedia(media?: CaseMedia) {
+  return Boolean(media?.url);
+}
+
+function Slot({ media, className = "" }: { media?: CaseMedia; className?: string }) {
   const url = media?.url ?? "";
-  if (url && media?.kind === "video") {
+  if (!url) return null;
+  if (media?.kind === "video") {
     return (
       <div className={`case-slot ${className}`}>
         <video controls playsInline preload="metadata" src={url} />
       </div>
     );
   }
-  if (url) {
-    return (
-      <div className={`case-slot ${className}`}>
-        <img alt="" src={url} />
-      </div>
-    );
-  }
   return (
-    <div className={`case-slot is-empty ${className}`}>
-      {label ? <strong>{label}</strong> : null}
-      {hint ? <small>{hint}</small> : null}
+    <div className={`case-slot ${className}`}>
+      <img alt="" src={url} />
     </div>
+  );
+}
+
+function FactTags({ tags, locale }: { tags: CaseTagLink[]; locale: Locale }) {
+  return (
+    <dd className="case-sheet-tags">
+      {tags.map((tag) =>
+        tag.href ? (
+          <Link href={`/${locale}${tag.href}`} key={`${tag.href}-${tag.label}`}>
+            {tag.label}
+          </Link>
+        ) : (
+          <span key={tag.label}>{tag.label}</span>
+        ),
+      )}
+    </dd>
   );
 }
 
@@ -74,7 +78,6 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
     titleSecond: t.contactTitleSecond,
   };
   const title = seo?.h1 || data.title;
-  const mediaLabel = data.mediaLabel || t.mediaLabel;
   const facts = [
     [t.factIndustry, data.industry],
     [t.factMarket, data.market],
@@ -89,8 +92,14 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
   const showStep2 = data.architecture.length > 0 || Boolean(data.step2);
   const showStep3 = Boolean(data.step3 || data.step3Result.title || data.step3Result.description);
   const showProcess = showStep1 || showStep2 || showStep3;
+  const briefMedia = data.briefMedia.filter(hasMedia);
+  const resultMedia = data.resultMedia.filter(hasMedia);
+  const testimonial = data.testimonial.trim();
+  const showQuoteAuthor = Boolean(
+    data.authorPhoto || data.testimonialAuthor || data.testimonialCompany,
+  );
   const showResult = Boolean(
-    data.resultTitle || data.resultLead || data.metrics.length || data.resultMedia.length,
+    data.resultTitle || data.resultLead || data.metrics.length || resultMedia.length,
   );
 
   return (
@@ -109,28 +118,31 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
       />
       <main className="case-detail-page case-sheet">
         <header className="container case-sheet-hero">
-          <div className="case-sheet-hero-top">
+          <div className={`case-sheet-hero-top${data.logo ? "" : " is-text-only"}`}>
             <div>
               {data.projectType ? <p className="case-sheet-kicker">{data.projectType}</p> : null}
               <h1>{title}</h1>
               {data.subtitle ? <p>{data.subtitle}</p> : null}
             </div>
-            <div className="case-sheet-logo">
-              {data.logo ? <img alt="" src={data.logo} /> : <span>{t.logoPlaceholder}</span>}
-            </div>
+            {data.logo ? (
+              <div className="case-sheet-logo">
+                <img alt="" src={data.logo} />
+              </div>
+            ) : null}
           </div>
           <Metrics metrics={data.metrics} />
         </header>
 
         <div className="container case-sheet-body">
-          <Slot
-            className="case-sheet-cover"
-            label={data.cover ? "" : t.galleryPlaceholder}
-            media={{ url: data.cover, kind: data.coverKind || "image" }}
-          />
+          {data.cover ? (
+            <Slot
+              className="case-sheet-cover"
+              media={{ url: data.cover, kind: data.coverKind || "image" }}
+            />
+          ) : null}
 
           {data.lead || showFacts ? (
-            <section className="case-sheet-intro">
+            <section className={`case-sheet-intro${showFacts ? "" : " is-text-only"}`}>
               <div>
                 {paragraphs(data.lead).map((part) => (
                   <p key={part}>{part}</p>
@@ -147,21 +159,13 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                   {data.serviceTags.length > 0 ? (
                     <div>
                       <dt>{t.factServices}</dt>
-                      <dd className="case-sheet-tags">
-                        {data.serviceTags.map((tag) => (
-                          <span key={tag}>{tag}</span>
-                        ))}
-                      </dd>
+                      <FactTags locale={locale} tags={data.serviceTags} />
                     </div>
                   ) : null}
                   {data.techTags.length > 0 ? (
                     <div>
                       <dt>{t.factTechnologies}</dt>
-                      <dd className="case-sheet-tags">
-                        {data.techTags.map((tag) => (
-                          <span key={tag}>{tag}</span>
-                        ))}
-                      </dd>
+                      <FactTags locale={locale} tags={data.techTags} />
                     </div>
                   ) : null}
                 </dl>
@@ -190,10 +194,13 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                   </ul>
                 </div>
               ) : null}
-              <div className="case-sheet-pair">
-                <Slot hint={t.mediaHint} label={mediaLabel} media={data.briefMedia[0]} />
-                <Slot hint={t.mediaHint} label={mediaLabel} media={data.briefMedia[1]} />
-              </div>
+              {briefMedia.length > 0 ? (
+                <div className={`case-sheet-pair${briefMedia.length === 1 ? " is-single" : ""}`}>
+                  {briefMedia.map((media, index) => (
+                    <Slot key={media.url || index} media={media} />
+                  ))}
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}
@@ -224,7 +231,9 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                 <h2>{data.processTitle || t.processHeading}</h2>
               </div>
               {showStep1 ? (
-                <article className="is-media-right">
+                <article
+                  className={hasMedia(data.stepMedia[0]) ? "is-media-right" : "is-text-only"}
+                >
                   <div>
                     <h3>{step1Title}</h3>
                     {paragraphs(data.step1).map((part) => (
@@ -241,12 +250,12 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                       </div>
                     ) : null}
                   </div>
-                  <Slot hint={t.mediaHintWide} label={mediaLabel} media={data.stepMedia[0]} />
+                  <Slot media={data.stepMedia[0]} />
                 </article>
               ) : null}
               {showStep2 ? (
-                <article className="is-media-left">
-                  <Slot hint={t.mediaHintWide} label={mediaLabel} media={data.stepMedia[1]} />
+                <article className={hasMedia(data.stepMedia[1]) ? "is-media-left" : "is-text-only"}>
+                  <Slot media={data.stepMedia[1]} />
                   <div>
                     <h3>{step2Title}</h3>
                     {paragraphs(data.step2).map((part) => (
@@ -266,7 +275,9 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                 </article>
               ) : null}
               {showStep3 ? (
-                <article className="is-media-right">
+                <article
+                  className={hasMedia(data.stepMedia[2]) ? "is-media-right" : "is-text-only"}
+                >
                   <div>
                     <h3>{step3Title}</h3>
                     {paragraphs(data.step3).map((part) => (
@@ -283,7 +294,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                       </div>
                     ) : null}
                   </div>
-                  <Slot hint={t.mediaHintWide} label={mediaLabel} media={data.stepMedia[2]} />
+                  <Slot media={data.stepMedia[2]} />
                 </article>
               ) : null}
             </div>
@@ -299,16 +310,18 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                 <p key={part}>{part}</p>
               ))}
               <Metrics divided metrics={data.metrics} />
-              <div className={`case-sheet-gallery is-${data.resultLayout}`}>
-                {Array.from({ length: data.resultLayout === "two-three" ? 5 : 3 }, (_, index) => (
-                  <Slot key={index} label={t.galleryPlaceholder} media={data.resultMedia[index]} />
-                ))}
-              </div>
+              {resultMedia.length > 0 ? (
+                <div className={`case-sheet-gallery is-${data.resultLayout}`}>
+                  {resultMedia.map((media, index) => (
+                    <Slot key={media.url || index} media={media} />
+                  ))}
+                </div>
+              ) : null}
             </section>
           ) : null}
         </div>
 
-        {data.testimonial ? (
+        {testimonial ? (
           <section className="case-sheet-quote">
             <div className="container">
               <div>
@@ -316,14 +329,16 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                 <h2>{t.testimonialTitle}</h2>
               </div>
               <blockquote>
-                <p>{data.testimonial}</p>
-                <footer>
-                  {data.authorPhoto ? <img alt="" src={data.authorPhoto} /> : <span />}
-                  <cite>
-                    <b>{data.testimonialAuthor}</b>
-                    {data.testimonialCompany ? <small>{data.testimonialCompany}</small> : null}
-                  </cite>
-                </footer>
+                <p>{testimonial}</p>
+                {showQuoteAuthor ? (
+                  <footer>
+                    {data.authorPhoto ? <img alt="" src={data.authorPhoto} /> : null}
+                    <cite>
+                      {data.testimonialAuthor ? <b>{data.testimonialAuthor}</b> : null}
+                      {data.testimonialCompany ? <small>{data.testimonialCompany}</small> : null}
+                    </cite>
+                  </footer>
+                ) : null}
               </blockquote>
             </div>
           </section>

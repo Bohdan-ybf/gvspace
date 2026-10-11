@@ -2402,6 +2402,250 @@ add_action('pre_get_posts', function (WP_Query $query): void {
     $query->set('tax_query', $tax_query);
 });
 
+function gvspace_case_public_slug(int $post_id): string
+{
+    $locale = (string) get_post_meta($post_id, '_gvspace_content_locale', true);
+    $group = trim((string) get_post_meta($post_id, '_gvspace_translation_group', true));
+    if ($locale !== '' && $locale !== 'legacy' && $group !== '') {
+        return $group;
+    }
+    $post = get_post($post_id);
+    return $post ? (string) $post->post_name : '';
+}
+
+function gvspace_case_linked_title(int $post_id, string $locale, string $meta_prefix): string
+{
+    $title = trim((string) get_post_meta($post_id, $meta_prefix . $locale, true));
+    if ($title === '' && $locale !== 'uk') {
+        $title = trim((string) get_post_meta($post_id, $meta_prefix . 'uk', true));
+    }
+    if ($title === '') {
+        $title = trim((string) get_the_title($post_id));
+    }
+    return $title;
+}
+
+function gvspace_case_service_href(int $post_id): string
+{
+    $slug = gvspace_case_public_slug($post_id);
+    if ($slug === '') {
+        return '';
+    }
+    $parent_id = (int) wp_get_post_parent_id($post_id);
+    if ($parent_id > 0) {
+        $parent = gvspace_case_public_slug($parent_id);
+        if ($parent !== '') {
+            return '/services/' . $parent . '/' . $slug;
+        }
+    }
+    return '/services/' . $slug;
+}
+
+function gvspace_case_saved_ids(int $post_id, string $meta_key): array
+{
+    $raw = (string) get_post_meta($post_id, $meta_key, true);
+    if ($raw === '') {
+        return [];
+    }
+    return array_values(array_unique(array_filter(array_map('absint', explode(',', $raw)))));
+}
+
+function gvspace_case_link_catalog(string $post_type): array
+{
+    static $cache = [];
+    if (isset($cache[$post_type])) {
+        return $cache[$post_type];
+    }
+    $prefix = $post_type === 'gv_service' ? '_gvspace_service_title_' : '_gvspace_technology_title_';
+    $catalog = [];
+    foreach (gvspace_case_relation_options($post_type) as $option) {
+        $titles = [mb_strtolower($option['label'])];
+        foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+            $title = trim((string) get_post_meta($option['id'], $prefix . $locale, true));
+            if ($title !== '') {
+                $titles[] = mb_strtolower($title);
+            }
+        }
+        $post = get_post($option['id']);
+        if ($post && $post->post_title !== '') {
+            $titles[] = mb_strtolower($post->post_title);
+        }
+        $href = $post_type === 'gv_service'
+            ? gvspace_case_service_href($option['id'])
+            : '/technologies/' . gvspace_case_public_slug($option['id']);
+        $catalog[] = ['titles' => array_values(array_unique($titles)), 'href' => $href];
+    }
+    $cache[$post_type] = $catalog;
+    return $catalog;
+}
+
+function gvspace_case_text_links(array $labels, string $post_type): array
+{
+    $catalog = gvspace_case_link_catalog($post_type);
+    $links = [];
+    foreach ($labels as $label) {
+        $needle = mb_strtolower(trim($label));
+        $href = '';
+        if ($needle !== '') {
+            foreach ($catalog as $item) {
+                if (in_array($needle, $item['titles'], true) && $item['href'] !== '') {
+                    $href = $item['href'];
+                    break;
+                }
+            }
+        }
+        if (trim($label) !== '') {
+            $links[] = ['label' => $label, 'href' => $href];
+        }
+    }
+    return $links;
+}
+
+function gvspace_case_fact_links(int $post_id, string $meta_key, string $text_key, string $post_type, string $locale): array
+{
+    $selected = gvspace_case_relation_links($post_id, $meta_key, $post_type, $locale);
+    if ($selected) {
+        return $selected;
+    }
+    return gvspace_case_text_links(gvspace_split_meta_lines(gvspace_case_locale_field($post_id, $text_key, $locale)), $post_type);
+}
+
+function gvspace_case_relation_links(int $post_id, string $meta_key, string $post_type, string $locale): array
+{
+    $links = [];
+    foreach (gvspace_case_saved_ids($post_id, $meta_key) as $id) {
+        $linked = get_post($id);
+        if (!$linked || $linked->post_type !== $post_type || $linked->post_status !== 'publish') {
+            continue;
+        }
+        $prefix = $post_type === 'gv_service' ? '_gvspace_service_title_' : '_gvspace_technology_title_';
+        $label = gvspace_case_linked_title($id, $locale, $prefix);
+        $href = $post_type === 'gv_service'
+            ? gvspace_case_service_href($id)
+            : '/technologies/' . gvspace_case_public_slug($id);
+        if ($label === '' || $href === '/services/' || $href === '/technologies/') {
+            continue;
+        }
+        $links[] = ['label' => $label, 'href' => $href];
+    }
+    return $links;
+}
+
+function gvspace_case_relation_options(string $post_type): array
+{
+    $posts = get_posts([
+        'post_type' => $post_type,
+        'post_status' => 'publish',
+        'posts_per_page' => 300,
+        'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
+        'order' => 'ASC',
+    ]);
+    $options = [];
+    foreach ($posts as $item) {
+        $prefix = $post_type === 'gv_service' ? '_gvspace_service_title_' : '_gvspace_technology_title_';
+        $label = gvspace_case_linked_title((int) $item->ID, 'uk', $prefix);
+        if ($label === '') {
+            continue;
+        }
+        $parent_id = $post_type === 'gv_service' ? (int) $item->post_parent : 0;
+        $group = '';
+        if ($parent_id > 0) {
+            $group = gvspace_case_linked_title($parent_id, 'uk', '_gvspace_service_title_');
+        }
+        $options[] = [
+            'id' => (int) $item->ID,
+            'label' => $label,
+            'group' => $group,
+        ];
+    }
+    return $options;
+}
+
+function gvspace_render_case_relation_select(string $name, string $label, string $post_type, array $selected): void
+{
+    $options = gvspace_case_relation_options($post_type);
+    usort($options, static function (array $left, array $right) use ($selected): int {
+        $left_selected = in_array($left['id'], $selected, true);
+        $right_selected = in_array($right['id'], $selected, true);
+        if ($left_selected !== $right_selected) {
+            return $left_selected ? -1 : 1;
+        }
+        return strcasecmp((string) $left['group'] . $left['label'], (string) $right['group'] . $right['label']);
+    });
+    $groups = [];
+    foreach ($options as $option) {
+        $groups[$option['group']][] = $option;
+    }
+    echo '<fieldset data-gvspace-relation style="margin:12px 0;padding:12px;border:1px solid #c3c4c7;max-width:520px">';
+    echo '<legend><strong>' . esc_html($label) . '</strong></legend>';
+    echo '<p style="margin:0 0 8px"><input type="search" data-gvspace-relation-filter placeholder="Пошук" style="width:100%"></p>';
+    echo '<div style="max-height:240px;overflow:auto">';
+    $render_option = static function (array $option) use ($name, $selected): void {
+        $id = (int) $option['id'];
+        $input_id = $name . '-' . $id;
+        echo '<label for="' . esc_attr($input_id) . '" data-gvspace-relation-option style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px">';
+        echo '<input id="' . esc_attr($input_id) . '" type="checkbox" name="' . esc_attr($name) . '[]" value="' . esc_attr((string) $id) . '"' . checked(in_array($id, $selected, true), true, false) . '>';
+        echo '<span>' . esc_html((string) $option['label']) . '</span></label>';
+    };
+    if (isset($groups[''])) {
+        foreach ($groups[''] as $option) {
+            $render_option($option);
+        }
+        unset($groups['']);
+    }
+    foreach ($groups as $group => $items) {
+        echo '<p data-gvspace-relation-group style="margin:10px 0 6px"><strong>' . esc_html((string) $group) . '</strong></p>';
+        foreach ($items as $option) {
+            $render_option($option);
+        }
+    }
+    echo '</div></fieldset>';
+}
+
+function gvspace_render_case_relation_fields(WP_Post $post): void
+{
+    echo '<input type="hidden" name="gvspace_case_relations_submitted" value="1">';
+    gvspace_render_case_relation_select(
+        'gvspace_case_service_ids',
+        'Послуги у фактах',
+        'gv_service',
+        gvspace_case_saved_ids($post->ID, '_gvspace_case_service_ids')
+    );
+    gvspace_render_case_relation_select(
+        'gvspace_case_technology_ids',
+        'Технології у фактах',
+        'gv_technology',
+        gvspace_case_saved_ids($post->ID, '_gvspace_case_technology_ids')
+    );
+    echo '<p class="description">Позначте всі потрібні пункти. Після збереження вони з’являться на сторінці кейсу як посилання на ці послуги й технології.</p>';
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-gvspace-relation]').forEach(function (box) {
+            var filter = box.querySelector('[data-gvspace-relation-filter]');
+            if (!filter) return;
+            filter.addEventListener('input', function () {
+                var query = filter.value.trim().toLowerCase();
+                box.querySelectorAll('[data-gvspace-relation-option]').forEach(function (option) {
+                    var text = (option.textContent || '').toLowerCase();
+                    option.hidden = query !== '' && text.indexOf(query) === -1;
+                });
+                box.querySelectorAll('[data-gvspace-relation-group]').forEach(function (group) {
+                    var next = group.nextElementSibling;
+                    var visible = false;
+                    while (next && !next.hasAttribute('data-gvspace-relation-group')) {
+                        if (next.hasAttribute('data-gvspace-relation-option') && !next.hidden) visible = true;
+                        next = next.nextElementSibling;
+                    }
+                    group.hidden = !visible;
+                });
+            });
+        });
+    });
+    </script>
+    <?php
+}
+
 function gvspace_render_case_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_case', 'gvspace_case_nonce');
@@ -2409,6 +2653,7 @@ function gvspace_render_case_fields(WP_Post $post): void
     $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
     echo '<p class="description"><strong>Один кейс — один запис.</strong> Тексти змінюються перемикачем мови і не стираються. Фото й відео спільні для всіх мов: поки файл не завантажено, на сторінці сіра заглушка, після «Завантажити» на її місці стоїть картинка. Фото картки каталогу — у «Головному зображенні». «Схожі кейси» збираються самі.</p>';
     gvspace_render_case_filter_fields($post);
+    gvspace_render_case_relation_fields($post);
     gvspace_render_case_brand_media($post);
     gvspace_render_case_design_media($post);
     echo '<p><label for="gvspace-case-language"><strong>Редагувати мовну версію</strong></label> ';
@@ -2596,6 +2841,21 @@ add_action('save_post_gv_case', function (int $post_id): void {
             if ($created !== '') $type_slug = $created;
         }
         wp_set_object_terms($post_id, $type_slug !== '' ? [$type_slug] : [], 'gv_case_project_type', false);
+    }
+
+    if (isset($_POST['gvspace_case_relations_submitted'])) {
+        $relation_fields = [
+            'gvspace_case_service_ids' => ['meta' => '_gvspace_case_service_ids', 'type' => 'gv_service'],
+            'gvspace_case_technology_ids' => ['meta' => '_gvspace_case_technology_ids', 'type' => 'gv_technology'],
+        ];
+        foreach ($relation_fields as $field => $config) {
+            $raw = wp_unslash($_POST[$field] ?? []);
+            $ids = array_values(array_unique(array_filter(array_map('absint', is_array($raw) ? $raw : []))));
+            $ids = array_values(array_filter($ids, static function (int $id) use ($config): bool {
+                return get_post_type($id) === $config['type'];
+            }));
+            update_post_meta($post_id, $config['meta'], implode(',', $ids));
+        }
     }
 
     gvspace_save_case_page_fields($post_id);
@@ -3688,6 +3948,12 @@ add_action('graphql_register_types', function (): void {
         'role' => ['type' => 'String'],
         'photo' => ['type' => 'String'],
     ]]);
+    register_graphql_object_type('GvspaceCaseLink', [
+        'fields' => [
+            'label' => ['type' => 'String'],
+            'href' => ['type' => 'String'],
+        ],
+    ]);
     register_graphql_object_type('GvspaceCaseDetails', [
         'fields' => [
             'title' => ['type' => 'String'],
@@ -3728,8 +3994,8 @@ add_action('graphql_register_types', function (): void {
             'market' => ['type' => 'String'],
             'period' => ['type' => 'String'],
             'status' => ['type' => 'String'],
-            'serviceTags' => ['type' => ['list_of' => 'String']],
-            'techTags' => ['type' => ['list_of' => 'String']],
+            'serviceTags' => ['type' => ['list_of' => 'GvspaceCaseLink']],
+            'techTags' => ['type' => ['list_of' => 'GvspaceCaseLink']],
             'goalsTitle' => ['type' => 'String'],
             'goals' => ['type' => ['list_of' => 'GvspaceCaseVector']],
             'processTitle' => ['type' => 'String'],
@@ -3816,8 +4082,8 @@ add_action('graphql_register_types', function (): void {
                 'market' => $field('market'),
                 'period' => $field('period'),
                 'status' => $field('status'),
-                'serviceTags' => $lines('service_tags'),
-                'techTags' => $lines('tech_tags'),
+                'serviceTags' => gvspace_case_fact_links($post_id, '_gvspace_case_service_ids', 'service_tags', 'gv_service', $locale),
+                'techTags' => gvspace_case_fact_links($post_id, '_gvspace_case_technology_ids', 'tech_tags', 'gv_technology', $locale),
                 'goalsTitle' => $field('goals_title'),
                 'goals' => $pairs('goals', 'title', 'description'),
                 'processTitle' => $field('process_title'),

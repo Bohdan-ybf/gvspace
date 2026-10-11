@@ -6,6 +6,7 @@ import {
 } from "@/content-localization";
 
 export type CaseMetric = { value: string; label: string };
+export type CaseTagLink = { label: string; href: string };
 export type CaseVector = { title: string; description: string };
 export type CasePerson = { name: string; role: string; photo: string };
 export type CaseMedia = { url: string; kind: string };
@@ -61,8 +62,8 @@ export type CaseStudy = {
   market: string;
   period: string;
   status: string;
-  serviceTags: string[];
-  techTags: string[];
+  serviceTags: CaseTagLink[];
+  techTags: CaseTagLink[];
   goalsTitle: string;
   goals: CaseVector[];
   processTitle: string;
@@ -115,7 +116,9 @@ const fields = `
     testimonial testimonialAuthor testimonialCompany
     projectType industry direction badge
     logo cover coverKind subtitle lead contextTitle contextBody
-    market period status serviceTags techTags
+    market period status
+    serviceTags { label href }
+    techTags { label href }
     goalsTitle goals { title description }
     processTitle step1Title step2Title step3Title
     resultTitle resultLead resultLayout mediaLabel
@@ -128,6 +131,12 @@ const fields = `
 
 function emptyVector(vector?: CaseVector | null): CaseVector {
   return { title: vector?.title ?? "", description: vector?.description ?? "" };
+}
+
+function mapTags(tags?: CaseTagLink[] | null): CaseTagLink[] {
+  return (tags ?? [])
+    .map((tag) => ({ label: tag?.label?.trim() ?? "", href: tag?.href?.trim() ?? "" }))
+    .filter((tag) => tag.label);
 }
 
 function mapMedia(media?: CaseMedia[] | null): CaseMedia[] {
@@ -196,8 +205,8 @@ function mapCase(node: CaseNode): CaseStudy | undefined {
     market: details.market ?? "",
     period: details.period ?? "",
     status: details.status ?? "",
-    serviceTags: details.serviceTags ?? [],
-    techTags: details.techTags ?? [],
+    serviceTags: mapTags(details.serviceTags),
+    techTags: mapTags(details.techTags),
     goalsTitle: details.goalsTitle ?? "",
     goals: (details.goals ?? []).map((goal) => emptyVector(goal)),
     processTitle: details.processTitle ?? "",
@@ -229,7 +238,7 @@ export async function getCaseStudies(locale: Locale): Promise<CaseStudy[]> {
         query: `query CasesV2($locale: String!) { projectCases(first: 100) { nodes { ${fields} } } }`,
         variables: { locale },
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return [];
     const result = (await response.json()) as {

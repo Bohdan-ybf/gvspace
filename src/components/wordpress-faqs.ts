@@ -47,7 +47,7 @@ export async function getHomeFaqs(locale: Locale): Promise<FaqItem[]> {
           }
         }`,
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return [];
 

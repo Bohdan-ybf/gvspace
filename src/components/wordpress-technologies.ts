@@ -164,7 +164,7 @@ async function queryWordPress<T>(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, variables }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return null;
     const result = (await response.json()) as { data?: T; errors?: unknown[] };

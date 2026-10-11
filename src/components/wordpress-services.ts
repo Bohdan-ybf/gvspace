@@ -118,7 +118,7 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
           query: `query Services($locale: String!, $after: String) { serviceOfferings(first: 100, after: $after) { pageInfo { hasNextPage endCursor } nodes { databaseId slug title modified menuOrder gvspaceLocalization { locale translationGroup status } parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } } featuredImage { node { sourceUrl } } serviceDetails(locale: $locale) { title headline description order fitCards { label title description } includes steps { title duration description } faq { question answer } metrics } } } }`,
           variables: { locale, after },
         }),
-        next: { revalidate: 10 },
+        cache: "no-store",
       });
       if (!response.ok) break;
       const json = (await response.json()) as {

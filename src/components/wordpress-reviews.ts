@@ -66,7 +66,7 @@ export async function getClientReviews(locale: Locale): Promise<ClientReview[]> 
         query: `query Reviews($locale: String!) { clientReviews(first: 100) { nodes { slug title menuOrder gvspaceLocalization { locale translationGroup status } featuredImage { node { sourceUrl } } reviewDetails(locale: $locale) { name position company text tags tagLabel category rating metrics logo } } } }`,
         variables: { locale },
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return [];
     const result = (await response.json()) as {

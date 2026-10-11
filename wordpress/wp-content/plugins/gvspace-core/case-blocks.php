@@ -416,7 +416,7 @@ function gvspace_render_case_language_sections(WP_Post $post, string $locale): v
     $groups = [
         'Картка каталогу' => ['catalog_title', 'excerpt'],
         'Перший екран' => ['subtitle', 'metrics', 'media_label'],
-        'Під обкладинкою' => ['lead', 'industry', 'market', 'period', 'status', 'service_tags', 'tech_tags'],
+        'Під обкладинкою' => ['lead', 'industry', 'market', 'period', 'status'],
         'Бриф' => ['challenge', 'problems'],
         'Цілі та задачі' => ['goals_title', 'goals'],
         'Процес' => ['process_title', 'step1_title', 'step1', 'step1_result', 'step2_title', 'architecture', 'step3_title', 'step3', 'step3_result'],

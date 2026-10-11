@@ -463,7 +463,7 @@ export function Header({
             {[...locales]
               .sort((a, b) => localeCode(a).localeCompare(localeCode(b)))
               .map((language) => (
-                <Link
+                <a
                   key={language}
                   href={languageHref(language)}
                   hrefLang={language}
@@ -474,7 +474,7 @@ export function Header({
                   onClick={() => setIsLanguageOpen(false)}
                 >
                   {localeCode(language)}
-                </Link>
+                </a>
               ))}
           </div>
         </div>
@@ -503,7 +503,7 @@ export function Header({
       >
         <div className="mobile-language-options" aria-label="Language">
           {locales.map((language) => (
-            <Link
+            <a
               key={language}
               href={languageHref(language)}
               hrefLang={language}
@@ -512,7 +512,7 @@ export function Header({
               onClick={closeMobileMenu}
             >
               {localeCode(language)}
-            </Link>
+            </a>
           ))}
         </div>
         <div className="mobile-nav-links">

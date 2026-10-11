@@ -42,7 +42,7 @@ export async function getHomeSeoText(locale: Locale): Promise<HomeSeoText | unde
           }
         }`,
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return undefined;
 

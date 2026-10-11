@@ -55,7 +55,7 @@ export async function getPrivacyPolicy(locale: Locale): Promise<PrivacyPolicy | 
         }`,
         variables: { locale },
       }),
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!response.ok) return undefined;
 
