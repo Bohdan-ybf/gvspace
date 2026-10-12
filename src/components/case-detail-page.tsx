@@ -53,6 +53,34 @@ function FactTags({ tags, locale }: { tags: CaseTagLink[]; locale: Locale }) {
   );
 }
 
+function stepLayout(withMedia: boolean, withResult: boolean) {
+  if (withMedia) return "is-media-right";
+  if (withResult) return "is-result-aside";
+  return "is-text-only";
+}
+
+function StageResult({
+  label,
+  title,
+  description,
+  emphasis = false,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  emphasis?: boolean;
+}) {
+  if (!title && !description) return null;
+  return (
+    <div className="case-sheet-result-card">
+      <b>{label}</b>
+      <p className={emphasis ? "is-emphasis" : undefined}>
+        {[title, description].filter(Boolean).join(" ")}
+      </p>
+    </div>
+  );
+}
+
 function Metrics({ metrics, divided = false }: { metrics: CaseMetric[]; divided?: boolean }) {
   if (!metrics.length) return null;
   return (
@@ -120,7 +148,16 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         <header className="container case-sheet-hero">
           <div className={`case-sheet-hero-top${data.logo ? "" : " is-text-only"}`}>
             <div>
-              {data.projectType ? <p className="case-sheet-kicker">{data.projectType}</p> : null}
+              {data.projectType || data.serviceBadge ? (
+                <div className="case-sheet-kickers">
+                  {data.projectType ? (
+                    <p className="case-sheet-kicker">{data.projectType}</p>
+                  ) : null}
+                  {data.serviceBadge && data.serviceBadge !== data.projectType ? (
+                    <p className="case-sheet-kicker is-solid">{data.serviceBadge}</p>
+                  ) : null}
+                </div>
+              ) : null}
               <h1>{title}</h1>
               {data.subtitle ? <p>{data.subtitle}</p> : null}
             </div>
@@ -232,69 +269,91 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
               </div>
               {showStep1 ? (
                 <article
-                  className={hasMedia(data.stepMedia[0]) ? "is-media-right" : "is-text-only"}
+                  className={stepLayout(
+                    hasMedia(data.stepMedia[0]),
+                    Boolean(data.step1Result.title || data.step1Result.description),
+                  )}
                 >
                   <div>
                     <h3>{step1Title}</h3>
                     {paragraphs(data.step1).map((part) => (
                       <p key={part}>{part}</p>
                     ))}
-                    {data.step1Result.title || data.step1Result.description ? (
-                      <div className="case-sheet-result-card">
-                        <b>{t.stageResult}</b>
-                        <p>
-                          {[data.step1Result.title, data.step1Result.description]
-                            .filter(Boolean)
-                            .join(" ")}
-                        </p>
-                      </div>
+                    {hasMedia(data.stepMedia[0]) ? (
+                      <StageResult
+                        description={data.step1Result.description}
+                        label={t.stageResult}
+                        title={data.step1Result.title}
+                      />
                     ) : null}
                   </div>
-                  <Slot media={data.stepMedia[0]} />
+                  {hasMedia(data.stepMedia[0]) ? (
+                    <Slot media={data.stepMedia[0]} />
+                  ) : (
+                    <StageResult
+                      description={data.step1Result.description}
+                      label={t.stageResult}
+                      title={data.step1Result.title}
+                    />
+                  )}
                 </article>
               ) : null}
               {showStep2 ? (
-                <article className={hasMedia(data.stepMedia[1]) ? "is-media-left" : "is-text-only"}>
+                <article
+                  className={hasMedia(data.stepMedia[1]) ? "is-media-left" : "is-vectors-row"}
+                >
                   <Slot media={data.stepMedia[1]} />
                   <div>
                     <h3>{step2Title}</h3>
                     {paragraphs(data.step2).map((part) => (
                       <p key={part}>{part}</p>
                     ))}
-                    <div className="case-sheet-vectors">
-                      {data.architecture.map((vector) => (
-                        <div key={vector.title}>
-                          <b>
-                            {t.vectorPrefix} {vector.title}
-                          </b>
-                          <p>{vector.description}</p>
-                        </div>
-                      ))}
-                    </div>
+                    {data.architecture.length > 0 ? (
+                      <div className="case-sheet-vectors">
+                        {data.architecture.map((vector) => (
+                          <div key={vector.title}>
+                            <b>
+                              {t.vectorPrefix} {vector.title}
+                            </b>
+                            <p>{vector.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </article>
               ) : null}
               {showStep3 ? (
                 <article
-                  className={hasMedia(data.stepMedia[2]) ? "is-media-right" : "is-text-only"}
+                  className={stepLayout(
+                    hasMedia(data.stepMedia[2]),
+                    Boolean(data.step3Result.title || data.step3Result.description),
+                  )}
                 >
                   <div>
                     <h3>{step3Title}</h3>
                     {paragraphs(data.step3).map((part) => (
                       <p key={part}>{part}</p>
                     ))}
-                    {data.step3Result.title || data.step3Result.description ? (
-                      <div className="case-sheet-result-card">
-                        <b>{t.stageResult}</b>
-                        <p className="is-emphasis">
-                          {[data.step3Result.title, data.step3Result.description]
-                            .filter(Boolean)
-                            .join(" ")}
-                        </p>
-                      </div>
+                    {hasMedia(data.stepMedia[2]) ? (
+                      <StageResult
+                        description={data.step3Result.description}
+                        emphasis
+                        label={t.stageResult}
+                        title={data.step3Result.title}
+                      />
                     ) : null}
                   </div>
-                  <Slot media={data.stepMedia[2]} />
+                  {hasMedia(data.stepMedia[2]) ? (
+                    <Slot media={data.stepMedia[2]} />
+                  ) : (
+                    <StageResult
+                      description={data.step3Result.description}
+                      emphasis
+                      label={t.stageResult}
+                      title={data.step3Result.title}
+                    />
+                  )}
                 </article>
               ) : null}
             </div>

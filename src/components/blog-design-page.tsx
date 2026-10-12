@@ -79,7 +79,7 @@ export function BlogDesignPage({
                 className={activeCategory === "all" ? "is-active" : ""}
                 onClick={() => selectCategory("all")}
               >
-                {text.all}
+                {text.all.toLocaleUpperCase("uk-UA")}
               </button>
               {categories.map(({ slug, name }) => (
                 <button
@@ -88,7 +88,7 @@ export function BlogDesignPage({
                   className={activeCategory === slug ? "is-active" : ""}
                   onClick={() => selectCategory(slug)}
                 >
-                  {name}
+                  {name.toLocaleUpperCase("uk-UA")}
                 </button>
               ))}
             </nav>

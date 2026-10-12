@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Locale } from "@/i18n";
+import { OpenApplicationButton } from "./open-application-button";
 
 import { getTranslations } from "@/i18n/pages";
 export function OpenApplicationBanner({ locale }: { locale: Locale }) {
@@ -18,9 +18,7 @@ export function OpenApplicationBanner({ locale }: { locale: Locale }) {
         <h2>{t.title}</h2>
         <p>{t.description}</p>
       </div>
-      <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-        {t.action}
-      </Link>
+      <OpenApplicationButton locale={locale}>{t.action}</OpenApplicationButton>
     </section>
   );
 }

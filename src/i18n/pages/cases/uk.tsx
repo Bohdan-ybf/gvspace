@@ -21,7 +21,7 @@ export default {
   },
   catalog: {
     directionLabel: "Оберіть напрям",
-    typeLabel: "Тип проєкту",
+    typeLabel: "Оберіть індустрію",
     resetFilters: "Скинути",
     empty: "Кейсів за цими фільтрами немає.",
     dateLocale: "uk-UA",

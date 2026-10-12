@@ -4,9 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown } from "./icons/chevron-down";
 
 function displayLabel(value: string) {
-  if (!/[А-ЯІЇЄҐ]/.test(value) || value !== value.toUpperCase()) return value;
-  const lower = value.toLocaleLowerCase("uk-UA");
-  return lower.charAt(0).toLocaleUpperCase("uk-UA") + lower.slice(1);
+  return value.toLocaleUpperCase("uk-UA");
 }
 
 export function FilterSelect({
@@ -53,7 +51,7 @@ export function FilterSelect({
         aria-controls={listId}
         onClick={() => setOpen((current) => !current)}
       >
-        <span>{selected ? displayLabel(selected.label) : label}</span>
+        <span>{displayLabel(selected ? selected.label : label)}</span>
         <ChevronDown />
       </button>
       {open ? (

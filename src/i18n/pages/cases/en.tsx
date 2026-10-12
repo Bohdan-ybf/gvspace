@@ -21,7 +21,7 @@ export default {
   },
   catalog: {
     directionLabel: "Choose a direction",
-    typeLabel: "Project type",
+    typeLabel: "Choose an industry",
     resetFilters: "Reset",
     empty: "No cases match these filters.",
     dateLocale: "en-US",

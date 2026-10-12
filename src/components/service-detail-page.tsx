@@ -11,6 +11,7 @@ import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ReviewsSection } from "./reviews-section";
 import { ServiceInsightsSection } from "./service-insights-section";
 import { ContactSection } from "./contact-section";
+import { LeadModalButton } from "./lead-modal";
 
 import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
@@ -93,10 +94,10 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
               <span className="mono service-detail-eyebrow">{item.title}</span>
               <h1>{seo?.h1 || item.headline}</h1>
               <p>{item.description}</p>
-              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+              <LeadModalButton className="btn btn-primary">
                 {t.heroAction}
                 <ArrowRight />
-              </Link>
+              </LeadModalButton>
             </div>
           </div>
         </section>
@@ -204,9 +205,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             <div>
               <h2>{t.faqTitle}</h2>
               <p>{t.faqDescription}</p>
-              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
-                {dictionary.faq.action}
-              </Link>
+              <LeadModalButton className="btn btn-primary">{dictionary.faq.action}</LeadModalButton>
             </div>
             <div>
               {faqs.map((faq, index) => (

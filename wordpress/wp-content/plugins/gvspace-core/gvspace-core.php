@@ -2501,6 +2501,51 @@ function gvspace_case_text_links(array $labels, string $post_type): array
     return $links;
 }
 
+function gvspace_case_service_title_by_public_slug(string $slug, string $locale): string
+{
+    $posts = get_posts([
+        'post_type' => 'gv_service',
+        'post_status' => 'publish',
+        'posts_per_page' => 1,
+        'meta_key' => '_gvspace_translation_group',
+        'meta_value' => $slug,
+    ]);
+    if (!$posts) {
+        $posts = get_posts([
+            'post_type' => 'gv_service',
+            'name' => $slug,
+            'post_status' => 'publish',
+            'posts_per_page' => 1,
+        ]);
+    }
+    if (!$posts) {
+        return '';
+    }
+    return gvspace_case_linked_title((int) $posts[0]->ID, $locale, '_gvspace_service_title_');
+}
+
+function gvspace_case_service_badge(int $post_id, string $locale): string
+{
+    $counts = [];
+    $links = gvspace_case_fact_links($post_id, '_gvspace_case_service_ids', 'service_tags', 'gv_service', $locale);
+    foreach ($links as $link) {
+        $href = (string) ($link['href'] ?? '');
+        if (!preg_match('#^/services/([^/]+)/#', $href, $match)) {
+            continue;
+        }
+        $label = gvspace_case_service_title_by_public_slug($match[1], $locale);
+        if ($label === '') {
+            continue;
+        }
+        $counts[$label] = ($counts[$label] ?? 0) + 1;
+    }
+    if (!$counts) {
+        return '';
+    }
+    arsort($counts);
+    return (string) array_key_first($counts);
+}
+
 function gvspace_case_fact_links(int $post_id, string $meta_key, string $text_key, string $post_type, string $locale): array
 {
     $selected = gvspace_case_relation_links($post_id, $meta_key, $post_type, $locale);
@@ -3983,6 +4028,7 @@ add_action('graphql_register_types', function (): void {
             'industry' => ['type' => 'String'],
             'direction' => ['type' => 'String'],
             'badge' => ['type' => 'String'],
+            'serviceBadge' => ['type' => 'String'],
             'logo' => ['type' => 'String'],
             'cover' => ['type' => 'String'],
             'coverKind' => ['type' => 'String'],
@@ -4071,6 +4117,7 @@ add_action('graphql_register_types', function (): void {
                 'industry' => $field('industry'),
                 'direction' => $direction,
                 'badge' => $direction ?: $field('badge'),
+                'serviceBadge' => gvspace_case_service_badge($post_id, $locale),
                 'logo' => $brand['logo']['url'],
                 'cover' => $brand['cover']['url'],
                 'coverKind' => $brand['cover']['kind'],

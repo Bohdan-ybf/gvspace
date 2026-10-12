@@ -51,6 +51,7 @@ export type CaseStudy = {
   industry: string;
   direction: string;
   badge: string;
+  serviceBadge: string;
   logo: string;
   cover: string;
   coverKind: string;
@@ -114,7 +115,7 @@ const fields = `
     gallery tasks documents
     team { name role photo }
     testimonial testimonialAuthor testimonialCompany
-    projectType industry direction badge
+    projectType industry direction badge serviceBadge
     logo cover coverKind subtitle lead contextTitle contextBody
     market period status
     serviceTags { label href }
@@ -194,6 +195,7 @@ function mapCase(node: CaseNode): CaseStudy | undefined {
     industry: details.industry ?? "",
     direction: details.direction || details.badge || "",
     badge: details.badge || details.direction || "",
+    serviceBadge: details.serviceBadge ?? "",
     logo: details.logo ?? "",
     cover: details.cover ?? "",
     coverKind: details.coverKind ?? "",

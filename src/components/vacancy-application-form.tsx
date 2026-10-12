@@ -1,11 +1,26 @@
+"use client";
+
+import type { FormEvent } from "react";
 import type { Locale } from "@/i18n";
 
 import { getTranslations } from "@/i18n/pages";
-export function VacancyApplicationForm({ locale }: { locale: Locale }) {
+export function VacancyApplicationForm({
+  locale,
+  onSubmit,
+}: {
+  locale: Locale;
+  onSubmit?: () => void;
+}) {
   const t = getTranslations("vacancies", locale).application;
 
   return (
-    <form className="vacancy-application-form">
+    <form
+      className="vacancy-application-form"
+      onSubmit={(event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        onSubmit?.();
+      }}
+    >
       <span className="mono">{t.eyebrow}</span>
       <h2>{t.title}</h2>
       <div>
