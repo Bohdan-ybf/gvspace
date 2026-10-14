@@ -788,6 +788,12 @@ add_action('init', function (): void {
         ]);
     }
 
+    register_post_meta('gv_review', '_gvspace_review_case_id', [
+        'type' => 'integer', 'single' => true, 'show_in_rest' => true,
+        'sanitize_callback' => 'absint',
+        'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+    ]);
+
     foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
         foreach (array_keys(GVSPACE_REVIEW_LANGUAGE_FIELDS) as $field) {
             $legacy_key = $field . '_' . $locale;
@@ -3095,6 +3101,32 @@ function gvspace_review_shared_value(int $post_id, string $field): string
     return gvspace_review_read($post_id, '_gvspace_review_localized_' . $field);
 }
 
+function gvspace_review_case_options(): array
+{
+    return get_posts([
+        'post_type' => 'gv_case',
+        'post_status' => ['publish', 'draft', 'pending', 'private'],
+        'numberposts' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC',
+    ]);
+}
+
+function gvspace_case_linked_review_id(int $case_id): int
+{
+    $review_ids = get_posts([
+        'post_type' => 'gv_review',
+        'post_status' => 'publish',
+        'posts_per_page' => 1,
+        'fields' => 'ids',
+        'meta_key' => '_gvspace_review_case_id',
+        'meta_value' => (string) $case_id,
+        'orderby' => ['menu_order' => 'ASC', 'date' => 'DESC'],
+        'no_found_rows' => true,
+    ]);
+    return isset($review_ids[0]) ? (int) $review_ids[0] : 0;
+}
+
 function gvspace_render_review_logo_field(WP_Post $post): void
 {
     $logo_id = absint(gvspace_review_read($post->ID, '_gvspace_review_logo_id'));
@@ -3162,6 +3194,17 @@ function gvspace_render_review_fields(WP_Post $post): void
     $tags = gvspace_review_tags($post->ID);
     $extra = array_values(array_filter($tags, static fn (string $tag): bool => !array_key_exists($tag, gvspace_review_default_tags())));
     echo '<p class="description"><strong>Один відгук — один запис.</strong> Оберіть мову й заповніть переклад. Фото автора — у «Головному зображенні», порядок карток — у полі «Порядок». Теги керують фільтром на сторінці відгуків і тим, на яких сторінках послуг і технологій цей відгук з’явиться.</p>';
+    $selected_case_id = absint(get_post_meta($post->ID, '_gvspace_review_case_id', true));
+    echo '<p><label for="gvspace_review_case_id"><strong>Пов’язаний кейс</strong></label><br>';
+    echo '<select id="gvspace_review_case_id" name="gvspace_review_case_id" style="width:100%;max-width:520px">';
+    echo '<option value="0">— Не прив’язувати до кейсу —</option>';
+    foreach (gvspace_review_case_options() as $case) {
+        $status_object = get_post_status_object($case->post_status);
+        $status_label = $case->post_status === 'publish' || !$status_object ? '' : ' — ' . $status_object->label;
+        echo '<option value="' . esc_attr((string) $case->ID) . '"' . selected($selected_case_id, $case->ID, false) . '>' . esc_html(get_the_title($case) . $status_label) . '</option>';
+    }
+    echo '</select></p>';
+    echo '<p class="description">Якщо обрати кейс, цей відгук з’явиться і на його сторінці, і в загальному розділі «Відгуки». Відгук, заповнений лише в самому кейсі, у загальному розділі не показується.</p>';
     echo '<p><label for="gvspace_review_company"><strong>Компанія</strong></label><br>';
     echo '<input type="text" id="gvspace_review_company" name="gvspace_review_company" value="' . esc_attr(gvspace_review_shared_value($post->ID, 'company')) . '" style="width:100%"></p>';
     echo '<p><label for="gvspace_review_rating"><strong>Оцінка від 1 до 5</strong></label><br>';
@@ -3208,6 +3251,15 @@ add_action('save_post_gv_review', function (int $post_id): void {
     static $saving_title = false;
     if ($saving_title) return;
     if (!isset($_POST['gvspace_review_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gvspace_review_nonce'])), 'gvspace_save_review') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return;
+
+    if (isset($_POST['gvspace_review_case_id'])) {
+        $case_id = absint(wp_unslash($_POST['gvspace_review_case_id']));
+        if ($case_id > 0 && get_post_type($case_id) === 'gv_case') {
+            update_post_meta($post_id, '_gvspace_review_case_id', $case_id);
+        } else {
+            delete_post_meta($post_id, '_gvspace_review_case_id');
+        }
+    }
 
     if (isset($_POST['gvspace_review_company'])) {
         update_post_meta($post_id, '_gvspace_review_company', sanitize_text_field(wp_unslash($_POST['gvspace_review_company'])));
@@ -4089,6 +4141,24 @@ add_action('graphql_register_types', function (): void {
             $brand = gvspace_case_brand_media($post_id);
             $context_body = $field('context_body');
             if ($context_body === '') $context_body = $field('challenge');
+            $testimonial = $field('testimonial');
+            $testimonial_author = $field('testimonial_author');
+            $testimonial_company = $field('testimonial_company');
+            $author_photo = gvspace_case_attachment_public(absint(get_post_meta($post_id, '_gvspace_case_author_photo', true)))['url'];
+            $linked_review_id = gvspace_case_linked_review_id($post_id);
+            if ($linked_review_id > 0) {
+                $linked_testimonial = gvspace_review_public_field($linked_review_id, 'text', $locale);
+                if ($linked_testimonial !== '') {
+                    $testimonial = $linked_testimonial;
+                    $testimonial_author = gvspace_review_public_field($linked_review_id, 'name', $locale);
+                    $testimonial_company = implode(' / ', array_filter([
+                        gvspace_review_public_field($linked_review_id, 'position', $locale),
+                        gvspace_review_shared_value($linked_review_id, 'company'),
+                    ]));
+                    $linked_author_photo = (string) get_the_post_thumbnail_url($linked_review_id, 'full');
+                    if ($linked_author_photo !== '') $author_photo = $linked_author_photo;
+                }
+            }
             return [
                 'title' => $field('title'),
                 'catalogTitle' => $field('catalog_title') ?: $field('title'),
@@ -4110,9 +4180,9 @@ add_action('graphql_register_types', function (): void {
                 'tasks' => $lines('tasks'),
                 'documents' => $lines('documents'),
                 'team' => $team,
-                'testimonial' => $field('testimonial'),
-                'testimonialAuthor' => $field('testimonial_author'),
-                'testimonialCompany' => $field('testimonial_company'),
+                'testimonial' => $testimonial,
+                'testimonialAuthor' => $testimonial_author,
+                'testimonialCompany' => $testimonial_company,
                 'projectType' => $project_type ?: $field('project_type'),
                 'industry' => $field('industry'),
                 'direction' => $direction,
@@ -4144,7 +4214,7 @@ add_action('graphql_register_types', function (): void {
                 'stepMedia' => gvspace_case_named_media($post_id, ['_gvspace_case_step1_media', '_gvspace_case_step2_media', '_gvspace_case_step3_media']),
                 'resultLayout' => gvspace_case_result_layout($post_id),
                 'resultMedia' => gvspace_case_result_media($post_id, $gallery),
-                'authorPhoto' => gvspace_case_attachment_public(absint(get_post_meta($post_id, '_gvspace_case_author_photo', true)))['url'],
+                'authorPhoto' => $author_photo,
             ];
         },
     ]);
@@ -4534,11 +4604,25 @@ function gvspace_consolidate_vasyl_team_translation(): void
 add_action('admin_init', 'gvspace_consolidate_vasyl_team_translation');
 
 add_filter('manage_gv_team_member_posts_columns', function (array $columns): array {
-    $columns['menu_order'] = 'Порядок';
-    return $columns;
+    $updated_columns = [];
+    foreach ($columns as $key => $label) {
+        $updated_columns[$key] = $label;
+        if ($key === 'title') {
+            $updated_columns['team_member_role'] = 'Посада';
+        }
+    }
+    $updated_columns['menu_order'] = 'Порядок';
+    return $updated_columns;
 });
 
 add_action('manage_gv_team_member_posts_custom_column', function (string $column, int $post_id): void {
+    if ($column === 'team_member_role') {
+        $role = (string) get_post_meta($post_id, '_gvspace_team_member_role_uk', true);
+        if ($role === '') $role = (string) get_post_meta($post_id, '_gvspace_team_member_role', true);
+        if ($role === '') $role = (string) get_post_meta($post_id, '_gvspace_team_member_role_en', true);
+        echo $role !== '' ? esc_html($role) : '&mdash;';
+        return;
+    }
     if ($column === 'menu_order') echo esc_html((string) get_post_field('menu_order', $post_id));
 }, 10, 2);
 

@@ -8,20 +8,22 @@ import { LeadModalButton } from "./lead-modal";
 import { ContactSection } from "./contact-section";
 import { StructuredData } from "./structured-data";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
+import { ArticleToc } from "./article-toc";
 
 function prepareArticleContent(content: string) {
-  const headings: Array<{ id: string; label: string }> = [];
+  const headings: Array<{ id: string; label: string; level: 2 | 3 }> = [];
   const withHeadings = content.replace(
-    /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
-    (heading, attributes: string, inner: string) => {
+    /<h([23])([^>]*)>([\s\S]*?)<\/h\1>/gi,
+    (heading, levelValue: string, attributes: string, inner: string) => {
       const label = inner
         .replace(/<[^>]*>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
       const existingId = attributes.match(/\sid=["']([^"']+)["']/i)?.[1];
       const id = existingId || `article-section-${headings.length + 1}`;
-      headings.push({ id, label });
-      return existingId ? heading : `<h2${attributes} id="${id}">${inner}</h2>`;
+      const level = Number(levelValue) as 2 | 3;
+      headings.push({ id, label, level });
+      return existingId ? heading : `<h${level}${attributes} id="${id}">${inner}</h${level}>`;
     },
   );
   const leadMatch = withHeadings.match(/^\s*(<p(?:\s[^>]*)?>[\s\S]*?<\/p>)/i);
@@ -30,7 +32,7 @@ function prepareArticleContent(content: string) {
   return { lead, body, headings };
 }
 
-const cardImage = (image?: string) => image || "/images/blog/blog-bg.png";
+const cardImage = (image?: string) => image || "/images/blog/blog.png";
 
 export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; slug: string }) {
   const t = getTranslations("blog", locale).article;
@@ -82,16 +84,7 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
 
       <div className="container article-design-layout">
         <aside className="article-sidebar">
-          {headings.length > 0 && (
-            <nav className="article-toc" aria-label={text.contents}>
-              <span className="mono">{text.contents}</span>
-              {headings.map((heading) => (
-                <a key={heading.id} href={`#${heading.id}`}>
-                  {heading.label}
-                </a>
-              ))}
-            </nav>
-          )}
+          {headings.length > 0 && <ArticleToc label={text.contents} headings={headings} />}
           <section className="article-project-card">
             <h2>{t.projectTitle}</h2>
             <p>{t.projectDescription}</p>

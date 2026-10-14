@@ -80,7 +80,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         <section className={`service-detail-hero${isDirection ? " is-direction" : " is-service"}`}>
           <Image
             className="service-detail-hero-background"
-            src="/images/services/l2-hero-bg.jpg"
+            src="/images/services/poslugi-l2.png"
             alt=""
             fill
             priority

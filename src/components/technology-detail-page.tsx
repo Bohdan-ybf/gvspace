@@ -249,7 +249,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                   alt=""
                   width={1000}
                   height={800}
-                  sizes="(max-width: 900px) 80vw, 360px"
+                  sizes="(max-width: 600px) 229px, (max-width: 900px) 360px, 360px"
                   unoptimized
                 />
               </span>

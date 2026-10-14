@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ContactSection } from "./contact-section";
+import { ArrowRight } from "./icons/arrow-right";
 import { ReviewsCatalog } from "./reviews-catalog";
 import { getClientReviews, type ClientReview } from "./wordpress-reviews";
 
@@ -28,7 +29,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
         <section className="reviews-hero">
           <Image
             className="reviews-hero-background"
-            src="/images/reviews/reviews-bg.png"
+            src="/images/reviews/reviews.png"
             alt=""
             fill
             priority
@@ -52,14 +53,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
               </div>
               <Link className="btn btn-primary" href={`/${locale}/contacts`}>
                 {t.heroAction}
-                <svg width="12" height="13" viewBox="0 0 12 13" fill="none" aria-hidden="true">
-                  <path
-                    d="M6 1V12M1.5 7.5L6 12L10.5 7.5"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <ArrowRight />
               </Link>
             </div>
             <dl>

@@ -264,7 +264,7 @@ function Blog({
       </header>
       <div className={`home-blog-grid${posts.length === 1 ? " is-single" : ""}`}>
         {posts.map((post, index) => {
-          const image = post.image || "/images/blog/blog-bg.png";
+          const image = post.image || "/images/blog/blog.png";
           return (
             <article
               className={`home-blog-card${index === 0 ? " is-featured" : ""}`}

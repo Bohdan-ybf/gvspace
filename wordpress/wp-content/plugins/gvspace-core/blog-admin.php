@@ -9,7 +9,7 @@ add_action('init', function (): void {
         'auth_callback' => static fn (): bool => current_user_can('manage_categories'),
     ]);
     foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
-        foreach (['title', 'excerpt', 'content'] as $field) {
+        foreach (['title', 'excerpt', 'content', 'markdown'] as $field) {
             register_post_meta('post', '_gvspace_blog_' . $field . '_' . $locale, [
                 'type' => 'string', 'single' => true, 'show_in_rest' => true,
                 'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
@@ -17,6 +17,135 @@ add_action('init', function (): void {
         }
     }
 }, 30);
+
+function gvspace_blog_markdown_inline(string $value): string
+{
+    $value = esc_html($value);
+    $value = preg_replace_callback('/`([^`]+)`/u', static fn (array $match): string => '<code>' . $match[1] . '</code>', $value) ?? $value;
+    $value = preg_replace('/\*\*([^*]+)\*\*/u', '<strong>$1</strong>', $value) ?? $value;
+    $value = preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/u', '<em>$1</em>', $value) ?? $value;
+    $value = preg_replace_callback('/\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]*)\)/u', static function (array $match): string {
+        return '<a href="' . esc_url($match[2]) . '">' . $match[1] . '</a>';
+    }, $value) ?? $value;
+    return $value;
+}
+
+/** Convert the deliberately small editorial Markdown contract into safe article HTML. */
+function gvspace_blog_markdown_to_html(string $markdown): string
+{
+    $markdown = str_replace(["\r\n", "\r"], "\n", preg_replace('/^\xEF\xBB\xBF/', '', $markdown) ?? $markdown);
+    $lines = explode("\n", trim($markdown));
+    $html = [];
+    $paragraph = [];
+    $list = '';
+    $table = [];
+    $flush_paragraph = static function () use (&$paragraph, &$html): void {
+        if (!$paragraph) return;
+        $html[] = '<p>' . gvspace_blog_markdown_inline(implode(' ', array_map('trim', $paragraph))) . '</p>';
+        $paragraph = [];
+    };
+    $flush_list = static function () use (&$list, &$html): void {
+        if ($list === '') return;
+        $html[] = '</' . $list . '>';
+        $list = '';
+    };
+    $flush_table = static function () use (&$table, &$html): void {
+        if (!$table) return;
+        $rows = array_map(static fn (string $row): array => array_map('trim', explode('|', trim($row, " \t|"))), $table);
+        $header = array_shift($rows) ?: [];
+        if ($rows && count($rows[0]) === count($header) && count(array_filter($rows[0], static fn (string $cell): bool => !preg_match('/^:?-{3,}:?$/', $cell))) === 0) array_shift($rows);
+        $markup = '<div class="article-table-wrap"><table><thead><tr>';
+        foreach ($header as $cell) $markup .= '<th>' . gvspace_blog_markdown_inline($cell) . '</th>';
+        $markup .= '</tr></thead><tbody>';
+        foreach ($rows as $row) {
+            $markup .= '<tr>';
+            foreach ($row as $cell) $markup .= '<td>' . gvspace_blog_markdown_inline($cell) . '</td>';
+            $markup .= '</tr>';
+        }
+        $html[] = $markup . '</tbody></table></div>';
+        $table = [];
+    };
+
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if (str_contains($trimmed, '|') && preg_match('/^\|?.+\|.+\|?$/u', $trimmed)) {
+            $flush_paragraph(); $flush_list(); $table[] = $trimmed; continue;
+        }
+        $flush_table();
+        if ($trimmed === '') { $flush_paragraph(); $flush_list(); continue; }
+        if (preg_match('/^#{1,6}\s+(.+)$/u', $trimmed, $match)) {
+            $flush_paragraph(); $flush_list();
+            $level = min(6, strspn($trimmed, '#'));
+            $html[] = '<h' . $level . '>' . gvspace_blog_markdown_inline($match[1]) . '</h' . $level . '>';
+            continue;
+        }
+        if (preg_match('/^[-*+]\s+(.+)$/u', $trimmed, $match) || preg_match('/^\d+[.)]\s+(.+)$/u', $trimmed, $match)) {
+            $flush_paragraph();
+            $wanted = preg_match('/^\d/u', $trimmed) ? 'ol' : 'ul';
+            if ($list !== $wanted) { $flush_list(); $html[] = '<' . $wanted . '>'; $list = $wanted; }
+            $html[] = '<li>' . gvspace_blog_markdown_inline($match[1]) . '</li>';
+            continue;
+        }
+        if (preg_match('/^>\s*(.+)$/u', $trimmed, $match)) {
+            $flush_paragraph(); $flush_list(); $html[] = '<blockquote><p>' . gvspace_blog_markdown_inline($match[1]) . '</p></blockquote>'; continue;
+        }
+        $paragraph[] = $trimmed;
+    }
+    $flush_paragraph(); $flush_list(); $flush_table();
+    return wp_kses_post(implode("\n", $html));
+}
+
+function gvspace_blog_parse_markdown(string $markdown, string $filename = ''): array
+{
+    $markdown = str_replace(["\r\n", "\r"], "\n", preg_replace('/^\xEF\xBB\xBF/', '', $markdown) ?? $markdown);
+    $meta_title = '';
+    $meta_description = '';
+    $category = '';
+    if (preg_match('/^\s*\*\*Meta title:\*\*\s*(.+)$/miu', $markdown, $match)) $meta_title = trim($match[1]);
+    if (preg_match('/^\s*\*\*Meta description:\*\*\s*(.+)$/miu', $markdown, $match)) $meta_description = trim($match[1]);
+    if (preg_match('/^\s*\*\*(?:Category|Категорія):\*\*\s*(.+)$/miu', $markdown, $match)) $category = trim($match[1]);
+    $body = preg_replace('/^\s*\*\*(?:Meta (?:title|description)|Category|Категорія):\*\*\s*.*(?:\n|$)/miu', '', $markdown) ?? $markdown;
+    $title = preg_match('/^#\s+(.+)$/mu', $body, $match) ? trim($match[1]) : '';
+    $body = preg_replace('/^#\s+.*(?:\n|$)/mu', '', $body, 1) ?? $body;
+    $plain = trim(wp_strip_all_tags(gvspace_blog_markdown_to_html($body)));
+    $excerpt = preg_split('/\n\s*\n/u', trim($body))[0] ?? '';
+    $excerpt = trim(wp_strip_all_tags(gvspace_blog_markdown_to_html($excerpt)));
+    $parts = function_exists('gvspace_l3_import_filename_parts') ? gvspace_l3_import_filename_parts($filename) : ['slug' => sanitize_title(pathinfo($filename, PATHINFO_FILENAME)), 'locale' => ''];
+    return [
+        'filename' => $filename,
+        'slug' => (string) ($parts['slug'] ?? ''),
+        'locale' => (string) ($parts['locale'] ?? ''),
+        'title' => $title,
+        'excerpt' => $excerpt,
+        'content' => gvspace_blog_markdown_to_html($body),
+        'markdown' => trim($markdown),
+        'meta_title' => $meta_title ?: $title,
+        'meta_description' => $meta_description ?: wp_trim_words($plain, 24, ''),
+        'category' => $category,
+    ];
+}
+
+function gvspace_blog_resolve_category_id(string $value, bool $create = true): int
+{
+    $value = trim($value);
+    if ($value === '') return 0;
+    $slug = sanitize_title($value);
+    $term = get_term_by('slug', $slug, 'category');
+    if (!$term) $term = get_term_by('name', $value, 'category');
+    if (!$term) {
+        $needle = function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
+        foreach (get_terms(['taxonomy' => 'category', 'hide_empty' => false]) as $candidate) {
+            if (!$candidate instanceof WP_Term) continue;
+            $english = trim((string) get_term_meta($candidate->term_id, '_gvspace_name_en', true));
+            $haystack = function_exists('mb_strtolower') ? mb_strtolower($english, 'UTF-8') : strtolower($english);
+            if ($english !== '' && $haystack === $needle) return (int) $candidate->term_id;
+        }
+    }
+    if ($term instanceof WP_Term) return (int) $term->term_id;
+    if (!$create) return 0;
+    $created = wp_insert_term($value, 'category', ['slug' => $slug]);
+    return is_wp_error($created) ? 0 : (int) $created['term_id'];
+}
 
 add_action('admin_head-post.php', 'gvspace_hide_native_blog_fields');
 add_action('admin_head-post-new.php', 'gvspace_hide_native_blog_fields');
@@ -41,8 +170,11 @@ add_action('add_meta_boxes', function (): void {
 function gvspace_render_blog_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_blog', 'gvspace_blog_nonce');
-    echo '<p class="description"><strong>Одна стаття — один запис.</strong> Оберіть мову та заповніть її заголовок, короткий опис і повний текст. Перемикання мови не перезавантажує сторінку та не видаляє введений текст. Категорія, автор і головне зображення є спільними для всіх мов.</p>';
+    echo '<p class="description"><strong>Одна стаття — один запис.</strong> Оберіть мову та заповніть її заголовок, короткий опис і повний текст. У Markdown маркетолог має вказувати категорію окремим рядком: <code>**Category:** it-development</code>. Рекомендовано використовувати slug наявної категорії. Категорія, автор і головне зображення є спільними для всіх мов.</p>';
     gvspace_render_blog_image_field($post);
+    echo '<p><label for="gvspace_blog_category"><strong>Категорія статті</strong></label><br>';
+    wp_dropdown_categories(['id' => 'gvspace_blog_category', 'name' => 'gvspace_blog_category', 'taxonomy' => 'category', 'hide_empty' => false, 'selected' => (int) (wp_get_post_categories($post->ID)[0] ?? 0), 'show_option_none' => 'Оберіть категорію', 'option_none_value' => 0]);
+    echo '<br><span class="description">Можна обрати вручну. Якщо в Markdown є <code>**Category:**</code>, категорія з файла матиме пріоритет.</span></p>';
     echo '<p><label for="gvspace-blog-language"><strong>Редагувати мовну версію</strong></label> ';
     echo '<select id="gvspace-blog-language" data-gvspace-language-select="blog-language">';
     foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
@@ -54,6 +186,9 @@ function gvspace_render_blog_fields(WP_Post $post): void
         $title = (string) get_post_meta($post->ID, '_gvspace_blog_title_' . $locale, true);
         $excerpt = (string) get_post_meta($post->ID, '_gvspace_blog_excerpt_' . $locale, true);
         $content = (string) get_post_meta($post->ID, '_gvspace_blog_content_' . $locale, true);
+        $markdown = (string) get_post_meta($post->ID, '_gvspace_blog_markdown_' . $locale, true);
+        $seo_title = (string) get_post_meta($post->ID, '_gvspace_seo_title_' . $locale, true);
+        $seo_description = (string) get_post_meta($post->ID, '_gvspace_seo_description_' . $locale, true);
         if ($locale === 'uk') {
             if ($title === '') $title = $post->post_title;
             if ($excerpt === '') $excerpt = $post->post_excerpt;
@@ -65,13 +200,16 @@ function gvspace_render_blog_fields(WP_Post $post): void
         echo '<input type="text" id="gvspace_blog_title_' . esc_attr($locale) . '" name="gvspace_blog_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
         echo '<p><label for="gvspace_blog_excerpt_' . esc_attr($locale) . '"><strong>Короткий опис для картки</strong></label><br>';
         echo '<textarea id="gvspace_blog_excerpt_' . esc_attr($locale) . '" name="gvspace_blog_excerpt_' . esc_attr($locale) . '" rows="3" style="width:100%">' . esc_textarea($excerpt) . '</textarea></p>';
-        echo '<p><strong>Текст статті</strong></p>';
-        wp_editor($content, 'gvspace_blog_content_' . $locale, [
-            'textarea_name' => 'gvspace_blog_content_' . $locale,
-            'textarea_rows' => 18,
-            'media_buttons' => true,
-            'teeny' => false,
-        ]);
+        echo '<p><label for="gvspace_blog_seo_title_' . esc_attr($locale) . '"><strong>Meta title</strong></label><br>';
+        echo '<input type="text" id="gvspace_blog_seo_title_' . esc_attr($locale) . '" name="gvspace_blog_seo_title_' . esc_attr($locale) . '" value="' . esc_attr($seo_title) . '" maxlength="70" style="width:100%"></p>';
+        echo '<p><label for="gvspace_blog_seo_description_' . esc_attr($locale) . '"><strong>Meta description</strong></label><br>';
+        echo '<textarea id="gvspace_blog_seo_description_' . esc_attr($locale) . '" name="gvspace_blog_seo_description_' . esc_attr($locale) . '" rows="3" maxlength="180" style="width:100%">' . esc_textarea($seo_description) . '</textarea></p>';
+        echo '<p><label for="gvspace_blog_markdown_' . esc_attr($locale) . '"><strong>Markdown статті</strong></label><br>';
+        echo '<span class="description">Вставте весь файл у форматі маркетолога: Meta title, Meta description, H1, H2/H3, списки, таблиці та посилання. HTML для сайту генерується автоматично.</span><br>';
+        echo '<textarea class="large-text code" id="gvspace_blog_markdown_' . esc_attr($locale) . '" name="gvspace_blog_markdown_' . esc_attr($locale) . '" rows="24">' . esc_textarea($markdown) . '</textarea></p>';
+        echo '<details><summary><strong>Згенерований HTML / сумісність зі старими статтями</strong></summary>';
+        wp_editor($content, 'gvspace_blog_content_' . $locale, ['textarea_name' => 'gvspace_blog_content_' . $locale, 'textarea_rows' => 12, 'media_buttons' => true, 'teeny' => false]);
+        echo '</details>';
         echo '</div>';
     }
     gvspace_render_language_switcher_script();
@@ -150,10 +288,33 @@ add_action('save_post_post', function (int $post_id): void {
         $title_field = 'gvspace_blog_title_' . $locale;
         $excerpt_field = 'gvspace_blog_excerpt_' . $locale;
         $content_field = 'gvspace_blog_content_' . $locale;
+        $markdown_field = 'gvspace_blog_markdown_' . $locale;
+        $seo_title_field = 'gvspace_blog_seo_title_' . $locale;
+        $seo_description_field = 'gvspace_blog_seo_description_' . $locale;
+        $markdown = isset($_POST[$markdown_field]) ? trim((string) wp_unslash($_POST[$markdown_field])) : '';
+        if ($markdown !== '') {
+            $parsed = gvspace_blog_parse_markdown($markdown);
+            $_POST[$title_field] = $parsed['title'] ?: ($_POST[$title_field] ?? '');
+            $_POST[$excerpt_field] = $parsed['excerpt'] ?: ($_POST[$excerpt_field] ?? '');
+            $_POST[$content_field] = $parsed['content'];
+            if (empty($_POST[$seo_title_field])) $_POST[$seo_title_field] = $parsed['meta_title'];
+            if (empty($_POST[$seo_description_field])) $_POST[$seo_description_field] = $parsed['meta_description'];
+            if ($parsed['category'] !== '') $_POST['gvspace_blog_category_from_markdown'] = $parsed['category'];
+            update_post_meta($post_id, '_gvspace_blog_markdown_' . $locale, $markdown);
+        } elseif (isset($_POST[$markdown_field])) {
+            delete_post_meta($post_id, '_gvspace_blog_markdown_' . $locale);
+        }
         if (isset($_POST[$title_field])) update_post_meta($post_id, '_gvspace_blog_title_' . $locale, sanitize_text_field(wp_unslash($_POST[$title_field])));
         if (isset($_POST[$excerpt_field])) update_post_meta($post_id, '_gvspace_blog_excerpt_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$excerpt_field])));
         if (isset($_POST[$content_field])) update_post_meta($post_id, '_gvspace_blog_content_' . $locale, wp_kses_post(wp_unslash($_POST[$content_field])));
+        if (isset($_POST[$seo_title_field])) update_post_meta($post_id, '_gvspace_seo_title_' . $locale, sanitize_text_field(wp_unslash($_POST[$seo_title_field])));
+        if (isset($_POST[$seo_description_field])) update_post_meta($post_id, '_gvspace_seo_description_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$seo_description_field])));
     }
+
+    $category_id = isset($_POST['gvspace_blog_category_from_markdown'])
+        ? gvspace_blog_resolve_category_id(sanitize_text_field(wp_unslash($_POST['gvspace_blog_category_from_markdown'])))
+        : absint($_POST['gvspace_blog_category'] ?? 0);
+    if ($category_id > 0) wp_set_post_categories($post_id, [$category_id], false);
 
     if (isset($_POST['gvspace_blog_thumbnail_id'])) {
         $thumbnail_id = absint(wp_unslash($_POST['gvspace_blog_thumbnail_id']));
@@ -211,6 +372,141 @@ function gvspace_save_category_translation(int $term_id): void
 }
 add_action('created_category', 'gvspace_save_category_translation');
 add_action('edited_category', 'gvspace_save_category_translation');
+
+function gvspace_blog_import_transient_key(): string
+{
+    return 'gvspace_blog_import_' . get_current_user_id();
+}
+
+function gvspace_blog_import_preview(array $files, string $default_locale, int $category_id = 0): array
+{
+    $records = [];
+    $errors = [];
+    foreach ($files as $file) {
+        $record = gvspace_blog_parse_markdown((string) $file['contents'], (string) $file['name']);
+        $base = strtolower((string) pathinfo((string) $file['name'], PATHINFO_FILENAME));
+        $filename_locale = function_exists('gvspace_l3_import_normalize_locale') ? gvspace_l3_import_normalize_locale($base) : '';
+        if ($filename_locale === '' && preg_match('/^(.*?)[.-](ua|uk|en|pl|de-de|de-at|es|fr|it|nl|cs|sk|en-gb)$/i', $base, $match)) {
+            $filename_locale = gvspace_l3_import_normalize_locale($match[2]);
+            $record['slug'] = sanitize_title($match[1]);
+        }
+        $record['locale'] = $record['locale'] ?: ($filename_locale ?: $default_locale);
+        if (!array_key_exists($record['locale'], GVSPACE_CONTENT_LOCALES)) $record['locale'] = $default_locale;
+        if ($record['title'] === '' || trim(wp_strip_all_tags($record['content'])) === '') {
+            $errors[] = $record['filename'] . ': не знайдено H1 або текст статті.';
+            continue;
+        }
+        if ($record['slug'] === '' || ($filename_locale !== '' && in_array($base, ['ua', 'uk', 'en'], true))) $record['slug'] = '';
+        $records[] = $record;
+    }
+    $shared_slug = '';
+    if ($records && count(array_filter($records, static fn (array $record): bool => $record['slug'] !== '')) === 0) {
+        $shared_slug = sanitize_title((string) $records[0]['title']);
+    }
+    foreach ($records as &$record) {
+        if ($record['slug'] === '') $record['slug'] = $shared_slug ?: sanitize_title((string) $record['title']);
+    }
+    unset($record);
+    $seen = [];
+    foreach ($records as $record) {
+        $key = $record['slug'] . "\0" . $record['locale'];
+        if (isset($seen[$key])) $errors[] = $record['filename'] . ': ця мовна версія дублюється у пакеті.';
+        $seen[$key] = true;
+    }
+    return ['records' => $records, 'errors' => $errors, 'category_id' => $category_id];
+}
+
+function gvspace_blog_import_apply(array $payload): int
+{
+    $updated = 0;
+    $fallback_category_id = absint($payload['category_id'] ?? 0);
+    foreach ((array) ($payload['records'] ?? []) as $record) {
+        $slug = sanitize_title((string) $record['slug']);
+        $locale = (string) $record['locale'];
+        $existing = get_posts(['post_type' => 'post', 'post_status' => 'any', 'numberposts' => 1, 'meta_key' => '_gvspace_translation_group', 'meta_value' => $slug]);
+        if (!$existing) $existing = get_posts(['post_type' => 'post', 'post_status' => 'any', 'numberposts' => 1, 'name' => $slug]);
+        $post_id = $existing ? (int) $existing[0]->ID : 0;
+        if (!$post_id) {
+            $created = wp_insert_post(['post_type' => 'post', 'post_status' => 'publish', 'post_name' => $slug, 'post_title' => (string) $record['title']], true);
+            if (is_wp_error($created)) continue;
+            $post_id = (int) $created;
+        }
+        update_post_meta($post_id, '_gvspace_content_locale', 'legacy');
+        update_post_meta($post_id, '_gvspace_translation_group', $slug);
+        update_post_meta($post_id, '_gvspace_translation_status', 'published');
+        foreach (['title', 'excerpt', 'content', 'markdown'] as $field) update_post_meta($post_id, '_gvspace_blog_' . $field . '_' . $locale, (string) $record[$field]);
+        update_post_meta($post_id, '_gvspace_seo_title_' . $locale, sanitize_text_field((string) $record['meta_title']));
+        update_post_meta($post_id, '_gvspace_seo_h1_' . $locale, sanitize_text_field((string) $record['title']));
+        update_post_meta($post_id, '_gvspace_seo_description_' . $locale, sanitize_textarea_field((string) $record['meta_description']));
+        $category_id = gvspace_blog_resolve_category_id((string) ($record['category'] ?? '')) ?: $fallback_category_id;
+        if ($category_id > 0 && term_exists($category_id, 'category')) {
+            wp_set_post_categories($post_id, [$category_id], false);
+        }
+        if ($locale === 'uk' || trim((string) get_post_field('post_title', $post_id)) === '') {
+            wp_update_post(['ID' => $post_id, 'post_title' => (string) $record['title'], 'post_name' => $slug, 'post_excerpt' => (string) $record['excerpt'], 'post_content' => (string) $record['content'], 'post_status' => 'publish']);
+        }
+        clean_post_cache($post_id);
+        $updated++;
+    }
+    return $updated;
+}
+
+add_action('admin_menu', static function (): void {
+    add_submenu_page('edit.php', 'Масовий імпорт статей', 'Імпорт Markdown', 'edit_posts', 'gvspace-blog-import', 'gvspace_render_blog_import_page');
+}, 9);
+
+function gvspace_render_blog_import_page(): void
+{
+    if (!current_user_can('edit_posts')) wp_die('Недостатньо прав.');
+    $notice = '';
+    $preview = get_transient(gvspace_blog_import_transient_key());
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        check_admin_referer('gvspace_blog_import');
+        $action = sanitize_key((string) ($_POST['gvspace_blog_import_action'] ?? ''));
+        if ($action === 'preview') {
+            $default_locale = gvspace_sanitize_content_locale((string) ($_POST['gvspace_blog_default_locale'] ?? 'uk'));
+            if ($default_locale === 'legacy') $default_locale = 'uk';
+            $category_id = absint($_POST['gvspace_blog_category'] ?? 0);
+            $uploads = function_exists('gvspace_l3_import_collect_uploads') ? gvspace_l3_import_collect_uploads('gvspace_blog_files') : ['files' => [], 'errors' => ['Завантаження недоступне.']];
+            $preview = gvspace_blog_import_preview((array) $uploads['files'], $default_locale, $category_id);
+            $preview['errors'] = array_merge((array) ($uploads['errors'] ?? []), (array) $preview['errors']);
+            set_transient(gvspace_blog_import_transient_key(), $preview, 30 * MINUTE_IN_SECONDS);
+        } elseif ($action === 'apply' && is_array($preview) && empty($preview['errors'])) {
+            $count = gvspace_blog_import_apply($preview);
+            delete_transient(gvspace_blog_import_transient_key());
+            $preview = false;
+            $notice = 'Імпорт завершено: оновлено мовних версій — ' . $count . '.';
+        } elseif ($action === 'cancel') {
+            delete_transient(gvspace_blog_import_transient_key());
+            $preview = false;
+        }
+    }
+    ?>
+    <div class="wrap"><h1>Масовий імпорт статей із Markdown</h1>
+        <p>Один файл — одна мовна версія. Для пакетів використовуйте назви <code>article-slug.uk.md</code>, <code>article-slug.en.md</code>. Для однієї статті можна разом завантажити <code>ua.md</code> та <code>en.md</code> — вони будуть об’єднані. У кожному файлі рекомендовано вказати <code>**Category:** it-development</code>; категорія з Markdown має пріоритет над загальним селектом.</p>
+        <?php if ($notice !== ''): ?><div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div><?php endif; ?>
+        <?php if (is_array($preview)): ?>
+            <?php foreach ((array) $preview['errors'] as $error): ?><div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div><?php endforeach; ?>
+            <p><strong>Категорія:</strong> <?php $preview_category = get_term(absint($preview['category_id'] ?? 0), 'category'); echo esc_html($preview_category instanceof WP_Term ? $preview_category->name : 'Не вибрана'); ?></p>
+            <table class="widefat striped"><thead><tr><th>Файл</th><th>Slug</th><th>Мова</th><th>Категорія з MD</th><th>H1</th><th>Meta title</th></tr></thead><tbody>
+            <?php foreach ((array) $preview['records'] as $record): ?><tr><td><?php echo esc_html($record['filename']); ?></td><td><code><?php echo esc_html($record['slug']); ?></code></td><td><code><?php echo esc_html($record['locale']); ?></code></td><td><code><?php echo esc_html($record['category'] ?: '—'); ?></code></td><td><?php echo esc_html($record['title']); ?></td><td><?php echo esc_html($record['meta_title']); ?></td></tr><?php endforeach; ?>
+            </tbody></table>
+            <form method="post" style="margin-top:16px"><?php wp_nonce_field('gvspace_blog_import'); ?>
+                <button class="button button-primary" name="gvspace_blog_import_action" value="apply" <?php disabled(!empty($preview['errors'])); ?>>Імпортувати</button>
+                <button class="button" name="gvspace_blog_import_action" value="cancel">Скасувати</button>
+            </form>
+        <?php else: ?>
+            <form method="post" enctype="multipart/form-data"><?php wp_nonce_field('gvspace_blog_import'); ?>
+                <table class="form-table"><tr><th><label for="gvspace_blog_default_locale">Мова за замовчуванням</label></th><td><select id="gvspace_blog_default_locale" name="gvspace_blog_default_locale">
+                    <?php foreach (GVSPACE_CONTENT_LOCALES as $code => $label): ?><option value="<?php echo esc_attr($code); ?>"><?php echo esc_html($label); ?></option><?php endforeach; ?>
+                </select><p class="description">Застосовується лише якщо мову не вказано в назві файла.</p></td></tr>
+                <tr><th><label for="gvspace_blog_category">Категорія</label></th><td><?php wp_dropdown_categories(['id' => 'gvspace_blog_category', 'name' => 'gvspace_blog_category', 'taxonomy' => 'category', 'hide_empty' => false, 'show_option_none' => 'Оберіть категорію', 'option_none_value' => 0]); ?><p class="description">Категорія буде застосована до всіх статей у поточному пакеті.</p></td></tr>
+                <tr><th><label for="gvspace_blog_files">Markdown-файли</label></th><td><input id="gvspace_blog_files" name="gvspace_blog_files[]" type="file" accept=".md,.zip,text/markdown,application/zip" multiple required></td></tr></table>
+                <p class="submit"><button class="button button-primary" name="gvspace_blog_import_action" value="preview">Перевірити пакет</button></p>
+            </form>
+        <?php endif; ?>
+    </div><?php
+}
 
 add_action('graphql_register_types', function (): void {
     if (!function_exists('register_graphql_field')) return;

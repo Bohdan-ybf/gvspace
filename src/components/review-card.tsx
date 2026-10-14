@@ -73,7 +73,9 @@ export function ReviewCard({
           </span>
         </header>
       )}
-      <p>{review.text}</p>
+      <p>
+        <span>{review.text}</span>
+      </p>
       {compact && readMoreLabel && (
         <button
           className="review-read-more"

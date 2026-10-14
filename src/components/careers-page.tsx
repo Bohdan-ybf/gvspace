@@ -26,7 +26,7 @@ export async function CareersPage({ locale }: { locale: Locale }) {
         <section className="careers-hero">
           <Image
             className="careers-hero-background"
-            src="/images/careers/careers-bg.png"
+            src="/images/careers/careers.png"
             alt=""
             fill
             priority

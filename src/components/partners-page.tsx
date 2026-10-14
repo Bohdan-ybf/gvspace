@@ -13,7 +13,7 @@ export function PartnersPage({ locale }: { locale: Locale }) {
       <section className="partners-hero">
         <Image
           className="partners-hero-background"
-          src="/images/technologies/technologies-bg.png"
+          src="/images/partners/partners.png"
           alt=""
           fill
           priority

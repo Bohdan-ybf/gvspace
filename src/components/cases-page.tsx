@@ -34,7 +34,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
         <section className="cases-hero">
           <Image
             className="cases-hero-background"
-            src="/images/cases/cases-bg.png"
+            src="/images/cases/cases.png"
             alt=""
             fill
             priority

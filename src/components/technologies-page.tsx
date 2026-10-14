@@ -27,7 +27,7 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
       <section className="technologies-hero">
         <Image
           className="technologies-hero-background"
-          src="/images/technologies/technologies-bg.png"
+          src="/images/technologies/technologies.png"
           alt=""
           fill
           priority

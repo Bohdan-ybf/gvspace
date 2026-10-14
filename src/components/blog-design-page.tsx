@@ -12,7 +12,7 @@ import { Pagination, scrollToBlockTop } from "./pagination";
 const POSTS_PER_PAGE = 6;
 
 const imageUrl = (image?: string) =>
-  image ? (image.startsWith("http") ? image : `/images/blog/${image}`) : "/images/blog/blog-bg.png";
+  image ? (image.startsWith("http") ? image : `/images/blog/${image}`) : "/images/blog/blog.png";
 
 export function BlogDesignPage({
   locale,
@@ -53,7 +53,7 @@ export function BlogDesignPage({
       <section className="blog-hero">
         <Image
           className="blog-hero-background"
-          src="/images/blog/blog-bg.png"
+          src="/images/blog/blog.png"
           alt=""
           fill
           priority

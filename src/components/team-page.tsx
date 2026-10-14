@@ -20,7 +20,7 @@ export async function TeamPage({ locale }: { locale: Locale }) {
       <section className="team-hero">
         <Image
           className="team-hero-background"
-          src="/images/team/team-bg.png"
+          src="/images/team/team.png"
           alt=""
           fill
           priority

@@ -57,7 +57,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
         <section className="services-hero">
           <Image
             className="services-hero-background"
-            src="/images/services/services-bg.jpg"
+            src="/images/services/poslugi-l1.png"
             alt=""
             fill
             priority
