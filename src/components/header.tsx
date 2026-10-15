@@ -146,7 +146,6 @@ export function Header({
   const [areDesktopMenusDismissed, setAreDesktopMenusDismissed] = useState(false);
   const [hoveredServiceSlug, setHoveredServiceSlug] = useState<string | null>(null);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>({ level: "root" });
-  const staticServiceDirections = getTranslations("services", locale).directions;
   const cmsServiceDirections = services
     .filter((service) => !service.parentSlug)
     .map((direction) => ({
@@ -156,13 +155,7 @@ export function Header({
         .filter((service) => service.parentSlug === direction.slug)
         .map((service) => ({ slug: service.slug, title: service.title })),
     }));
-  const serviceMenuDirections = cmsServiceDirections.some((direction) => direction.services.length)
-    ? cmsServiceDirections
-    : staticServiceDirections.map((direction) => ({
-        slug: direction.slug,
-        title: direction.title,
-        services: direction.services.map((title) => ({ slug: "", title })),
-      }));
+  const serviceMenuDirections = cmsServiceDirections;
   const pathWithoutLocale = pathname.startsWith(`/${locale}`)
     ? pathname.slice(locale.length + 1)
     : pathname;
