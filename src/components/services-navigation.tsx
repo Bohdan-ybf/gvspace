@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { ChevronDown } from "./icons/chevron-down";
 
 type NavigationItem = {
   slug: string;
@@ -182,7 +181,7 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
         disabled={!canPrev}
         onClick={() => scrollByDirection(-1)}
       >
-        <ChevronDown />
+        <ServicesArrowPrevious />
       </button>
       <div
         className="container"
@@ -212,8 +211,30 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
         disabled={!canNext}
         onClick={() => scrollByDirection(1)}
       >
-        <ChevronDown />
+        <ServicesArrowNext />
       </button>
     </nav>
+  );
+}
+
+function ServicesArrowNext() {
+  return (
+    <svg width="11" height="16" viewBox="0 0 11 16" fill="none" aria-hidden="true">
+      <path
+        d="M10.5879 8L2.58789 16L0 13.4121L5.41211 8L0 2.58789L2.58789 0L10.5879 8Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function ServicesArrowPrevious() {
+  return (
+    <svg width="11" height="16" viewBox="0 0 11 16" fill="none" aria-hidden="true">
+      <path
+        d="M6.99382e-07 8L8 -2.26241e-07L10.5879 2.58789L5.17578 8L10.5879 13.4121L8 16L6.99382e-07 8Z"
+        fill="currentColor"
+      />
+    </svg>
   );
 }

@@ -143,7 +143,12 @@ export function Header({
   const [isCompact, setIsCompact] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
-  const [areDesktopMenusDismissed, setAreDesktopMenusDismissed] = useState(false);
+  const [desktopMenuDismissal, setDesktopMenuDismissal] = useState({
+    pathname,
+    dismissed: false,
+  });
+  const areDesktopMenusDismissed =
+    desktopMenuDismissal.dismissed || desktopMenuDismissal.pathname !== pathname;
   const [hoveredServiceSlug, setHoveredServiceSlug] = useState<string | null>(null);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>({ level: "root" });
   const cmsServiceDirections = services
@@ -220,6 +225,13 @@ export function Header({
   useEffect(() => {
     isMenuOpenRef.current = isMenuOpen;
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, [pathname]);
+
   const isSectionActive = (index: number) => {
     const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
     const prefix = `/${locale}`;
@@ -303,8 +315,9 @@ export function Header({
       <nav
         className="desktop-only"
         aria-label={t.mainNavigationLabel}
-        onClickCapture={() => setAreDesktopMenusDismissed(true)}
-        onPointerLeave={() => setAreDesktopMenusDismissed(false)}
+        onClickCapture={() => setDesktopMenuDismissal({ pathname, dismissed: true })}
+        onPointerEnter={() => setDesktopMenuDismissal({ pathname, dismissed: false })}
+        onPointerLeave={() => setDesktopMenuDismissal({ pathname, dismissed: false })}
       >
         {text.navigation.map((label, index) =>
           index === 0 ? (

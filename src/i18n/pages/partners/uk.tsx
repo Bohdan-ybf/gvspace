@@ -204,7 +204,7 @@ export default {
     email: "Email*",
     website: "Сайт або портфоліо",
     about: "Розкажіть про себе і ваш підхід",
-    attachment: "ПРИКРІПИТИ ПРЕЗЕНТАЦІЮ (PDF ДО ?? МБ)",
+    attachment: "ПРИКРІПИТИ ПРЕЗЕНТАЦІЮ (PDF ДО 25 МБ)",
     submit: "Відправити заявку",
   },
 } as const;

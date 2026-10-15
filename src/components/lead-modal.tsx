@@ -14,6 +14,7 @@ import {
 import { createPortal } from "react-dom";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { FileUploadField } from "./file-upload-field";
 
 type LeadVariant = "lead" | "partner" | "question";
 
@@ -87,7 +88,6 @@ function LeadModal({
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const [interest, setInterest] = useState("development");
-  const [fileName, setFileName] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const onCloseRef = useRef(onClose);
@@ -325,19 +325,12 @@ function LeadModal({
                 </>
               )}
 
-              <label className="lead-modal-file">
-                <input
-                  type="file"
-                  name="file"
-                  accept={partner ? ".pdf,application/pdf" : undefined}
-                  onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}
-                />
-                <img src="/images/lead-modal/file-add.svg" width="24" height="24" alt="" />
-                <span>
-                  {question ? text.attachment : partner ? partner.attachment : text.attachment}
-                  {fileName ? ` — ${fileName}` : ""}
-                </span>
-              </label>
+              <FileUploadField
+                className="lead-modal-file"
+                label={question ? text.attachment : partner ? partner.attachment : text.attachment}
+                locale={locale}
+                accept={partner ? ".pdf,application/pdf" : undefined}
+              />
 
               <div className="lead-modal-submit">
                 <button type="submit">

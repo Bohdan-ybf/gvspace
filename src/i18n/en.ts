@@ -146,7 +146,7 @@ export const en: Messages = {
     phonePlaceholder: "+38 0__ ___ __ __",
     source: "How did you hear about us?",
     description: "Tell us about your project or challenge",
-    attachment: "ATTACH FILE (1 document up to ???MB)",
+    attachment: "ATTACH FILE (1 document up to 25 MB)",
     submit: "Send request",
     consent: 'By clicking "Send request", you consent to the processing of your personal data.',
     consentMore: "Learn more",

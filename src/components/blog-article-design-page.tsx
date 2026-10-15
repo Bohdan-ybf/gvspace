@@ -15,15 +15,16 @@ function prepareArticleContent(content: string) {
   const withHeadings = content.replace(
     /<h([23])([^>]*)>([\s\S]*?)<\/h\1>/gi,
     (heading, levelValue: string, attributes: string, inner: string) => {
+      if (levelValue === "3") return heading;
+
       const label = inner
         .replace(/<[^>]*>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
       const existingId = attributes.match(/\sid=["']([^"']+)["']/i)?.[1];
       const id = existingId || `article-section-${headings.length + 1}`;
-      const level = Number(levelValue) as 2 | 3;
-      headings.push({ id, label, level });
-      return existingId ? heading : `<h${level}${attributes} id="${id}">${inner}</h${level}>`;
+      headings.push({ id, label, level: 2 });
+      return existingId ? heading : `<h2${attributes} id="${id}">${inner}</h2>`;
     },
   );
   const leadMatch = withHeadings.match(/^\s*(<p(?:\s[^>]*)?>[\s\S]*?<\/p>)/i);

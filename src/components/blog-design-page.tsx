@@ -50,126 +50,143 @@ export function BlogDesignPage({
 
   return (
     <main className="blog-page">
-      <section className="blog-hero">
-        <Image
-          className="blog-hero-background"
-          src="/images/blog/blog.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-        />
-        <Image
-          className="blog-hero-object"
-          src="/images/blog/blog-object.png"
-          alt=""
-          width={450}
-          height={429}
-          priority
-        />
-        <div className="container blog-hero-content">
-          <div className="blog-hero-copy">
-            <span className="mono">BLOG</span>
-            <h1>{text.title}</h1>
-            <p>{text.intro}</p>
-            <div className="blog-topic-label mono">{text.chooseTopic}</div>
-            <nav className="blog-filters" aria-label={t.filtersLabel}>
-              <button
-                type="button"
-                className={activeCategory === "all" ? "is-active" : ""}
-                onClick={() => selectCategory("all")}
-              >
-                {text.all.toLocaleUpperCase("uk-UA")}
-              </button>
-              {categories.map(({ slug, name }) => (
+      <div className="blog-catalog-region">
+        <section className="blog-hero">
+          <Image
+            className="blog-hero-background"
+            src="/images/blog/blog.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="blog-hero-object"
+            src="/images/blog/blog-object.png"
+            alt=""
+            width={450}
+            height={429}
+            priority
+          />
+          <div className="container blog-hero-content">
+            <div className="blog-hero-copy">
+              <span className="mono">BLOG</span>
+              <h1>{text.title}</h1>
+              <p>{text.intro}</p>
+              <div className="blog-topic-label mono">{text.chooseTopic}</div>
+              <nav className="blog-filters" aria-label={t.filtersLabel}>
                 <button
                   type="button"
-                  key={slug}
-                  className={activeCategory === slug ? "is-active" : ""}
-                  onClick={() => selectCategory(slug)}
+                  className={activeCategory === "all" ? "is-active" : ""}
+                  onClick={() => selectCategory("all")}
                 >
-                  {name.toLocaleUpperCase("uk-UA")}
+                  {text.all.toLocaleUpperCase("uk-UA")}
                 </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </section>
-
-      <section className="container blog-catalog" aria-live="polite" ref={catalogRef}>
-        {featured ? (
-          <>
-            <article className="blog-featured">
-              <Link
-                className={`blog-card-image${featured.image ? "" : " is-placeholder"}`}
-                href={`/${locale}/blog/${featured.slug}`}
-                style={{ backgroundImage: `url(${imageUrl(featured.image)})` }}
-                aria-label={featured.title}
-              >
-                <span>{featured.category}</span>
-              </Link>
-              <div className="blog-featured-copy">
-                <div className="blog-meta mono">
-                  <small>
-                    {featured.publishedAt} · {featured.readingTime} {text.minutesShort}
-                  </small>
-                  <small>
-                    {text.author}: {featured.authorName}
-                  </small>
-                </div>
-                <h2>
-                  <Link href={`/${locale}/blog/${featured.slug}`}>{featured.title}</Link>
-                </h2>
-                {featured.excerpt && <p>{featured.excerpt}</p>}
+                {categories.map(({ slug, name }) => (
+                  <button
+                    type="button"
+                    key={slug}
+                    className={activeCategory === slug ? "is-active" : ""}
+                    onClick={() => selectCategory(slug)}
+                  >
+                    {name.toLocaleUpperCase("uk-UA")}
+                  </button>
+                ))}
+              </nav>
+              <div className="blog-filter-bar">
+                <select
+                  className="blog-filter-select"
+                  aria-label={text.chooseTopic}
+                  value={activeCategory}
+                  onChange={(event) => selectCategory(event.target.value)}
+                >
+                  <option value="all">{text.chooseTopic}</option>
+                  {categories.map(({ slug, name }) => (
+                    <option key={slug} value={slug}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </article>
-            <div className="blog-grid">
-              {visible.map((article) => (
-                <article className="blog-card" key={article.slug}>
-                  <Link
-                    className={`blog-card-image${article.image ? "" : " is-placeholder"}`}
-                    href={`/${locale}/blog/${article.slug}`}
-                    style={{ backgroundImage: `url(${imageUrl(article.image)})` }}
-                    aria-label={article.title}
-                  />
-                  <div className="blog-card-meta mono">
-                    <span>{article.category}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="container blog-catalog" aria-live="polite" ref={catalogRef}>
+          {featured ? (
+            <>
+              <article className="blog-featured">
+                <Link
+                  className={`blog-card-image${featured.image ? "" : " is-placeholder"}`}
+                  href={`/${locale}/blog/${featured.slug}`}
+                  style={{ backgroundImage: `url(${imageUrl(featured.image)})` }}
+                  aria-label={featured.title}
+                >
+                  <span>{featured.category}</span>
+                </Link>
+                <div className="blog-featured-copy">
+                  <div className="blog-meta mono">
                     <small>
-                      {article.publishedAt} · {article.readingTime} {text.minutesShort}
+                      {featured.publishedAt} · {featured.readingTime} {text.minutesShort}
+                    </small>
+                    <small>
+                      {text.author}: {featured.authorName}
                     </small>
                   </div>
-                  <h3>
-                    <Link href={`/${locale}/blog/${article.slug}`}>{article.title}</Link>
-                  </h3>
-                  <small className="blog-card-author">
-                    {text.author}: {article.authorName}
-                  </small>
-                </article>
-              ))}
-            </div>
-            {currentPage < totalPages && (
-              <button
-                className="btn blog-load-more"
-                type="button"
-                onClick={() => selectPage(currentPage + 1)}
-              >
-                {text.more} ↓
-              </button>
-            )}
-            <Pagination
-              className="blog-pagination"
-              page={currentPage}
-              pageCount={totalPages}
-              label={text.paginationLabel}
-              previousLabel={text.previousPage}
-              nextLabel={text.nextPage}
-              onPageChange={selectPage}
-            />
-          </>
-        ) : (
-          <p className="blog-empty">{t.emptyState}</p>
-        )}
-      </section>
+                  <h2>
+                    <Link href={`/${locale}/blog/${featured.slug}`}>{featured.title}</Link>
+                  </h2>
+                  {featured.excerpt && <p>{featured.excerpt}</p>}
+                </div>
+              </article>
+              <div className="blog-grid">
+                {visible.map((article) => (
+                  <article className="blog-card" key={article.slug}>
+                    <Link
+                      className={`blog-card-image${article.image ? "" : " is-placeholder"}`}
+                      href={`/${locale}/blog/${article.slug}`}
+                      style={{ backgroundImage: `url(${imageUrl(article.image)})` }}
+                      aria-label={article.title}
+                    />
+                    <div className="blog-card-meta mono">
+                      <span>{article.category}</span>
+                      <small>
+                        {article.publishedAt} · {article.readingTime} {text.minutesShort}
+                      </small>
+                    </div>
+                    <h3>
+                      <Link href={`/${locale}/blog/${article.slug}`}>{article.title}</Link>
+                    </h3>
+                    <small className="blog-card-author">
+                      {text.author}: {article.authorName}
+                    </small>
+                  </article>
+                ))}
+              </div>
+              {currentPage < totalPages && (
+                <button
+                  className="btn blog-load-more"
+                  type="button"
+                  onClick={() => selectPage(currentPage + 1)}
+                >
+                  {text.more} ↓
+                </button>
+              )}
+              <Pagination
+                className="blog-pagination"
+                page={currentPage}
+                pageCount={totalPages}
+                label={text.paginationLabel}
+                previousLabel={text.previousPage}
+                nextLabel={text.nextPage}
+                onPageChange={selectPage}
+              />
+            </>
+          ) : (
+            <p className="blog-empty">{t.emptyState}</p>
+          )}
+        </section>
+      </div>
 
       <Breadcrumbs locale={locale} items={[{ label: text.breadcrumb }]} visible />
       <section className="blog-newsletter">
