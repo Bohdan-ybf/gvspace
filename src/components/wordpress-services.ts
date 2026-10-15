@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n";
 import {
-  filterPublishedForLocale,
   getPublicContentSlug,
+  isContentPublishedForLocale,
   type ContentLocalization,
 } from "@/content-localization";
 
@@ -143,7 +143,18 @@ export async function getServiceOfferings(locale: Locale): Promise<ServiceOfferi
     }
 
     if (!nodes.length) return fallback;
-    return filterPublishedForLocale(nodes, locale)
+    return nodes
+      .filter((node) => {
+        const contentLocale = node.gvspaceLocalization?.locale || "legacy";
+
+        // Legacy services store UK and EN in one WordPress post. The public
+        // GraphQL connection already contains published posts only, so their
+        // stale translation meta must not hide an otherwise published service.
+        return (
+          contentLocale === "legacy" ||
+          isContentPublishedForLocale(node.gvspaceLocalization, locale)
+        );
+      })
       .sort(
         (a, b) =>
           (a.serviceDetails?.order ?? a.menuOrder ?? 0) -
