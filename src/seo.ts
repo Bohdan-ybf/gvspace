@@ -12,6 +12,8 @@ export type SeoData = {
   canonical?: string;
   datePublished?: string;
   dateModified?: string;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
 };
 
 export type SeoGraphqlData = Partial<SeoData> | null | undefined;
@@ -26,13 +28,16 @@ export const seoGraphqlFields = `
   canonical
   datePublished
   dateModified
+  robotsIndex
+  robotsFollow
 `;
 
 export function normalizeSeoData(
   seo: SeoGraphqlData,
   fallback: Pick<SeoData, "title" | "description">,
 ): SeoData {
-  const title = seo?.title?.trim() || fallback.title;
+  const rawTitle = seo?.title?.trim() || fallback.title;
+  const title = rawTitle.replace(/\s*\|\s*GVSPACE\s*$/i, "").trim() || fallback.title;
   const description = seo?.description?.trim() || fallback.description;
 
   return {
@@ -45,6 +50,8 @@ export function normalizeSeoData(
     canonical: seo?.canonical?.trim() || undefined,
     datePublished: seo?.datePublished || undefined,
     dateModified: seo?.dateModified || undefined,
+    robotsIndex: seo?.robotsIndex ?? true,
+    robotsFollow: seo?.robotsFollow ?? true,
   };
 }
 
@@ -99,6 +106,10 @@ export function buildSeoMetadata({
   return {
     title: seo.title,
     description: seo.description,
+    robots: {
+      index: seo.robotsIndex !== false,
+      follow: seo.robotsFollow !== false,
+    },
     alternates: {
       canonical,
       ...(canonical === nativeCanonical

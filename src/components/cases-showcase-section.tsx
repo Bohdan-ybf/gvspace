@@ -48,7 +48,7 @@ export async function CasesShowcaseSection({
         <aside>
           <h2>{heading}</h2>
           {subtitle ? <p>{subtitle}</p> : null}
-          <Link className="btn btn-primary" href={`/${locale}/cases`}>
+          <Link className="btn btn-primary" href="/cases">
             <span>{cta}</span>
             <ArrowRight />
           </Link>
@@ -69,7 +69,7 @@ export async function CasesShowcaseSection({
           <span className="mono">{eyebrow ?? t.eyebrow}</span>
           <h2>{heading}</h2>
         </div>
-        <Link className="btn btn-primary" href={`/${locale}/cases`}>
+        <Link className="btn btn-primary" href="/cases">
           {cta}
           <ArrowRight />
         </Link>

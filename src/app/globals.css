@@ -5433,7 +5433,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   filter: brightness(1.06) saturate(1.08);
 }
 .blog-page .blog-card-image {
-  background-image: url("/images/blog/blog.png");
+  background-image: url("/images/blog/blog.webp");
 }
 .blog-page .blog-card-image.is-placeholder {
   background-position: center;
@@ -7096,7 +7096,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   color: #fff;
   background:
     linear-gradient(100deg, rgb(7 6 42 / 88%), rgb(28 10 78 / 72%)),
-    url("/images/reviews/reviews.png") center/cover;
+    url("/images/reviews/reviews.webp") center/cover;
 }
 .review-submit h2 {
   margin: 0 0 12px;

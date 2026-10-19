@@ -17,6 +17,7 @@ out/
 *.log
 coverage/
 lighthouse-reports/
+reports/image-optimization/
 
 # editor and operating system files
 .DS_Store

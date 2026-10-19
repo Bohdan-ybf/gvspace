@@ -18,7 +18,7 @@ export function CareersBanner({ locale }: { locale: Locale }) {
         <h2>{t.title}</h2>
         <p>{t.description}</p>
       </div>
-      <Link className="btn btn-primary" href={`/${locale}/careers`}>
+      <Link className="btn btn-primary" href="/careers">
         {t.action}
         <ArrowRight />
       </Link>

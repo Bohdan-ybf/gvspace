@@ -20,7 +20,7 @@ export async function TeamPage({ locale }: { locale: Locale }) {
       <section className="team-hero">
         <Image
           className="team-hero-background"
-          src="/images/team/team.png"
+          src="/images/team/team.webp"
           alt=""
           fill
           priority
@@ -28,7 +28,7 @@ export async function TeamPage({ locale }: { locale: Locale }) {
         />
         <Image
           className="team-hero-object"
-          src="/images/team/team-object.png"
+          src="/images/team/team-object.webp"
           alt=""
           width={563}
           height={535}

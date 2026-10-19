@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   createContext,
   useContext,
@@ -130,7 +131,7 @@ function LeadModal({
           aria-label={text.close}
           onClick={onClose}
         >
-          <img src="/images/lead-modal/close.svg" width="24.8091" height="24.8091" alt="" />
+          <Image src="/images/lead-modal/close.svg" width={25} height={25} alt="" />
         </button>
         {submitted ? (
           <div className="lead-modal-success">
@@ -338,7 +339,7 @@ function LeadModal({
                 </button>
                 <p className="lead-modal-consent">
                   {question ? question.consent : text.consent}{" "}
-                  <Link href={`/${locale}/privacy-policy`}>
+                  <Link href="/privacy-policy">
                     {question ? question.consentMore : text.consentMore}
                   </Link>
                 </p>

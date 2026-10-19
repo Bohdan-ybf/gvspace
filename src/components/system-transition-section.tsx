@@ -9,7 +9,7 @@ export function SystemTransitionSection({ locale }: { locale: Locale }) {
 
   return (
     <section className="services-method">
-      <Image src="/images/services/system-background.png" alt="" fill sizes="100vw" />
+      <Image src="/images/services/system-background.webp" alt="" fill sizes="100vw" />
       <div className="container">
         <span className="mono">{t.eyebrow}</span>
         <h2>{t.title}</h2>

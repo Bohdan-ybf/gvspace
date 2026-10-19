@@ -27,7 +27,7 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
       <section className="technologies-hero">
         <Image
           className="technologies-hero-background"
-          src="/images/technologies/technologies.png"
+          src="/images/technologies/technologies.webp"
           alt=""
           fill
           priority
@@ -35,7 +35,7 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
         />
         <Image
           className="technologies-hero-object"
-          src="/images/technologies/technologies-object.png"
+          src="/images/technologies/technologies-object.webp"
           alt=""
           width={488}
           height={459}
@@ -46,7 +46,7 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
           <span className="mono">TECHNOLOGIES</span>
           <h1>{t.heroTitle}</h1>
           <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+          <Link className="btn btn-primary" href="/contacts">
             {t.heroAction}
             <ArrowRight />
           </Link>

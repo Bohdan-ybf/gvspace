@@ -62,7 +62,7 @@ export function TeamDirectorySection({
                   }
                 />
               ) : (
-                <img src="/images/team/user-none.jpg" alt="" />
+                <Image src="/images/team/user-none.jpg" alt="" fill sizes="320px" />
               )}
             </div>
             <div>
@@ -92,7 +92,7 @@ export function TeamDirectorySection({
             </article>
           ))}
         </div>
-        <Link className="btn" href={`/${locale}/partners`}>
+        <Link className="btn" href="/partners">
           {t.contactAction}
           <ArrowRight />
         </Link>

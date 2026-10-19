@@ -1,10 +1,15 @@
-"use client";
-
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import { ArrowRight } from "@/components/icons/arrow-right";
-import { defaultLocale, isLocale, type Locale } from "@/i18n";
+import { defaultLocale, type Locale } from "@/i18n";
+import { getMarket } from "@/markets";
+
+export const metadata: Metadata = {
+  title: "404",
+  description: null,
+};
 
 const content = {
   uk: {
@@ -69,10 +74,9 @@ function NotFoundMark() {
   );
 }
 
-export default function NotFound() {
-  const pathname = usePathname();
-  const pathLocale = pathname.split("/")[1];
-  const locale = isLocale(pathLocale) ? pathLocale : defaultLocale;
+export default async function NotFound() {
+  const requestHeaders = await headers();
+  const locale = getMarket(requestHeaders.get("host") ?? "")?.routeLocale ?? defaultLocale;
   const text = content[locale];
 
   return (
@@ -85,7 +89,7 @@ export default function NotFound() {
           <nav className="not-found-links" aria-label={text.linksLabel}>
             <span className="mono">{text.linksLabel}</span>
             {text.links.map((label, index) => (
-              <Link key={label} href={`/${locale}/${routes[index]}`}>
+              <Link key={label} href={`/${routes[index]}`}>
                 {label}
                 <ArrowRight />
               </Link>

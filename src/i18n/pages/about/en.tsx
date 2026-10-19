@@ -83,7 +83,7 @@ export default {
     items: [
       [
         "$10M+",
-        "Marketing budgets under management",
+        "Client capitalization after transitioning to systematic marketing",
         "Experience scaling businesses of different sizes.",
       ],
       ["15+", "Industries", "From high-load e-commerce to complex SaaS platforms."],

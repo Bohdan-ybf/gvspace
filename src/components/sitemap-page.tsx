@@ -29,7 +29,7 @@ export function SitemapPage({ locale }: { locale: Locale }) {
             <section key={column.title}>
               <h2>{column.title}</h2>
               {column.links.map((item) => (
-                <Link key={item.href} href={`/${locale}${item.href}`}>
+                <Link key={item.href} href={item.href}>
                   {item.label}
                 </Link>
               ))}

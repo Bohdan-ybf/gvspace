@@ -11,7 +11,7 @@ export default {
       "We do not collect logos. We build systems — and ask clients to speak about the results.",
     heroAction: "Leave a review",
     projectsLabel: "PROJECTS COMPLETED",
-    capitalizationLabel: "BUDGETS MANAGED",
+    capitalizationLabel: "CLIENT CAPITALIZATION AFTER TRANSITIONING TO SYSTEMATIC MARKETING",
     directionsLabel: "SERVICE DIRECTIONS",
     recommendationLabel: "CLIENTS RETURN",
     clientsEyebrow: "COMPANIES THAT TRUSTED US",

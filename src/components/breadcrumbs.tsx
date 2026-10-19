@@ -40,9 +40,7 @@ export function Breadcrumbs({
           <span key={`${item.label}-${index}`}>
             {index > 0 && <span aria-hidden="true">/</span>}
             {item.pathname && index < allItems.length - 1 ? (
-              <Link href={`/${locale}${item.pathname === "/" ? "" : item.pathname}`}>
-                {item.label}
-              </Link>
+              <Link href={item.pathname}>{item.label}</Link>
             ) : (
               <span aria-current={index === allItems.length - 1 ? "page" : undefined}>
                 {item.label}

@@ -13,7 +13,7 @@ export function PartnersPage({ locale }: { locale: Locale }) {
       <section className="partners-hero">
         <Image
           className="partners-hero-background"
-          src="/images/partners/partners.png"
+          src="/images/partners/partners.webp"
           alt=""
           fill
           priority
@@ -21,7 +21,7 @@ export function PartnersPage({ locale }: { locale: Locale }) {
         />
         <Image
           className="partners-hero-object"
-          src="/images/partners/rings.png"
+          src="/images/partners/rings.webp"
           alt=""
           width={510}
           height={487}

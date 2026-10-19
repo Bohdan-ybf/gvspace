@@ -13,7 +13,7 @@ import {
   XIcon,
 } from "./icons/social-icons";
 import type { FooterContactDetails } from "./wordpress-contacts";
-import type { ServiceOffering } from "./wordpress-services";
+import type { ServiceMenuItem } from "./wordpress-services";
 
 const socialIcons: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   facebook: FacebookIcon,
@@ -61,7 +61,7 @@ export function Footer({
 }: {
   locale: Locale;
   contacts: FooterContactDetails;
-  services?: ServiceOffering[];
+  services?: ServiceMenuItem[];
 }) {
   const t = getTranslations("common", locale).footer;
   const { footer } = getTranslations("global", locale);
@@ -91,18 +91,18 @@ export function Footer({
         </div>
         {columns.map((column) => (
           <div key={column.title}>
-            <Link className="footer-column-title" href={`/${locale}${column.href}`}>
+            <Link className="footer-column-title" href={column.href}>
               {column.title}
             </Link>
             {column.links.map((item) => (
-              <Link key={item.href} href={`/${locale}${item.href}`}>
+              <Link key={item.href} href={item.href}>
                 {item.label}
               </Link>
             ))}
           </div>
         ))}
         <div>
-          <Link className="footer-column-title" href={`/${locale}${footer.contactsHref}`}>
+          <Link className="footer-column-title" href={footer.contactsHref}>
             {footer.contactsTitle}
           </Link>
           {contacts.phone ? <a href={contacts.phone.href}>{contacts.phone.value}</a> : null}
@@ -125,9 +125,9 @@ export function Footer({
           © {new Date().getFullYear()} GVSPACE. {footer.copyright}
         </span>
         <nav aria-label={t.legalNavigationLabel}>
-          <Link href={`/${locale}/sitemap`}>{footer.sitemap}</Link>
-          <Link href={`/${locale}/privacy-policy`}>{footer.privacy}</Link>
-          <Link href={`/${locale}/terms-of-use`}>{footer.terms}</Link>
+          <Link href="/sitemap">{footer.sitemap}</Link>
+          <Link href="/privacy-policy">{footer.privacy}</Link>
+          <Link href="/terms-of-use">{footer.terms}</Link>
         </nav>
       </div>
     </footer>

@@ -23,6 +23,8 @@ export type ServiceOffering = {
   modifiedAt?: string;
 };
 
+export type ServiceMenuItem = Pick<ServiceOffering, "id" | "slug" | "parentSlug" | "title">;
+
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
 const fallback: ServiceOffering[] = [
   [
@@ -191,4 +193,88 @@ export async function getServiceOffering(locale: Locale, slugs: string[]) {
   if (!item) return undefined;
   if (slugs.length === 2 && item.parentSlug !== slugs[0]) return undefined;
   return { item, children: items.filter((entry) => entry.parentSlug === item.slug) };
+}
+
+/** Keep navigation payloads small: full service records can contain images, FAQ and page copy. */
+export async function getServiceMenuItems(locale: Locale): Promise<ServiceMenuItem[]> {
+  if (!endpoint) {
+    return (await getServiceOfferings(locale)).map(({ id, slug, parentSlug, title }) => ({
+      id,
+      slug,
+      parentSlug,
+      title,
+    }));
+  }
+
+  try {
+    const nodes: Node[] = [];
+    let after: string | null = null;
+    for (let page = 0; page < 20; page += 1) {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `query ServiceMenu($locale: String!, $after: String) {
+            serviceOfferings(first: 100, after: $after) {
+              pageInfo { hasNextPage endCursor }
+              nodes {
+                databaseId slug title menuOrder
+                gvspaceLocalization { locale translationGroup status }
+                parent { node { slug ... on ServiceOffering { gvspaceLocalization { locale translationGroup status } } } }
+                serviceDetails(locale: $locale) { title order }
+              }
+            }
+          }`,
+          variables: { locale, after },
+        }),
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("Service menu request failed");
+      const result = (await response.json()) as {
+        data?: {
+          serviceOfferings?: {
+            nodes?: Node[];
+            pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
+          };
+        };
+        errors?: unknown[];
+      };
+      if (result.errors) throw new Error("Service menu query failed");
+      const connection = result.data?.serviceOfferings;
+      const pageNodes = connection?.nodes ?? [];
+      nodes.push(...pageNodes);
+      if (!connection?.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
+      after = connection.pageInfo.endCursor;
+    }
+    if (!nodes.length) throw new Error("Service menu is empty");
+
+    return nodes
+      .filter((node) => {
+        const contentLocale = node.gvspaceLocalization?.locale || "legacy";
+        return (
+          contentLocale === "legacy" ||
+          isContentPublishedForLocale(node.gvspaceLocalization, locale)
+        );
+      })
+      .sort(
+        (a, b) =>
+          (a.serviceDetails?.order ?? a.menuOrder ?? 0) -
+          (b.serviceDetails?.order ?? b.menuOrder ?? 0),
+      )
+      .map((node) => ({
+        id: node.databaseId,
+        slug: getPublicContentSlug(node.slug, node.gvspaceLocalization),
+        parentSlug: node.parent?.node?.slug
+          ? getPublicContentSlug(node.parent.node.slug, node.parent.node.gvspaceLocalization)
+          : undefined,
+        title: node.serviceDetails?.title || node.title,
+      }));
+  } catch {
+    return (await getServiceOfferings(locale)).map(({ id, slug, parentSlug, title }) => ({
+      id,
+      slug,
+      parentSlug,
+      title,
+    }));
+  }
 }

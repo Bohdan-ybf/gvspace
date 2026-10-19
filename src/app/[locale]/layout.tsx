@@ -6,6 +6,7 @@ import "../globals.css";
 import { geistMono, geistSans } from "../fonts";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gvspace.com";
+const indexingEnabled = process.env.SITE_INDEXING_ENABLED === "true";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   authors: [{ name: "GVSPACE", url: siteUrl }],
   creator: "GVSPACE",
   publisher: "GVSPACE",
-  robots: { index: true, follow: true },
+  robots: { index: indexingEnabled, follow: indexingEnabled },
   openGraph: {
     title: "GVSPACE",
     description: "Простір вашого масштабування",

@@ -39,7 +39,7 @@ export function proxy(request: NextRequest) {
       cleanPathname + request.nextUrl.search,
       getLocaleOrigin(requestedLocale),
     );
-    return NextResponse.redirect(target, 307);
+    return NextResponse.redirect(target, 308);
   }
 
   const internalUrl = request.nextUrl.clone();

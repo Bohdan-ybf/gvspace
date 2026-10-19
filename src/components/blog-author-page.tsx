@@ -88,7 +88,7 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
                 </small>
                 <h3>{featured.title}</h3>
                 <p>{featured.excerpt}</p>
-                <Link href={`/${locale}/blog/${featured.slug}`}>{t.readArticle} →</Link>
+                <Link href={`/blog/${featured.slug}`}>{t.readArticle} →</Link>
               </div>
             </article>
           ) : (
@@ -116,7 +116,7 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
                     {card.publishedAt} · {card.readingTime} хв
                   </small>
                   <h3>{card.title}</h3>
-                  <Link href={`/${locale}/blog/${card.slug}`}>{t.readMore} →</Link>
+                  <Link href={`/blog/${card.slug}`}>{t.readMore} →</Link>
                 </article>
               ))}
             </div>

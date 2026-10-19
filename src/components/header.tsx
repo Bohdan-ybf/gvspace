@@ -9,7 +9,7 @@ import { ChevronDown } from "./icons/chevron-down";
 import { ClutchIcon, FacebookIcon, InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 import { LeadModalButton } from "./lead-modal";
 import { Logo } from "./logo";
-import type { ServiceOffering } from "./wordpress-services";
+import type { ServiceMenuItem } from "./wordpress-services";
 
 import { getTranslations } from "@/i18n/pages";
 const routes = ["services", "cases", "expertise", "about", "blog", "contacts"];
@@ -97,30 +97,27 @@ type MobilePanel =
   | { level: "company" };
 
 function hasDarkHero(pathname: string, locale: Locale) {
-  const localizedPathname = pathname.startsWith(`/${locale}`)
-    ? pathname
-    : `/${locale}${pathname === "/" ? "" : pathname}`;
-  const pathSegments = localizedPathname.split("/").filter(Boolean);
-  const isHomePage = localizedPathname === `/${locale}` || localizedPathname === `/${locale}/`;
-  const isServiceDetail = pathSegments[1] === "services" && pathSegments.length >= 3;
-  const isTechnologyCatalog = localizedPathname === `/${locale}/technologies`;
+  const publicPathname = pathname.replace(new RegExp(`^/${locale}(?=/|$)`), "") || "/";
+  const pathSegments = publicPathname.split("/").filter(Boolean);
+  const isHomePage = publicPathname === "/";
+  const isServiceDetail = pathSegments[0] === "services" && pathSegments.length >= 2;
+  const isTechnologyCatalog = publicPathname === "/technologies";
 
   return (
     isHomePage ||
-    localizedPathname === `/${locale}/services` ||
+    publicPathname === "/services" ||
     isServiceDetail ||
-    localizedPathname === `/${locale}/cases` ||
-    localizedPathname === `/${locale}/reviews` ||
-    localizedPathname === `/${locale}/about` ||
-    localizedPathname === `/${locale}/team` ||
+    publicPathname === "/cases" ||
+    publicPathname === "/reviews" ||
+    publicPathname === "/about" ||
+    publicPathname === "/team" ||
     isTechnologyCatalog ||
-    localizedPathname === `/${locale}/industries` ||
-    localizedPathname === `/${locale}/partners` ||
-    localizedPathname === `/${locale}/blog` ||
-    (localizedPathname.startsWith(`/${locale}/blog/`) &&
-      !localizedPathname.startsWith(`/${locale}/blog/author/`)) ||
-    localizedPathname === `/${locale}/careers` ||
-    localizedPathname.startsWith(`/${locale}/careers/`)
+    publicPathname === "/industries" ||
+    publicPathname === "/partners" ||
+    publicPathname === "/blog" ||
+    (publicPathname.startsWith("/blog/") && !publicPathname.startsWith("/blog/author/")) ||
+    publicPathname === "/careers" ||
+    publicPathname.startsWith("/careers/")
   );
 }
 
@@ -131,7 +128,7 @@ export function Header({
 }: {
   locale: Locale;
   forceSolid?: boolean;
-  services: ServiceOffering[];
+  services: ServiceMenuItem[];
 }) {
   const t = getTranslations("common", locale).header;
   const text = getTranslations("global", locale);
@@ -309,7 +306,7 @@ export function Header({
     <header
       className={`header${forceSolid || !hasDarkHero(pathname, locale) || isScrolled || isMenuOpen ? " is-scrolled" : ""}${isMenuOpen ? " is-menu-open" : ""}${isCompact && !isMenuOpen ? " is-compact" : ""}${areDesktopMenusDismissed ? " desktop-menus-dismissed" : ""}`}
     >
-      <Link className="logo" href={`/${locale}`} aria-label="GVSPACE">
+      <Link className="logo" href="/" aria-label="GVSPACE">
         <Logo variant="header" priority />
       </Link>
       <nav
@@ -328,7 +325,7 @@ export function Header({
             >
               <Link
                 className="nav-link"
-                href={`/${locale}/services`}
+                href="/services"
                 aria-current={isSectionActive(0) ? "page" : undefined}
               >
                 {label.toUpperCase()}
@@ -340,7 +337,7 @@ export function Header({
                     {serviceMenuDirections.map((direction) => (
                       <li key={direction.slug}>
                         <Link
-                          href={`/${locale}/services/${direction.slug}`}
+                          href={`/services/${direction.slug}`}
                           className={
                             direction.slug === activeServiceDirection?.slug
                               ? "is-active"
@@ -364,8 +361,8 @@ export function Header({
                         <Link
                           href={
                             service.slug
-                              ? `/${locale}/services/${activeServiceDirection.slug}/${service.slug}`
-                              : `/${locale}/services/${activeServiceDirection.slug}`
+                              ? `/services/${activeServiceDirection.slug}/${service.slug}`
+                              : `/services/${activeServiceDirection.slug}`
                           }
                         >
                           {service.title}
@@ -380,7 +377,7 @@ export function Header({
             <div className="expertise-menu" key="expertise">
               <Link
                 className="nav-link"
-                href={`/${locale}/technologies`}
+                href="/technologies"
                 aria-current={isSectionActive(2) ? "page" : undefined}
               >
                 {label.toUpperCase()}
@@ -389,7 +386,7 @@ export function Header({
               <div className="expertise-dropdown">
                 <div className="expertise-dropdown-grid">
                   {expertiseLinks.map((item) => (
-                    <Link href={`/${locale}${item.href}`} key={item.title}>
+                    <Link href={item.href} key={item.title}>
                       <strong>
                         <MenuArrowIcon />
                         {item.title}
@@ -404,7 +401,7 @@ export function Header({
             <div className="company-menu" key="about">
               <Link
                 className="nav-link"
-                href={`/${locale}/about`}
+                href="/about"
                 aria-current={isSectionActive(3) ? "page" : undefined}
               >
                 {companyMenuLabel.toUpperCase()}
@@ -413,7 +410,7 @@ export function Header({
               <div className="company-dropdown">
                 <div className="company-dropdown-grid">
                   {companyLinks.map((item) => (
-                    <Link href={`/${locale}${item.href}`} key={item.title}>
+                    <Link href={item.href} key={item.title}>
                       <strong>
                         <MenuArrowIcon />
                         {item.title}
@@ -428,7 +425,7 @@ export function Header({
             <Link
               className="nav-link"
               key={routes[index]}
-              href={`/${locale}/${routes[index]}`}
+              href={`/${routes[index]}`}
               aria-current={isSectionActive(index) ? "page" : undefined}
             >
               {label.toUpperCase()}
@@ -526,7 +523,7 @@ export function Header({
             <>
               <div className="mobile-root-row">
                 <Link
-                  href={`/${locale}/services`}
+                  href="/services"
                   aria-current={isSectionActive(0) ? "page" : undefined}
                   tabIndex={isMenuOpen ? 0 : -1}
                   onClick={closeMobileMenu}
@@ -544,7 +541,7 @@ export function Header({
               </div>
               <Link
                 className="mobile-root-row"
-                href={`/${locale}/cases`}
+                href="/cases"
                 aria-current={isSectionActive(1) ? "page" : undefined}
                 tabIndex={isMenuOpen ? 0 : -1}
                 onClick={closeMobileMenu}
@@ -553,7 +550,7 @@ export function Header({
               </Link>
               <div className="mobile-root-row">
                 <Link
-                  href={`/${locale}/technologies`}
+                  href="/technologies"
                   aria-current={isSectionActive(2) ? "page" : undefined}
                   tabIndex={isMenuOpen ? 0 : -1}
                   onClick={closeMobileMenu}
@@ -571,7 +568,7 @@ export function Header({
               </div>
               <div className="mobile-root-row">
                 <Link
-                  href={`/${locale}/about`}
+                  href="/about"
                   aria-current={isSectionActive(3) ? "page" : undefined}
                   tabIndex={isMenuOpen ? 0 : -1}
                   onClick={closeMobileMenu}
@@ -589,7 +586,7 @@ export function Header({
               </div>
               <Link
                 className="mobile-root-row"
-                href={`/${locale}/blog`}
+                href="/blog"
                 aria-current={isSectionActive(4) ? "page" : undefined}
                 tabIndex={isMenuOpen ? 0 : -1}
                 onClick={closeMobileMenu}
@@ -598,7 +595,7 @@ export function Header({
               </Link>
               <Link
                 className="mobile-root-row"
-                href={`/${locale}/contacts`}
+                href="/contacts"
                 aria-current={isSectionActive(5) ? "page" : undefined}
                 tabIndex={isMenuOpen ? 0 : -1}
                 onClick={closeMobileMenu}
@@ -623,7 +620,7 @@ export function Header({
                 direction.services.length ? (
                   <div className="mobile-drill-row" key={direction.slug}>
                     <Link
-                      href={`/${locale}/services/${direction.slug}`}
+                      href={`/services/${direction.slug}`}
                       tabIndex={isMenuOpen ? 0 : -1}
                       onClick={closeMobileMenu}
                     >
@@ -641,7 +638,7 @@ export function Header({
                 ) : (
                   <Link
                     className="mobile-sub-link"
-                    href={`/${locale}/services/${direction.slug}`}
+                    href={`/services/${direction.slug}`}
                     key={direction.slug}
                     tabIndex={isMenuOpen ? 0 : -1}
                     onClick={closeMobileMenu}
@@ -669,8 +666,8 @@ export function Header({
                   className="mobile-sub-link"
                   href={
                     service.slug
-                      ? `/${locale}/services/${activeDirection.slug}/${service.slug}`
-                      : `/${locale}/services/${activeDirection.slug}`
+                      ? `/services/${activeDirection.slug}/${service.slug}`
+                      : `/services/${activeDirection.slug}`
                   }
                   key={service.slug || service.title}
                   tabIndex={isMenuOpen ? 0 : -1}
@@ -696,7 +693,7 @@ export function Header({
               {expertiseLinks.map((item) => (
                 <Link
                   className="mobile-sub-link"
-                  href={`/${locale}${item.href}`}
+                  href={item.href}
                   key={item.href}
                   tabIndex={isMenuOpen ? 0 : -1}
                   onClick={closeMobileMenu}
@@ -721,7 +718,7 @@ export function Header({
               {orderedCompanyLinks.map((item) => (
                 <Link
                   className="mobile-sub-link"
-                  href={`/${locale}${item.href}`}
+                  href={item.href}
                   key={item.href}
                   tabIndex={isMenuOpen ? 0 : -1}
                   onClick={closeMobileMenu}

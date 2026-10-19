@@ -4,12 +4,12 @@ import { Footer } from "./footer";
 import { Header } from "./header";
 import { LeadModalProvider } from "./lead-modal";
 import { getContactsPage, toFooterContacts } from "./wordpress-contacts";
-import { getServiceOfferings } from "./wordpress-services";
+import { getServiceMenuItems } from "./wordpress-services";
 
 async function FooterSlot({ locale }: { locale: Locale }) {
   const [contactsPage, services] = await Promise.all([
     getContactsPage(locale),
-    getServiceOfferings(locale),
+    getServiceMenuItems(locale),
   ]);
   return <Footer locale={locale} contacts={toFooterContacts(contactsPage)} services={services} />;
 }
@@ -21,7 +21,7 @@ export async function SiteShell({
   children: React.ReactNode;
   locale: Locale;
 }) {
-  const services = await getServiceOfferings(locale);
+  const services = await getServiceMenuItems(locale);
 
   return (
     <LeadModalProvider locale={locale}>

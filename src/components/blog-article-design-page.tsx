@@ -33,7 +33,7 @@ function prepareArticleContent(content: string) {
   return { lead, body, headings };
 }
 
-const cardImage = (image?: string) => image || "/images/blog/blog.png";
+const cardImage = (image?: string) => image || "/images/blog/blog.webp";
 
 export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; slug: string }) {
   const t = getTranslations("blog", locale).article;
@@ -125,7 +125,7 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
                 <p>{t.authorBio}</p>
               </div>
             </div>
-            <Link href={`/${locale}/blog/author/${post.author.slug}`}>{text.author} →</Link>
+            <Link href={`/blog/author/${post.author.slug}`}>{text.author} →</Link>
           </section>
 
           <section className="article-rating" aria-label={t.ratingLabel}>
@@ -162,7 +162,7 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
               <article key={item.slug}>
                 <Link
                   className="article-related-image"
-                  href={`/${locale}/blog/${item.slug}`}
+                  href={`/blog/${item.slug}`}
                   style={{ backgroundImage: `url(${cardImage(item.image)})` }}
                   aria-label={item.title}
                 >
@@ -172,7 +172,7 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
                   {item.publishedAt} · {item.readingTime} {text.read}
                 </small>
                 <h3>
-                  <Link href={`/${locale}/blog/${item.slug}`}>{item.title}</Link>
+                  <Link href={`/blog/${item.slug}`}>{item.title}</Link>
                 </h3>
                 <small>
                   {t.authorLabel}: {item.authorName}

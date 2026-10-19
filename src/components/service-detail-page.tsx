@@ -17,6 +17,17 @@ import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
 import { Breadcrumbs, type BreadcrumbItem } from "./breadcrumbs";
 import { StructuredData } from "./structured-data";
+
+function localizeStageLabel(label: string, locale: Locale): string {
+  if (locale !== "uk") return label;
+  const labels: Record<string, string> = {
+    "early stage": "Ранній етап",
+    "growth stage": "Етап зростання",
+    "scale stage": "Етап масштабування",
+  };
+  return labels[label.trim().toLowerCase()] ?? label;
+}
+
 export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slugs: string[] }) {
   const result = await getServiceOffering(locale, slugs);
   if (!result) notFound();
@@ -80,7 +91,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         <section className={`service-detail-hero${isDirection ? " is-direction" : " is-service"}`}>
           <Image
             className="service-detail-hero-background"
-            src="/images/services/poslugi-l2.png"
+            src="/images/services/poslugi-l2.webp"
             alt=""
             fill
             priority
@@ -88,7 +99,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
           />
           <div className="container service-detail-hero-grid">
             <div className="service-detail-icon">
-              {item.image && <Image src={item.image} alt="" fill sizes="520px" unoptimized />}
+              {item.image && <Image src={item.image} alt={item.title} fill sizes="520px" />}
             </div>
             <div className="service-detail-copy">
               <span className="mono service-detail-eyebrow">{item.title}</span>
@@ -108,7 +119,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
             <div>
               {item.fitCards.map((card) => (
                 <article key={`${card.label}-${card.title}`}>
-                  <small className="mono">{card.label}</small>
+                  <small className="mono">{localizeStageLabel(card.label, locale)}</small>
                   <h2>{card.title}</h2>
                   <p>{card.description}</p>
                 </article>
@@ -126,7 +137,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
               {(children.length
                 ? children.map((child) => ({
                     label: child.title,
-                    href: `/${locale}/services/${item.slug}/${child.slug}`,
+                    href: `/services/${item.slug}/${child.slug}`,
                   }))
                 : item.includes.map((label) => ({ label, href: "" }))
               ).map((entry) =>

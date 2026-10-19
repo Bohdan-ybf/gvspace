@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import type { Locale } from "@/i18n";
 
-export function FooterHomeLink({ locale, children }: { locale: Locale; children: ReactNode }) {
+export function FooterHomeLink({ children }: { locale: Locale; children: ReactNode }) {
   const pathname = usePathname();
-  const home = `/${locale}`;
+  const home = "/";
   const current = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 
   return (

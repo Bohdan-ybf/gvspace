@@ -1,71 +1,11 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
-import { getBlogPosts } from "@/components/wordpress-posts";
-import { getCaseStudies } from "@/components/wordpress-cases";
-import { getServiceOfferings } from "@/components/wordpress-services";
-import { getVacancies } from "@/components/wordpress-vacancies";
-import { getTechnologyStack } from "@/components/wordpress-technologies";
-import type { Locale } from "@/i18n";
-import { getEnabledMarkets, getMarket, getMarketById } from "@/markets";
+import { getMarket, getMarketById } from "@/markets";
+import { getLocaleSitemapEntries } from "@/sitemap-data";
 
 export const dynamic = "force-dynamic";
 
-const staticPaths = [
-  "/",
-  "/services",
-  "/cases",
-  "/reviews",
-  "/about",
-  "/team",
-  "/careers",
-  "/technologies",
-  "/industries",
-  "/partners",
-  "/blog",
-  "/contacts",
-  "/sitemap",
-  "/privacy-policy",
-  "/terms-of-use",
-] as const;
-
-type SitemapEntry = { pathname: string; lastModified?: string };
-
-async function getLocalePaths(locale: Locale): Promise<SitemapEntry[]> {
-  const [posts, cases, vacancies, services, technologies] = await Promise.all([
-    getBlogPosts(locale),
-    getCaseStudies(locale),
-    getVacancies(locale),
-    getServiceOfferings(locale),
-    getTechnologyStack(locale),
-  ]);
-  return [
-    ...staticPaths.map((pathname) => ({ pathname })),
-    ...posts.map((post) => ({
-      pathname: `/blog/${post.slug}`,
-      lastModified: post.modifiedAt,
-    })),
-    ...cases.map((item) => ({
-      pathname: `/cases/${item.slug}`,
-      lastModified: item.modifiedAt,
-    })),
-    ...vacancies.map((vacancy) => ({
-      pathname: `/careers/${vacancy.slug}`,
-      lastModified: vacancy.modifiedAt,
-    })),
-    ...services.map((service) => ({
-      pathname: service.parentSlug
-        ? `/services/${service.parentSlug}/${service.slug}`
-        : `/services/${service.slug}`,
-      lastModified: service.modifiedAt,
-    })),
-    ...technologies.items.map((item) => ({
-      pathname: `/technologies/${item.slug}`,
-    })),
-  ];
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const enabledMarkets = getEnabledMarkets();
   const requestHeaders = await headers();
   const requestedMarket = getMarket(requestHeaders.get("host") ?? "");
   const currentMarket =
@@ -74,40 +14,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       : getMarketById("international");
   if (!currentMarket.routeLocale) return [];
 
-  const pathsByLocale = new Map(
-    await Promise.all(
-      enabledMarkets.map(
-        async (market) =>
-          [
-            market.routeLocale,
-            new Map(
-              (await getLocalePaths(market.routeLocale)).map((entry) => [entry.pathname, entry]),
-            ),
-          ] as const,
-      ),
-    ),
-  );
-
-  const currentPaths =
-    pathsByLocale.get(currentMarket.routeLocale) ?? new Map<string, SitemapEntry>();
-  return [...currentPaths.values()].map(({ pathname, lastModified }) => ({
+  const entries = await getLocaleSitemapEntries(currentMarket.routeLocale);
+  return entries.map(({ pathname, lastModified }) => ({
     url: `${currentMarket.origin}${pathname === "/" ? "" : pathname}`,
     ...(lastModified ? { lastModified } : {}),
-    changeFrequency: "weekly" as const,
-    priority: pathname === "/" ? 1 : 0.7,
-    alternates: {
-      languages: Object.fromEntries([
-        ...enabledMarkets
-          .filter((market) => pathsByLocale.get(market.routeLocale)?.has(pathname))
-          .map((market) => [
-            market.contentLocale,
-            `${market.origin}${pathname === "/" ? "" : pathname}`,
-          ]),
-        [
-          "x-default",
-          `${getMarketById("international").origin}${pathname === "/" ? "" : pathname}`,
-        ],
-      ]),
-    },
   }));
 }

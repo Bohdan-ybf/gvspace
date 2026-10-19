@@ -8,22 +8,14 @@ import type { TechnologyCategory, TechnologyItem } from "./wordpress-technologie
 
 import { getTranslations } from "@/i18n/pages";
 
-function TechnologyTools({
-  locale,
-  items,
-  emptyState,
-}: {
-  locale: Locale;
-  items: TechnologyItem[];
-  emptyState: string;
-}) {
+function TechnologyTools({ items, emptyState }: { items: TechnologyItem[]; emptyState: string }) {
   if (!items.length) return <p className="technology-tools-empty">{emptyState}</p>;
 
   return (
     <div className="technology-tools-grid">
       {items.map((item) => (
         <article key={item.slug}>
-          <Link href={`/${locale}/technologies/${item.slug}`}>
+          <Link href={`/technologies/${item.slug}`}>
             <div className="technology-logo">
               {item.image ? (
                 <Image src={item.image} alt="" fill sizes="72px" unoptimized />
@@ -146,9 +138,7 @@ export function TechnologiesCatalog({
                 <b>{category.name}</b>
                 <span className="technologies-accordion-icon" aria-hidden="true" />
               </button>
-              {open ? (
-                <TechnologyTools locale={locale} items={categoryItems} emptyState={t.emptyState} />
-              ) : null}
+              {open ? <TechnologyTools items={categoryItems} emptyState={t.emptyState} /> : null}
             </div>
           );
         })}

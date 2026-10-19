@@ -29,7 +29,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
         <section className="reviews-hero">
           <Image
             className="reviews-hero-background"
-            src="/images/reviews/reviews.png"
+            src="/images/reviews/reviews.webp"
             alt=""
             fill
             priority
@@ -37,7 +37,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
           />
           <Image
             className="reviews-hero-object"
-            src="/images/reviews/reviews-object.png"
+            src="/images/reviews/reviews-object.webp"
             alt=""
             width={259}
             height={245}
@@ -51,7 +51,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
                 <h1>{t.heroTitle}</h1>
                 <p>{t.heroDescription}</p>
               </div>
-              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+              <Link className="btn btn-primary" href="/contacts">
                 {t.heroAction}
                 <ArrowRight />
               </Link>
@@ -89,7 +89,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
                       alt={client.company || client.name}
                       width={140}
                       height={36}
-                      unoptimized={client.logo.startsWith("http")}
+                      unoptimized={client.logo.endsWith(".svg")}
                     />
                   </span>
                 ) : (

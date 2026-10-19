@@ -28,7 +28,7 @@ export function Home({ locale }: { locale: Locale }) {
     <>
       <section className="hero">
         <Image
-          src="/images/hero/hero-main.jpg"
+          src="/images/hero/hero-main.webp"
           alt=""
           fill
           priority
@@ -50,7 +50,7 @@ export function Home({ locale }: { locale: Locale }) {
       </section>
       <main>
         <Problems text={text} />
-        <Approach text={text} locale={locale} />
+        <Approach text={text} />
         <Suspense fallback={null}>
           <HomeServices text={text} locale={locale} />
         </Suspense>
@@ -61,7 +61,7 @@ export function Home({ locale }: { locale: Locale }) {
         <Suspense fallback={null}>
           <CasesSection text={text.cases} locale={locale} />
         </Suspense>
-        <People text={text} locale={locale} />
+        <People text={text} />
         <Suspense fallback={null}>
           <HomePartners text={text} locale={locale} />
         </Suspense>
@@ -113,7 +113,7 @@ async function HomeBlog({ text, locale }: { text: Messages; locale: Locale }) {
 
 async function HomeFaq({ text, locale }: { text: Messages; locale: Locale }) {
   const items = await getHomeFaqs(locale);
-  return <Faq text={text} locale={locale} items={items} />;
+  return <Faq text={text} items={items} />;
 }
 
 async function HomeMission({ text, locale }: { text: Messages; locale: Locale }) {
@@ -154,7 +154,7 @@ function Problems({ text }: { text: Messages }) {
   );
 }
 
-function Approach({ text, locale }: { text: Messages; locale: Locale }) {
+function Approach({ text }: { text: Messages }) {
   return (
     <section className="section container approach-section">
       <h2>{text.approach.title}</h2>
@@ -177,7 +177,7 @@ function Approach({ text, locale }: { text: Messages; locale: Locale }) {
         ))}
       </div>
       <div className="center">
-        <Link className="btn" href={`/${locale}/about`}>
+        <Link className="btn" href="/about">
           <span>{text.approach.more}</span>
           <ArrowRight />
         </Link>
@@ -199,7 +199,7 @@ function MobileClarity({ text }: { text: Messages }) {
   );
 }
 
-function People({ text, locale }: { text: Messages; locale: Locale }) {
+function People({ text }: { text: Messages }) {
   return (
     <section className="section container people">
       <div className="people-profile">
@@ -207,7 +207,7 @@ function People({ text, locale }: { text: Messages; locale: Locale }) {
         <div className="people-profile-grid">
           <div className="people-founder">
             <div className="people-founder-photo" role="img" aria-label={text.people.name} />
-            <Link className="btn btn-primary people-team-link" href={`/${locale}/team`}>
+            <Link className="btn btn-primary people-team-link" href="/team">
               <span>{text.people.teamAction}</span>
               <ArrowRight />
             </Link>
@@ -257,14 +257,14 @@ function Blog({
     <section className="section container home-blog-section">
       <header className="home-blog-header">
         <h2>{text.blog.title}</h2>
-        <Link className="btn btn-primary home-blog-more" href={`/${locale}/blog`}>
+        <Link className="btn btn-primary home-blog-more" href="/blog">
           {t.allArticles}
           <ArrowRight />
         </Link>
       </header>
       <div className={`home-blog-grid${posts.length === 1 ? " is-single" : ""}`}>
         {posts.map((post, index) => {
-          const image = post.image || "/images/blog/blog.png";
+          const image = post.image || "/images/blog/blog.webp";
           return (
             <article
               className={`home-blog-card${index === 0 ? " is-featured" : ""}`}
@@ -273,7 +273,7 @@ function Blog({
               <Link
                 aria-label={post.title}
                 className={`home-blog-image${post.image ? "" : " is-placeholder"}`}
-                href={`/${locale}/blog/${post.slug}`}
+                href={`/blog/${post.slug}`}
                 style={{ backgroundImage: `url(${image})` }}
               />
               <div className="home-blog-body">
@@ -290,7 +290,7 @@ function Blog({
                   )}
                 </div>
                 <h3>
-                  <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
+                  <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                 </h3>
                 <small className="home-blog-card-author mono">
                   {t.cardAuthorLabel}: {post.authorName}
@@ -304,13 +304,13 @@ function Blog({
   );
 }
 
-function Faq({ text, locale, items }: { text: Messages; locale: Locale; items: FaqItem[] }) {
+function Faq({ text, items }: { text: Messages; items: FaqItem[] }) {
   return (
     <section className="section container faq">
       <div className="faq-intro">
         <h2>{text.faq.title}</h2>
         <p>{text.faq.subtitle}</p>
-        <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+        <Link className="btn btn-primary" href="/contacts">
           {text.faq.action}
         </Link>
       </div>

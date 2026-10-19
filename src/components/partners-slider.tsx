@@ -26,7 +26,13 @@ export function PartnersSlider({
             <article className="partner-slide" key={`${partner.id}-${index}`}>
               <div className="partner-logo">
                 {partner.image && (
-                  <Image src={partner.image} alt={partner.imageAlt} fill sizes="72px" unoptimized />
+                  <Image
+                    src={partner.image}
+                    alt={partner.imageAlt}
+                    fill
+                    sizes="72px"
+                    unoptimized={partner.image.endsWith(".svg")}
+                  />
                 )}
               </div>
               <div>

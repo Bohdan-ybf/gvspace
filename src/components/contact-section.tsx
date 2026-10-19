@@ -39,7 +39,7 @@ export function ContactSection({ text, locale }: ContactSectionProps) {
             {text.submit}
           </button>
           <p className="contact-consent">
-            {text.consent} <Link href={`/${locale}/privacy-policy`}>{text.consentMore}</Link>
+            {text.consent} <Link href="/privacy-policy">{text.consentMore}</Link>
           </p>
         </div>
       </form>

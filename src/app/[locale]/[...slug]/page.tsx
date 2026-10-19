@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ServicesPage } from "@/components/services-page";
 import { ServiceDetailPage } from "@/components/service-detail-page";
 import { CasesPage } from "@/components/cases-page";
@@ -8,6 +8,9 @@ import { TeamPage } from "@/components/team-page";
 import { CareersPage } from "@/components/careers-page";
 import { VacancyDetailPage } from "@/components/vacancy-detail-page";
 import { getVacancyBySlug } from "@/components/wordpress-vacancies";
+import { getBlogPost } from "@/components/wordpress-posts";
+import { getCaseStudy } from "@/components/wordpress-cases";
+import { getServiceOffering } from "@/components/wordpress-services";
 import { getTechnologyBySlug } from "@/components/wordpress-technologies";
 import { TechnologiesPage } from "@/components/technologies-page";
 import { IndustriesPage } from "@/components/industries-page";
@@ -21,12 +24,7 @@ import { ReviewsPage } from "@/components/reviews-page";
 import { isLocale } from "@/i18n";
 import { locales, type Locale } from "@/i18n";
 import { buildSeoMetadata, normalizeSeoData } from "@/seo";
-import {
-  getDynamicSeo,
-  getPublishedSeoLocales,
-  getStaticPageSeo,
-  type DynamicSeoKind,
-} from "@/wordpress-seo";
+import { getDynamicSeo, getStaticPageSeo, type DynamicSeoKind } from "@/wordpress-seo";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 const routeSeo = {
@@ -67,6 +65,87 @@ function getDynamicRoute(slug: string[]): { kind: DynamicSeoKind; publicSlug: st
   return undefined;
 }
 
+const staticRoutes = new Set([
+  "services",
+  "cases",
+  "reviews",
+  "about",
+  "team",
+  "careers",
+  "technologies",
+  "industries",
+  "partners",
+  "blog",
+]);
+
+async function getResolvedDynamicSeo(
+  kind: DynamicSeoKind,
+  publicSlug: string,
+  locale: Locale,
+  routeSlugs: string[],
+) {
+  const configuredSeo = await getDynamicSeo(kind, publicSlug, locale);
+
+  if (kind === "service") {
+    const result = await getServiceOffering(locale, routeSlugs.slice(1));
+    if (!result) return undefined;
+    const genericTitle = /^(?:services|послуги)(?:\s*\|\s*gvspace)?$/i.test(
+      configuredSeo?.title ?? "",
+    );
+    const genericDescription = new Set([
+      "System solutions for business growth",
+      "Системні рішення для розвитку бізнесу",
+    ]).has(configuredSeo?.description ?? "");
+    const sourceDescription = result.item.description || result.item.headline;
+    const generatedDescription =
+      locale === "uk"
+        ? `${result.item.title}: ${sourceDescription}. Системне рішення GVSPACE для вимірюваного розвитку бізнесу.`
+        : `${result.item.title}: ${sourceDescription}. A GVSPACE system solution designed for measurable business growth.`;
+    const description =
+      configuredSeo?.description &&
+      !genericDescription &&
+      configuredSeo.description.trim().length >= 70
+        ? configuredSeo.description
+        : generatedDescription.length > 160
+          ? `${generatedDescription.slice(0, 157).replace(/\s+\S*$/, "")}…`
+          : generatedDescription;
+    return normalizeSeoData(
+      {
+        ...configuredSeo,
+        title: !configuredSeo?.title || genericTitle ? result.item.title : configuredSeo.title,
+        description,
+      },
+      { title: result.item.title, description },
+    );
+  }
+  if (configuredSeo) return configuredSeo;
+  if (kind === "blog") {
+    const post = await getBlogPost(publicSlug, locale);
+    return post
+      ? normalizeSeoData(undefined, { title: post.title, description: post.excerpt })
+      : undefined;
+  }
+  if (kind === "case") {
+    const item = await getCaseStudy(publicSlug, locale);
+    return item
+      ? normalizeSeoData(undefined, { title: item.title, description: item.excerpt })
+      : undefined;
+  }
+  if (kind === "vacancy") {
+    const vacancy = await getVacancyBySlug(publicSlug, locale);
+    return vacancy
+      ? normalizeSeoData(undefined, { title: vacancy.title, description: vacancy.excerpt })
+      : undefined;
+  }
+  const technology = await getTechnologyBySlug(publicSlug, locale);
+  return technology
+    ? normalizeSeoData(undefined, {
+        title: technology.title,
+        description: technology.intro || technology.description,
+      })
+    : undefined;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -79,48 +158,35 @@ export async function generateMetadata({
   const dynamicRoute = getDynamicRoute(slug);
 
   if (dynamicRoute) {
-    const [seo, alternateLocales] = await Promise.all([
-      getDynamicSeo(dynamicRoute.kind, dynamicRoute.publicSlug, locale),
-      getPublishedSeoLocales(dynamicRoute.kind, dynamicRoute.publicSlug, locales),
+    const [seo, localizedSeo] = await Promise.all([
+      getResolvedDynamicSeo(dynamicRoute.kind, dynamicRoute.publicSlug, locale, slug),
+      Promise.all(
+        locales.map(async (candidate) => ({
+          locale: candidate,
+          seo: await getResolvedDynamicSeo(
+            dynamicRoute.kind,
+            dynamicRoute.publicSlug,
+            candidate,
+            slug,
+          ),
+        })),
+      ),
     ]);
-    if (seo) {
-      return buildSeoMetadata({
-        locale,
-        pathname,
-        seo,
-        alternateLocales,
-        type: dynamicRoute.kind === "blog" ? "article" : "website",
-      });
-    }
-    if (dynamicRoute.kind === "vacancy") {
-      const vacancy = await getVacancyBySlug(dynamicRoute.publicSlug, locale);
-      if (vacancy) {
-        return buildSeoMetadata({
-          locale,
-          pathname,
-          seo: normalizeSeoData(undefined, {
-            title: vacancy.title,
-            description: vacancy.excerpt,
-          }),
-          alternateLocales,
-        });
-      }
-    }
-    if (dynamicRoute.kind === "technology") {
-      const technology = await getTechnologyBySlug(dynamicRoute.publicSlug, locale);
-      if (technology) {
-        return buildSeoMetadata({
-          locale,
-          pathname,
-          seo: normalizeSeoData(undefined, {
-            title: technology.title,
-            description: technology.intro || technology.description,
-          }),
-          alternateLocales,
-        });
-      }
-    }
+    if (!seo) notFound();
+    const alternateLocales = localizedSeo
+      .filter((entry) => entry.seo?.robotsIndex !== false)
+      .map((entry) => entry.locale);
+    return buildSeoMetadata({
+      locale,
+      pathname,
+      seo,
+      alternateLocales,
+      type: dynamicRoute.kind === "blog" ? "article" : "website",
+    });
   }
+
+  const isAuthorRoute = slug.length === 3 && slug[0] === "blog" && slug[1] === "author";
+  if (!(slug.length === 1 && staticRoutes.has(slug[0])) && !isAuthorRoute) notFound();
 
   const section = slug[0] as keyof (typeof routeSeo)[Locale];
   const fallback = routeSeo[locale][section] ?? ["GVSPACE", "Space for managed growth"];
@@ -135,6 +201,27 @@ export default async function RoutedPage({
   params: Promise<{ locale: string; slug: string[] }>;
 }) {
   const { locale, slug } = await params;
+  if (!isLocale(locale)) notFound();
+
+  if (
+    slug.length === 3 &&
+    slug[0] === "blog" &&
+    slug[1] === "author" &&
+    slug[2] === "gvspace_admin"
+  ) {
+    permanentRedirect("/blog");
+  }
+
+  const dynamicRoute = getDynamicRoute(slug);
+  if (dynamicRoute) {
+    const exists = await getResolvedDynamicSeo(
+      dynamicRoute.kind,
+      dynamicRoute.publicSlug,
+      locale,
+      slug,
+    );
+    if (!exists) notFound();
+  }
   const section = (key: keyof (typeof routeSeo)[Locale], content: React.ReactNode) => (
     <>
       <Breadcrumbs

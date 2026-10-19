@@ -34,7 +34,7 @@ export function CaseCard({
   const catalog = getTranslations("cases", locale).catalog;
   const dateLabel = caseDateLabel(project.publishedAt, catalog.dateLocale);
   const categoryLabel = caseCategoryLabel(project);
-  const href = `/${locale}/cases/${project.slug}`;
+  const href = `/cases/${project.slug}`;
   const metrics = variant === "catalog" ? [] : project.metrics.slice(0, 2);
 
   if (variant === "list") {
@@ -68,11 +68,10 @@ export function CaseCard({
         <Link className="case-image" href={href}>
           {project.image ? (
             <Image
-              alt=""
+              alt={project.catalogTitle}
               fill
               sizes="(max-width: 900px) 100vw, 50vw"
               src={project.image}
-              unoptimized
             />
           ) : null}
           <span className="home-case-labels mono">
@@ -90,11 +89,10 @@ export function CaseCard({
         <Link className="showcase-case-image" href={href}>
           {project.image ? (
             <Image
-              alt=""
+              alt={project.catalogTitle}
               fill
               sizes="(max-width: 900px) 100vw, 33vw"
               src={project.image}
-              unoptimized
             />
           ) : null}
           <span className="showcase-case-labels mono">
@@ -133,11 +131,10 @@ export function CaseCard({
       <Link className="catalog-case-image" href={href}>
         {project.image ? (
           <Image
-            alt=""
+            alt={project.catalogTitle}
             fill
             sizes="(max-width: 900px) 100vw, 50vw"
             src={project.image}
-            unoptimized
           />
         ) : null}
         <span className="catalog-case-labels mono">

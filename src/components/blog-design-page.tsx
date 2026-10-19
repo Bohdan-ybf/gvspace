@@ -12,7 +12,7 @@ import { Pagination, scrollToBlockTop } from "./pagination";
 const POSTS_PER_PAGE = 6;
 
 const imageUrl = (image?: string) =>
-  image ? (image.startsWith("http") ? image : `/images/blog/${image}`) : "/images/blog/blog.png";
+  image ? (image.startsWith("http") ? image : `/images/blog/${image}`) : "/images/blog/blog.webp";
 
 export function BlogDesignPage({
   locale,
@@ -54,7 +54,7 @@ export function BlogDesignPage({
         <section className="blog-hero">
           <Image
             className="blog-hero-background"
-            src="/images/blog/blog.png"
+            src="/images/blog/blog.webp"
             alt=""
             fill
             priority
@@ -62,7 +62,7 @@ export function BlogDesignPage({
           />
           <Image
             className="blog-hero-object"
-            src="/images/blog/blog-object.png"
+            src="/images/blog/blog-object.webp"
             alt=""
             width={450}
             height={429}
@@ -118,7 +118,7 @@ export function BlogDesignPage({
               <article className="blog-featured">
                 <Link
                   className={`blog-card-image${featured.image ? "" : " is-placeholder"}`}
-                  href={`/${locale}/blog/${featured.slug}`}
+                  href={`/blog/${featured.slug}`}
                   style={{ backgroundImage: `url(${imageUrl(featured.image)})` }}
                   aria-label={featured.title}
                 >
@@ -134,7 +134,7 @@ export function BlogDesignPage({
                     </small>
                   </div>
                   <h2>
-                    <Link href={`/${locale}/blog/${featured.slug}`}>{featured.title}</Link>
+                    <Link href={`/blog/${featured.slug}`}>{featured.title}</Link>
                   </h2>
                   {featured.excerpt && <p>{featured.excerpt}</p>}
                 </div>
@@ -144,7 +144,7 @@ export function BlogDesignPage({
                   <article className="blog-card" key={article.slug}>
                     <Link
                       className={`blog-card-image${article.image ? "" : " is-placeholder"}`}
-                      href={`/${locale}/blog/${article.slug}`}
+                      href={`/blog/${article.slug}`}
                       style={{ backgroundImage: `url(${imageUrl(article.image)})` }}
                       aria-label={article.title}
                     />
@@ -155,7 +155,7 @@ export function BlogDesignPage({
                       </small>
                     </div>
                     <h3>
-                      <Link href={`/${locale}/blog/${article.slug}`}>{article.title}</Link>
+                      <Link href={`/blog/${article.slug}`}>{article.title}</Link>
                     </h3>
                     <small className="blog-card-author">
                       {text.author}: {article.authorName}

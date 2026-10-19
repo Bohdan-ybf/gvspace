@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
 import { ContactSection } from "./contact-section";
@@ -20,7 +21,15 @@ function hasMedia(media?: CaseMedia) {
   return Boolean(media?.url);
 }
 
-function Slot({ media, className = "" }: { media?: CaseMedia; className?: string }) {
+function Slot({
+  media,
+  className = "",
+  alt,
+}: {
+  media?: CaseMedia;
+  className?: string;
+  alt: string;
+}) {
   const url = media?.url ?? "";
   if (!url) return null;
   if (media?.kind === "video") {
@@ -32,17 +41,17 @@ function Slot({ media, className = "" }: { media?: CaseMedia; className?: string
   }
   return (
     <div className={`case-slot ${className}`}>
-      <img alt="" src={url} />
+      <Image alt={alt} fill sizes="(max-width: 900px) 100vw, 1200px" src={url} />
     </div>
   );
 }
 
-function FactTags({ tags, locale }: { tags: CaseTagLink[]; locale: Locale }) {
+function FactTags({ tags }: { tags: CaseTagLink[] }) {
   return (
     <dd className="case-sheet-tags">
       {tags.map((tag) =>
         tag.href ? (
-          <Link href={`/${locale}${tag.href}`} key={`${tag.href}-${tag.label}`}>
+          <Link href={tag.href} key={`${tag.href}-${tag.label}`}>
             {tag.label}
           </Link>
         ) : (
@@ -163,7 +172,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
             </div>
             {data.logo ? (
               <div className="case-sheet-logo">
-                <img alt="" src={data.logo} />
+                <Image alt={`${title} logo`} height={259} src={data.logo} width={326} />
               </div>
             ) : null}
           </div>
@@ -173,6 +182,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
         <div className="container case-sheet-body">
           {data.cover ? (
             <Slot
+              alt={title}
               className="case-sheet-cover"
               media={{ url: data.cover, kind: data.coverKind || "image" }}
             />
@@ -196,13 +206,13 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                   {data.serviceTags.length > 0 ? (
                     <div>
                       <dt>{t.factServices}</dt>
-                      <FactTags locale={locale} tags={data.serviceTags} />
+                      <FactTags tags={data.serviceTags} />
                     </div>
                   ) : null}
                   {data.techTags.length > 0 ? (
                     <div>
                       <dt>{t.factTechnologies}</dt>
-                      <FactTags locale={locale} tags={data.techTags} />
+                      <FactTags tags={data.techTags} />
                     </div>
                   ) : null}
                 </dl>
@@ -234,7 +244,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
               {briefMedia.length > 0 ? (
                 <div className={`case-sheet-pair${briefMedia.length === 1 ? " is-single" : ""}`}>
                   {briefMedia.map((media, index) => (
-                    <Slot key={media.url || index} media={media} />
+                    <Slot alt={title} key={media.url || index} media={media} />
                   ))}
                 </div>
               ) : null}
@@ -288,7 +298,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                     ) : null}
                   </div>
                   {hasMedia(data.stepMedia[0]) ? (
-                    <Slot media={data.stepMedia[0]} />
+                    <Slot alt={title} media={data.stepMedia[0]} />
                   ) : (
                     <StageResult
                       description={data.step1Result.description}
@@ -302,7 +312,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                 <article
                   className={hasMedia(data.stepMedia[1]) ? "is-media-left" : "is-vectors-row"}
                 >
-                  <Slot media={data.stepMedia[1]} />
+                  <Slot alt={title} media={data.stepMedia[1]} />
                   <div>
                     <h3>{step2Title}</h3>
                     {paragraphs(data.step2).map((part) => (
@@ -345,7 +355,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                     ) : null}
                   </div>
                   {hasMedia(data.stepMedia[2]) ? (
-                    <Slot media={data.stepMedia[2]} />
+                    <Slot alt={title} media={data.stepMedia[2]} />
                   ) : (
                     <StageResult
                       description={data.step3Result.description}
@@ -372,7 +382,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
               {resultMedia.length > 0 ? (
                 <div className={`case-sheet-gallery is-${data.resultLayout}`}>
                   {resultMedia.map((media, index) => (
-                    <Slot key={media.url || index} media={media} />
+                    <Slot alt={title} key={media.url || index} media={media} />
                   ))}
                 </div>
               ) : null}
@@ -391,7 +401,14 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
                 <p>{testimonial}</p>
                 {showQuoteAuthor ? (
                   <footer>
-                    {data.authorPhoto ? <img alt="" src={data.authorPhoto} /> : null}
+                    {data.authorPhoto ? (
+                      <Image
+                        alt={data.testimonialAuthor || title}
+                        height={72}
+                        src={data.authorPhoto}
+                        width={72}
+                      />
+                    ) : null}
                     <cite>
                       {data.testimonialAuthor ? <b>{data.testimonialAuthor}</b> : null}
                       {data.testimonialCompany ? <small>{data.testimonialCompany}</small> : null}

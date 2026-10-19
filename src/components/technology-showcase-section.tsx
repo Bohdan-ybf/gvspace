@@ -42,7 +42,7 @@ export async function TechnologyShowcaseSection({
           emptyLabel={t.emptyState}
           initialCategory={initialCategory}
         />
-        <Link className="technology-showcase-more" href={`/${locale}/technologies`}>
+        <Link className="technology-showcase-more" href="/technologies">
           <strong>{t.moreTitle}</strong>
           <p>{t.moreText}</p>
           <span className="technology-showcase-more-action">

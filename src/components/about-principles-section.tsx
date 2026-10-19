@@ -36,7 +36,7 @@ export function AboutPrinciplesSection({
         <div className="about-team-copy">
           <h2>{t.teamTitle}</h2>
           <p>{t.teamDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/team`}>
+          <Link className="btn btn-primary" href="/team">
             {locale === "uk" ? "До команди" : "Meet the team"}
             <ArrowRight />
           </Link>

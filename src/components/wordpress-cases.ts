@@ -80,6 +80,7 @@ export type CaseStudy = {
   resultMedia: CaseMedia[];
   authorPhoto: string;
   image?: string;
+  robotsIndex: boolean;
 };
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -99,11 +100,13 @@ type CaseNode = {
   featuredImage?: { node?: { sourceUrl?: string } };
   caseDetails?: CaseDetails | null;
   gvspaceLocalization?: ContentLocalization | null;
+  gvspaceSeo?: { robotsIndex?: boolean } | null;
 };
 
 const fields = `
   slug title date modified menuOrder
   gvspaceLocalization { locale translationGroup status }
+  gvspaceSeo(locale: $locale) { robotsIndex }
   featuredImage { node { sourceUrl } }
   caseDetails(locale: $locale) {
     title catalogTitle excerpt result services
@@ -227,6 +230,7 @@ function mapCase(node: CaseNode): CaseStudy | undefined {
     resultMedia: mapMedia(details.resultMedia),
     authorPhoto: details.authorPhoto ?? "",
     image: node.featuredImage?.node?.sourceUrl,
+    robotsIndex: node.gvspaceSeo?.robotsIndex !== false,
   };
 }
 

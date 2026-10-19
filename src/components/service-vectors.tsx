@@ -60,7 +60,7 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
     <section className="section container vectors-section">
       <header className="vectors-header">
         <h2>{text.title}</h2>
-        <Link className="btn btn-primary vectors-all" href={`/${locale}/services`}>
+        <Link className="btn btn-primary vectors-all" href="/services">
           <span>{locale === "uk" ? "Усі послуги" : "All services"}</span>
           <ArrowRight />
         </Link>
@@ -116,8 +116,8 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
                         <Link
                           href={
                             service.slug
-                              ? `/${locale}/services/${direction.slug}/${service.slug}`
-                              : `/${locale}/services/${direction.slug}`
+                              ? `/services/${direction.slug}/${service.slug}`
+                              : `/services/${direction.slug}`
                           }
                         >
                           <span>{service.title}</span>
@@ -126,7 +126,7 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
                       </li>
                     ))}
                   </ul>
-                  <Link className="btn vector-more" href={`/${locale}/services/${direction.slug}`}>
+                  <Link className="btn vector-more" href={`/services/${direction.slug}`}>
                     <span>{text.more}</span>
                     <ArrowRight />
                   </Link>

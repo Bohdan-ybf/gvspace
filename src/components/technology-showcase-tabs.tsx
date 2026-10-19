@@ -7,7 +7,6 @@ import type { Locale } from "@/i18n";
 import type { TechnologyCategory, TechnologyItem } from "./wordpress-technologies";
 
 export function TechnologyShowcaseTabs({
-  locale,
   categories,
   items,
   emptyLabel,
@@ -46,7 +45,7 @@ export function TechnologyShowcaseTabs({
       </div>
       <div className="technology-showcase-grid" role="tabpanel">
         {visible.map((item) => (
-          <Link href={`/${locale}/technologies/${item.slug}`} key={item.id}>
+          <Link href={`/technologies/${item.slug}`} key={item.id}>
             <div>
               {item.image ? (
                 <Image src={item.image} alt="" fill sizes="70px" unoptimized />

@@ -19,7 +19,7 @@ export async function TechnologySection({ locale, title }: TechnologySectionProp
       <div className="container">
         <div className="technology-stack-heading">
           <h2>{title ?? t.title}</h2>
-          <Link className="btn btn-primary" href={`/${locale}/technologies`}>
+          <Link className="btn btn-primary" href="/technologies">
             {t.allTechnologies}
             <ArrowRight />
           </Link>

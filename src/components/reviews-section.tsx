@@ -36,7 +36,7 @@ export async function ReviewsSection({
           {eyebrow ? <span className="mono">{eyebrow}</span> : null}
           <h2>{title ?? t.title}</h2>
         </div>
-        <Link className="btn btn-primary" href={`/${locale}/reviews`}>
+        <Link className="btn btn-primary" href="/reviews">
           {t.allReviews}
           <ArrowRight />
         </Link>

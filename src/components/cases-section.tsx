@@ -19,7 +19,7 @@ export async function CasesSection({ locale, text }: CasesSectionProps) {
       <aside>
         <h2>{text.title}</h2>
         <p>{text.subtitle}</p>
-        <Link className="btn btn-primary" href={`/${locale}/cases`}>
+        <Link className="btn btn-primary" href="/cases">
           <span>{text.all}</span>
           <ArrowRight />
         </Link>

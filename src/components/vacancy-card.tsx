@@ -21,7 +21,7 @@ export function VacancyCard({ locale, vacancy }: { locale: Locale; vacancy: Vaca
       </div>
       <div className="vacancy-card-footer">
         <b>{vacancy.salary}</b>
-        <Link href={`/${locale}/careers/${vacancy.slug}`}>
+        <Link href={`/careers/${vacancy.slug}`}>
           <span>{t.detailsAction}</span>
           <ArrowRight />
         </Link>

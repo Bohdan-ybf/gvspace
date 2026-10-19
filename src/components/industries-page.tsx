@@ -36,7 +36,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
       <section className="industries-hero">
         <Image
           className="industries-hero-background"
-          src="/images/technologies/technologies-bg.png"
+          src="/images/technologies/technologies-bg.webp"
           alt=""
           fill
           priority
@@ -44,7 +44,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
         />
         <Image
           className="industries-hero-object"
-          src="/images/industries/industries-object.png"
+          src="/images/industries/industries-object.webp"
           alt=""
           width={447}
           height={424}
@@ -58,7 +58,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
             {t.heroTitleSecond}
           </h1>
           <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+          <Link className="btn btn-primary" href="/contacts">
             {t.heroAction}
             <ArrowRight />
           </Link>
@@ -109,7 +109,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
                       </li>
                     ))}
                   </ul>
-                  <Link className="btn btn-primary" href={`/${locale}/cases`}>
+                  <Link className="btn btn-primary" href="/cases">
                     {t.casesAction}
                     <ArrowRight />
                   </Link>
@@ -150,7 +150,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
               <strong>{t.processStat}</strong>
               <span>{t.processStatNote}</span>
             </p>
-            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+            <Link className="btn btn-primary" href="/contacts">
               {t.heroAction}
             </Link>
           </div>

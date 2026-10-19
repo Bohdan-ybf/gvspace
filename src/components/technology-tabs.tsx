@@ -13,7 +13,7 @@ type TechnologyTabsProps = {
   emptyLabel: string;
 };
 
-export function TechnologyTabs({ locale, categories, items, emptyLabel }: TechnologyTabsProps) {
+export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabsProps) {
   const firstCategory = categories[0]?.slug ?? "";
   const [activeCategory, setActiveCategory] = useState(firstCategory);
   const selectedCategory = categories.some(({ slug }) => slug === activeCategory)
@@ -74,11 +74,7 @@ export function TechnologyTabs({ locale, categories, items, emptyLabel }: Techno
         aria-labelledby={`technology-tab-${selectedCategory}`}
       >
         {visibleItems.map((item) => (
-          <Link
-            className="technology-stack-card"
-            href={`/${locale}/technologies/${item.slug}`}
-            key={item.id}
-          >
+          <Link className="technology-stack-card" href={`/technologies/${item.slug}`} key={item.id}>
             <div className="technology-stack-icon">
               {item.image ? (
                 <Image src={item.image} alt="" fill sizes="84px" unoptimized />

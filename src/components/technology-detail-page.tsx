@@ -190,7 +190,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                   width={220}
                   height={220}
                   priority
-                  unoptimized={logo.startsWith("http") || logo.endsWith(".svg")}
+                  unoptimized={logo.endsWith(".svg")}
                 />
               </div>
             ) : null}
@@ -260,10 +260,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
               <span className="mono">{t.detail.servicesEyebrow}</span>
               <div>
                 {relatedServices.map((service) => (
-                  <Link
-                    href={`/${locale}/services/${directionSlug}/${service.slug}`}
-                    key={service.id}
-                  >
+                  <Link href={`/services/${directionSlug}/${service.slug}`} key={service.id}>
                     <span>{service.title}</span>
                     <ArrowRight />
                   </Link>
@@ -277,7 +274,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
           <section className="section container technology-detail-case">
             <div className="technology-detail-case-head">
               <span className="mono">{t.detail.caseEyebrow}</span>
-              <Link className="btn btn-primary" href={`/${locale}/cases`}>
+              <Link className="btn btn-primary" href="/cases">
                 {t.detail.allCases}
                 <ArrowRight />
               </Link>
@@ -296,17 +293,13 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                 </div>
               ) : null}
               <article className="technology-detail-case-card">
-                <Link
-                  className="technology-detail-case-media"
-                  href={`/${locale}/cases/${relatedCase.slug}`}
-                >
+                <Link className="technology-detail-case-media" href={`/cases/${relatedCase.slug}`}>
                   {relatedCase.image ? (
                     <Image
                       src={relatedCase.image}
-                      alt=""
+                      alt={relatedCase.catalogTitle}
                       fill
                       sizes="(max-width: 900px) 100vw, 720px"
-                      unoptimized
                     />
                   ) : null}
                   <span className="technology-detail-case-labels mono">
@@ -316,14 +309,12 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                 </Link>
                 <div className="technology-detail-case-copy">
                   <h3>
-                    <Link href={`/${locale}/cases/${relatedCase.slug}`}>
-                      {relatedCase.catalogTitle}
-                    </Link>
+                    <Link href={`/cases/${relatedCase.slug}`}>{relatedCase.catalogTitle}</Link>
                   </h3>
                   {relatedCase.excerpt ? <p>{relatedCase.excerpt}</p> : null}
                   <Link
                     className="technology-detail-case-arrow"
-                    href={`/${locale}/cases/${relatedCase.slug}`}
+                    href={`/cases/${relatedCase.slug}`}
                     aria-label={casesCatalog.openCase}
                   >
                     <CaseArrow />
@@ -365,7 +356,7 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
             <div className="faq-intro">
               <h2>{text.faq.title}</h2>
               <p>{text.faq.subtitle}</p>
-              <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+              <Link className="btn btn-primary" href="/contacts">
                 {text.faq.action}
               </Link>
             </div>

@@ -235,6 +235,8 @@ const GVSPACE_SEO_FIELDS = [
     'og_description' => ['label' => 'Open Graph Description', 'type' => 'textarea', 'limit' => 0],
     'og_image' => ['label' => 'Open Graph Image URL', 'type' => 'url', 'limit' => 0],
     'canonical' => ['label' => 'Canonical URL', 'type' => 'url', 'limit' => 0],
+    'noindex' => ['label' => 'Не індексувати сторінку (noindex)', 'type' => 'checkbox', 'limit' => 0],
+    'nofollow' => ['label' => 'Не переходити за посиланнями (nofollow)', 'type' => 'checkbox', 'limit' => 0],
 ];
 
 function gvspace_seo_field_is_url(string $key): bool
@@ -244,6 +246,7 @@ function gvspace_seo_field_is_url(string $key): bool
 
 function gvspace_sanitize_seo_meta_value(string $key, string $value): string
 {
+    if (in_array($key, ['noindex', 'nofollow'], true)) return $value === '1' ? '1' : '';
     return gvspace_seo_field_is_url($key) ? esc_url_raw($value) : sanitize_textarea_field($value);
 }
 
@@ -1734,7 +1737,10 @@ function gvspace_render_seo_field(WP_Post $post, string $key, array $config, str
     $value = (string) get_post_meta($post->ID, '_gvspace_seo_' . $key . $locale_suffix, true);
     $limit = (int) ($config['limit'] ?? 0);
     echo '<p><label for="' . esc_attr($field_id) . '"><strong>' . esc_html($config['label']) . '</strong></label><br>';
-    if ($config['type'] === 'textarea') {
+    if ($config['type'] === 'checkbox') {
+        echo '<input type="hidden" name="' . esc_attr($field_id) . '" value="0">';
+        echo '<label><input type="checkbox" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" value="1"' . checked($value, '1', false) . '> ' . esc_html($config['label']) . '</label>';
+    } elseif ($config['type'] === 'textarea') {
         echo '<textarea id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" rows="3" style="width:100%">' . esc_textarea($value) . '</textarea>';
     } else {
         $type = $config['type'] === 'url' ? 'url' : 'text';
@@ -3556,6 +3562,8 @@ add_action('graphql_register_types', function (): void {
             'canonical' => ['type' => 'String'],
             'datePublished' => ['type' => 'String'],
             'dateModified' => ['type' => 'String'],
+            'robotsIndex' => ['type' => 'Boolean'],
+            'robotsFollow' => ['type' => 'Boolean'],
         ],
     ]);
 
@@ -3607,6 +3615,8 @@ add_action('graphql_register_types', function (): void {
                         'canonical' => $value('canonical'),
                         'datePublished' => get_post_time(DATE_W3C, true, $post_id),
                         'dateModified' => get_post_modified_time(DATE_W3C, true, $post_id),
+                        'robotsIndex' => $value('noindex') !== '1',
+                        'robotsFollow' => $value('nofollow') !== '1',
                     ];
                 }
                 if (in_array($post->post_type, GVSPACE_CENTRALIZED_POST_TYPES, true) && $requested_locale !== 'uk') {
@@ -3720,6 +3730,8 @@ add_action('graphql_register_types', function (): void {
                     'canonical' => $value('canonical'),
                     'datePublished' => get_post_time(DATE_W3C, true, $post_id),
                     'dateModified' => get_post_modified_time(DATE_W3C, true, $post_id),
+                    'robotsIndex' => $value('noindex') !== '1',
+                    'robotsFollow' => $value('nofollow') !== '1',
                 ];
             },
         ]);
@@ -4284,6 +4296,29 @@ add_action('graphql_register_types', function (): void {
     ]);
 
 });
+
+// One-time rollout of the explicitly approved private case-study list.
+add_action('init', function (): void {
+    if (get_option('gvspace_private_cases_seo_v1') === 'done') return;
+
+    $private_case_slugs = ['sonnari', 'platinum-auto', 'weststein', 'porzellan-haus'];
+    $case_ids = get_posts([
+        'post_type' => 'gv_case',
+        'post_status' => 'any',
+        'numberposts' => -1,
+        'fields' => 'ids',
+    ]);
+    foreach ($case_ids as $case_id) {
+        $slug = (string) get_post_field('post_name', $case_id);
+        $public_slug = preg_replace('/-(?:uk|en)$/', '', $slug) ?: $slug;
+        if (!in_array($public_slug, $private_case_slugs, true)) continue;
+        foreach (['uk', 'en'] as $locale) {
+            update_post_meta((int) $case_id, '_gvspace_seo_noindex_' . $locale, '1');
+            update_post_meta((int) $case_id, '_gvspace_seo_nofollow_' . $locale, '1');
+        }
+    }
+    update_option('gvspace_private_cases_seo_v1', 'done', false);
+}, 30);
 
 register_activation_hook(__FILE__, function (): void {
     do_action('init');

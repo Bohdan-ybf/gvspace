@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Locale } from "@/i18n";
@@ -68,7 +69,7 @@ function VacancyApplicationModal({ locale, onClose }: { locale: Locale; onClose:
           aria-label={text.close}
           onClick={onClose}
         >
-          <img src="/images/lead-modal/close.svg" width="24.8091" height="24.8091" alt="" />
+          <Image src="/images/lead-modal/close.svg" width={25} height={25} alt="" />
         </button>
         {submitted ? (
           <div className="lead-modal-success vacancy-application-success">

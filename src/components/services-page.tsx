@@ -57,7 +57,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
         <section className="services-hero">
           <Image
             className="services-hero-background"
-            src="/images/services/poslugi-l1.png"
+            src="/images/services/poslugi-l1.webp"
             alt=""
             fill
             priority
@@ -65,7 +65,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
           />
           <Image
             className="services-hero-object"
-            src="/images/services/services-object.png"
+            src="/images/services/services-object.webp"
             alt=""
             width={521}
             height={490}
@@ -76,7 +76,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
             <span className="mono">SERVICES & SOLUTIONS</span>
             <h1>{t.heroTitle}</h1>
             <p>{t.heroDescription}</p>
-            <Link className="btn btn-primary" href={`/${locale}/contacts`}>
+            <Link className="btn btn-primary" href="/contacts">
               {t.heroAction}
               <ArrowRight />
             </Link>
@@ -97,13 +97,12 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
                     alt=""
                     fill
                     sizes="92px"
-                    unoptimized={Boolean(direction.image?.startsWith("http"))}
                   />
                 </div>
                 <div>
                   <span className="mono service-number">[0{index + 1}]</span>
                   <h2>{direction.title}</h2>
-                  <Link className="btn" href={`/${locale}/services/${direction.slug}`}>
+                  <Link className="btn" href={`/services/${direction.slug}`}>
                     {t.detailsAction}
                     <ArrowRight />
                   </Link>
@@ -114,7 +113,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
                 {direction.services.map((service) => (
                   <li key={service.id || service.title}>
                     {service.slug ? (
-                      <Link href={`/${locale}/services/${direction.slug}/${service.slug}`}>
+                      <Link href={`/services/${direction.slug}/${service.slug}`}>
                         <span>{service.title}</span>
                         <ArrowRight />
                       </Link>

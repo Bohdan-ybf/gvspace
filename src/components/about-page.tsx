@@ -21,7 +21,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
       <section className="about-hero">
         <Image
           className="about-hero-background"
-          src="/images/about/about-bg.png"
+          src="/images/about/about-bg.webp"
           alt=""
           fill
           priority
@@ -38,7 +38,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
         />
         <Image
           className="about-hero-mobile"
-          src="/images/about/about-mob.png"
+          src="/images/about/about-mob.webp"
           alt=""
           fill
           priority

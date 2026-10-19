@@ -31,7 +31,7 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
           <span className="mono">{copy.eyebrow}</span>
           <h2>{copy.title}</h2>
         </div>
-        <Link className="btn btn-primary" href={`/${locale}/blog`}>
+        <Link className="btn btn-primary" href="/blog">
           {copy.all}
           <ArrowRight />
         </Link>
@@ -42,7 +42,7 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
             <Link
               aria-label={post.title}
               className="service-insights-image"
-              href={`/${locale}/blog/${post.slug}`}
+              href={`/blog/${post.slug}`}
               style={post.image ? { backgroundImage: `url(${post.image})` } : undefined}
             />
             <div className="service-insights-copy">
@@ -53,7 +53,7 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
                 </small>
               </div>
               <h3>
-                <Link href={`/${locale}/blog/${post.slug}`}>{post.title}</Link>
+                <Link href={`/blog/${post.slug}`}>{post.title}</Link>
               </h3>
               <p>
                 {copy.author}: {post.authorName}

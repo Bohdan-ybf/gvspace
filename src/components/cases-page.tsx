@@ -34,7 +34,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
         <section className="cases-hero">
           <Image
             className="cases-hero-background"
-            src="/images/cases/cases.png"
+            src="/images/cases/cases.webp"
             alt=""
             fill
             priority
@@ -42,7 +42,7 @@ export async function CasesPage({ locale }: { locale: Locale }) {
           />
           <Image
             className="cases-hero-object"
-            src="/images/cases/cases-object.png"
+            src="/images/cases/cases-object.webp"
             alt=""
             width={497}
             height={474}

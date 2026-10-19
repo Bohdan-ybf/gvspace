@@ -10,6 +10,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
+    "images:audit": "node scripts/optimize-images.mjs --audit",
+    "images:optimize:dry": "node scripts/optimize-images.mjs --dry-run",
+    "images:optimize": "node scripts/optimize-images.mjs --apply",
     "check": "npm run format:check && npm run lint && npm run typecheck"
   },
   "engines": {
