@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import type { ChangeEvent } from "react";
 import type { Locale } from "@/i18n";
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
+const DEFAULT_MAX_FILE_SIZE_MB = 25;
 
 type FileUploadFieldProps = {
   className: string;
@@ -12,6 +12,7 @@ type FileUploadFieldProps = {
   locale: Locale;
   accept?: string;
   name?: string;
+  maxFileSizeMb?: number;
 };
 
 export function FileUploadField({
@@ -20,6 +21,7 @@ export function FileUploadField({
   locale,
   accept,
   name = "file",
+  maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
 }: FileUploadFieldProps) {
   const inputId = useId();
   const [fileName, setFileName] = useState("");
@@ -29,9 +31,11 @@ export function FileUploadField({
     const input = event.currentTarget;
     const file = input.files?.[0];
 
-    if (file && file.size > MAX_FILE_SIZE) {
+    if (file && file.size > maxFileSizeMb * 1024 * 1024) {
       const message =
-        locale === "uk" ? "Максимальний розмір файлу — 25 МБ" : "Maximum file size is 25 MB";
+        locale === "uk"
+          ? `Максимальний розмір файлу — ${maxFileSizeMb} МБ`
+          : `Maximum file size is ${maxFileSizeMb} MB`;
       input.value = "";
       input.setCustomValidity(message);
       setFileName("");

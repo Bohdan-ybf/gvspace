@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type ReviewSubmitCopy = {
   title: string;
   description: string;
+  detail: string;
   name: string;
-  position: string;
   company: string;
+  email: string;
+  phone: string;
   text: string;
-  rating: string;
-  consent: string;
   submit: string;
+  privacy: string;
+  privacyLink: string;
   success: string;
 };
 
 export function ReviewSubmitForm({ copy }: { copy: ReviewSubmitCopy }) {
-  const [rating, setRating] = useState(5);
   const [sent, setSent] = useState(false);
 
   if (sent) {
@@ -32,9 +34,10 @@ export function ReviewSubmitForm({ copy }: { copy: ReviewSubmitCopy }) {
 
   return (
     <section className="container review-submit" id="leave-review">
-      <div>
+      <div className="review-submit-copy">
         <h2>{copy.title}</h2>
         <p>{copy.description}</p>
+        <p>{copy.detail}</p>
       </div>
       <form
         onSubmit={(event) => {
@@ -44,35 +47,31 @@ export function ReviewSubmitForm({ copy }: { copy: ReviewSubmitCopy }) {
       >
         <div className="review-submit-fields">
           <input name="name" aria-label={copy.name} placeholder={copy.name} required />
-          <input name="position" aria-label={copy.position} placeholder={copy.position} />
           <input name="company" aria-label={copy.company} placeholder={copy.company} />
+          <input
+            type="email"
+            name="email"
+            aria-label={copy.email}
+            placeholder={copy.email}
+            required
+          />
+          <input
+            type="tel"
+            name="phone"
+            aria-label={copy.phone}
+            placeholder={copy.phone}
+            required
+          />
         </div>
         <textarea name="text" aria-label={copy.text} placeholder={copy.text} required />
-        <div className="review-submit-meta">
-          <div className="review-rating" role="radiogroup" aria-label={copy.rating}>
-            <span className="mono">{copy.rating}</span>
-            {[1, 2, 3, 4, 5].map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={value <= rating ? "is-active" : ""}
-                aria-label={`${value} / 5`}
-                aria-checked={value === rating}
-                role="radio"
-                onClick={() => setRating(value)}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-          <label className="review-submit-consent">
-            <input type="checkbox" name="consent" required />
-            <span>{copy.consent}</span>
-          </label>
+        <div className="review-submit-actions">
+          <button className="btn btn-primary" type="submit">
+            {copy.submit}
+          </button>
+          <p>
+            {copy.privacy} <Link href="/privacy-policy">{copy.privacyLink}</Link>
+          </p>
         </div>
-        <button className="btn btn-primary" type="submit">
-          {copy.submit}
-        </button>
       </form>
     </section>
   );

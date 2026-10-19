@@ -33,14 +33,17 @@ export default {
   form: {
     title: "Leave a review",
     description:
-      "Leave a review about working with us — it helps other businesses make a decision.",
+      "Leave an honest review about working with us: what you liked and what we could improve.",
+    detail:
+      "It takes 2 minutes and helps us make the system better for you and our future clients.",
     name: "Name*",
-    position: "Position",
     company: "Company",
+    email: "Email*",
+    phone: "+1 (___) ___-____*",
     text: "Review*",
-    rating: "Rating",
-    consent: "Allow this review to be published on the website. We will contact you to confirm it.",
-    submit: "Submit review",
+    submit: "Send",
+    privacy: "By clicking “Send”, you agree to the processing of your personal data.",
+    privacyLink: "Learn more",
     success: "Thank you. We will contact you to confirm it before publishing.",
   },
   summary: {

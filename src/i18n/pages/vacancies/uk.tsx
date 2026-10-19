@@ -14,9 +14,12 @@ export default {
     portfolioPlaceholder: "LinkedIn або портфоліо",
     aboutLabel: "Про себе",
     aboutPlaceholder: "Розкажіть про себе і свій підхід",
-    resumeLabel: "Прикріпити резюме (PDF, до 5 МБ)",
+    resumeLabel: "Прикріпити резюме (PDF до 5 МБ)",
     submit: "Відправити заявку",
     consent: "Натискаючи кнопку, ви погоджуєтесь з обробкою персональних даних",
+    privacyLink: "Детальніше",
+    successTitle: "Дякуємо, ваше резюме\nбуде розглянуто",
+    successDescription: "Наш менеджер зв'яжеться з Вами щоб обговорити деталі",
   },
   card: {
     hotLabel: "ГАРЯЧА",

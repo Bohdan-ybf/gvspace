@@ -93,7 +93,7 @@ export const en: Messages = {
     position: "CEO & FOUNDER",
     name: "Vasyl Horaichuk",
     teamAction: "More about the team",
-    capitalization: "Client capitalization after transitioning to systematic marketing.",
+    capitalization: "Marketing budgets under management",
     ecosystems: "Ecosystems built.",
     days: "30 days",
     results: "Average time to first results.",

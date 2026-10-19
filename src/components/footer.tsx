@@ -65,6 +65,7 @@ export function Footer({
 }) {
   const t = getTranslations("common", locale).footer;
   const { footer } = getTranslations("global", locale);
+  const currentYear = new Date().getFullYear();
   const serviceLinks = services
     .filter((service) => !service.parentSlug)
     .slice(0, 6)
@@ -122,7 +123,7 @@ export function Footer({
       </div>
       <div className="legal container">
         <span>
-          © {new Date().getFullYear()} GVSPACE. {footer.copyright}
+          © 2022 - {currentYear} GVSPACE. {footer.copyright}
         </span>
         <nav aria-label={t.legalNavigationLabel}>
           <Link href="/sitemap">{footer.sitemap}</Link>

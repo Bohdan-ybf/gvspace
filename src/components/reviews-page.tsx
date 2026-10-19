@@ -3,8 +3,10 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ContactSection } from "./contact-section";
+import { Breadcrumbs } from "./breadcrumbs";
 import { ArrowRight } from "./icons/arrow-right";
 import { ReviewsCatalog } from "./reviews-catalog";
+import { ReviewSubmitForm } from "./review-submit-form";
 import { getClientReviews, type ClientReview } from "./wordpress-reviews";
 
 import { getTranslations } from "@/i18n/pages";
@@ -13,7 +15,8 @@ import { ItemListStructuredData } from "./structured-data";
 export async function ReviewsPage({ locale }: { locale: Locale }) {
   const reviews = await getClientReviews(locale);
   const text = getTranslations("global", locale);
-  const t = getTranslations("reviews", locale).page;
+  const reviewsText = getTranslations("reviews", locale);
+  const t = reviewsText.page;
   const clients = reviewClients(reviews);
 
   return (
@@ -51,7 +54,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
                 <h1>{t.heroTitle}</h1>
                 <p>{t.heroDescription}</p>
               </div>
-              <Link className="btn btn-primary" href="/contacts">
+              <Link className="btn btn-primary" href="#leave-review">
                 {t.heroAction}
                 <ArrowRight />
               </Link>
@@ -102,6 +105,8 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
 
         <ReviewsCatalog locale={locale} reviews={reviews} />
         <CasesShowcaseSection locale={locale} />
+        <ReviewSubmitForm copy={reviewsText.form} />
+        <Breadcrumbs locale={locale} items={[{ label: reviewsText.summary.title }]} visible />
         <ContactSection
           locale={locale}
           text={{
