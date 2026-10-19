@@ -12,21 +12,21 @@ const stylesheet = `<?xml version="1.0" encoding="UTF-8"?>
         <title>GVSPACE XML Sitemap</title>
         <style>
           * { box-sizing: border-box; }
-          body { margin: 0; background: #f5f7f8; color: #142127; font: 14px/1.5 Arial, sans-serif; }
-          header { padding: 28px clamp(20px, 4vw, 64px); background: #15282f; color: #fff; }
+          body { margin: 0; background: #f8f8fc; color: #4a4470; font: 14px/1.5 Arial, sans-serif; }
+          header { padding: 28px clamp(20px, 4vw, 64px); background: linear-gradient(100deg, #5500ff 0%, #2b00bf 50%, #000080 100%); color: #fff; }
           h1 { margin: 0 0 6px; font-size: clamp(24px, 3vw, 36px); }
-          header p { margin: 0; color: #bdc9cd; }
+          header p { margin: 0; color: #fff; opacity: .82; }
           main { padding: 24px clamp(12px, 4vw, 64px) 48px; }
           .table-wrap { overflow-x: auto; border: 1px solid #dce3e5; border-radius: 10px; background: #fff; }
           table { width: 100%; border-collapse: collapse; }
           th, td { padding: 12px 16px; border-bottom: 1px solid #e7ecee; text-align: left; }
-          th { position: sticky; top: 0; background: #eaf0f2; color: #496069; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+          th { position: sticky; top: 0; background: #f1eff8; color: #4a4470; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
           tr:last-child td { border-bottom: 0; }
           tr:hover td { background: #f8fafb; }
-          td:first-child { width: 64px; color: #789099; }
-          td:last-child { width: 220px; white-space: nowrap; color: #5e737b; }
-          a { color: #087b65; text-decoration: none; overflow-wrap: anywhere; }
-          a:hover { text-decoration: underline; }
+          td:first-child { width: 64px; color: #4a4470; opacity: .7; }
+          td:last-child { width: 220px; white-space: nowrap; color: #4a4470; }
+          a { color: #4a4470; text-decoration: none; overflow-wrap: anywhere; transition: color .2s ease; }
+          a:hover { color: #5500ff; text-decoration: underline; }
           @media (max-width: 640px) {
             header { padding: 22px 16px; }
             main { padding: 16px 8px 32px; }
