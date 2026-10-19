@@ -166,6 +166,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 .industries-hero-content .btn-primary,
 .partners-hero-content .btn-primary,
 .service-detail-hero .btn-primary,
+.technology-meet-clarity .btn-primary,
 .open-application .btn-primary,
 .careers-banner .btn-primary,
 .method-cta,
@@ -189,6 +190,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 .industries-hero-content .btn-primary:hover,
 .partners-hero-content .btn-primary:hover,
 .service-detail-hero .btn-primary:hover,
+.technology-meet-clarity .btn-primary:hover,
 .open-application .btn-primary:hover,
 .careers-banner .btn-primary:hover,
 .method-cta:hover,
@@ -817,12 +819,15 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   align-items: center;
   justify-content: center;
   border: 0;
-  color: #5500ff;
+  border-radius: 4px;
+  color: rgb(85 0 255 / 50%);
   background: transparent;
   cursor: pointer;
+  transition: color 180ms ease;
 }
 .technology-meet-nav button:hover {
-  color: var(--violet);
+  color: #5500ff;
+  background-color: transparent;
 }
 .technology-meet-grid {
   display: grid;
@@ -838,7 +843,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   gap: 16px;
   color: #fff;
   background: linear-gradient(165deg, #2b00bf 0%, #00003d 100%);
-  border-radius: 12px;
+  border-radius: 0;
 }
 .technology-meet-clarity h3 {
   max-width: 270px;
@@ -5315,6 +5320,14 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   box-shadow:
     0 2px 6px rgb(0 0 61 / 4%),
     0 4px 12px rgb(0 0 61 / 8%);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.blog-featured:hover,
+.blog-featured:focus-within {
+  box-shadow: 0 16px 32px rgba(16, 0, 95, 0.18);
 }
 .blog-featured .blog-card-image {
   min-height: 336px;
@@ -6255,10 +6268,10 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 .about-team-card-copy {
   position: relative;
   min-width: 0;
-  padding: 0 24px 0 0;
+  padding: 0 24px 27px 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
 }
 .about-team-card-nav {
   position: absolute;
@@ -6308,12 +6321,13 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   margin: 12px 0 0;
 }
 .about-team-card-stats > div {
-  flex: none;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .about-team-card-stats > div + div {
   margin-left: 0;
-  padding-left: 0;
-  border-left: 0;
+  padding-left: 16px;
+  border-left: 1px solid #e2dff0;
 }
 .about-team-card-stats dt {
   color: #5500ff;
@@ -6331,7 +6345,8 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: 0;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 .about-team-card-tags {
   display: flex;
@@ -6694,6 +6709,9 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
     flex-direction: column;
     gap: 8px;
     margin-top: 10px;
+  }
+  .about-team-card-stats > div {
+    flex: none;
   }
   .about-team-card-stats > div + div {
     margin-left: 0;
@@ -8290,7 +8308,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   cursor: grabbing;
 }
 .services-tabs.is-overflowing > div {
-  padding-inline: 40px;
+  padding-inline: 64px;
 }
 .services-tabs-arrow {
   position: absolute;
@@ -8302,7 +8320,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   place-items: center;
   padding: 0;
   border: 0;
-  color: #2e2a50;
+  color: #6b6494;
   background: transparent;
   transform: translateY(-50%);
   cursor: pointer;
@@ -8345,11 +8363,11 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   height: 16px;
 }
 .services-tabs-arrow svg path {
-  fill: #2e2a50;
+  fill: #6b6494;
   transition: fill 180ms ease;
 }
 .services-tabs-arrow:not(:disabled):hover svg path {
-  fill: #6b6494;
+  fill: #2e2a50;
 }
 .services-tabs.is-overflowing .services-tabs-arrow:disabled svg path {
   fill: #6b6494;
@@ -8832,6 +8850,11 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
 .service-steps.is-process > div > div {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px;
+}
+@media (min-width: 601px) {
+  .service-steps.is-process.has-three-steps > div > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 .service-steps.is-process article {
   min-height: 0;
@@ -17269,10 +17292,18 @@ nav.seo-breadcrumbs.mono > span > span[aria-current="page"] {
   .service-detail-hero .btn,
   .team-hero-content .btn,
   .technologies-hero-content .btn,
+  .about-hero-content .btn,
+  .careers-banner .btn,
+  .open-application .btn,
+  .partners-cta .btn,
+  .technology-meet-clarity .btn,
+  .mobile-clarity .btn,
+  .method-cta,
   .hero-cta {
-    width: fit-content;
-    min-width: min(189px, 100%);
+    width: max-content;
+    min-width: 0;
     max-width: 100%;
+    flex: none;
     min-height: 47px;
     grid-column: 1;
     grid-row: auto;
@@ -17283,7 +17314,7 @@ nav.seo-breadcrumbs.mono > span > span[aria-current="page"] {
     font-size: 15px;
     line-height: 1;
     text-align: center;
-    white-space: normal;
+    white-space: nowrap;
   }
 
   .vacancy-detail-hero {

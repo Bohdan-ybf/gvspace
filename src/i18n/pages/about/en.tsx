@@ -83,8 +83,8 @@ export default {
     items: [
       [
         "$10M+",
-        "Total capital managed",
-        "Experience scaling budgets for businesses of different sizes.",
+        "Marketing budgets under management",
+        "Experience scaling businesses of different sizes.",
       ],
       ["15+", "Industries", "From high-load e-commerce to complex SaaS platforms."],
       ["4", "Vectors", "Audit, IT, marketing, and content working as one system."],

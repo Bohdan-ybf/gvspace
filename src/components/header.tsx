@@ -407,7 +407,7 @@ export function Header({
                 href={`/${locale}/about`}
                 aria-current={isSectionActive(3) ? "page" : undefined}
               >
-                {label.toUpperCase()}
+                {companyMenuLabel.toUpperCase()}
                 <ChevronDown className="chevron" />
               </Link>
               <div className="company-dropdown">
@@ -438,8 +438,8 @@ export function Header({
         )}
       </nav>
       <div className="actions">
-        <a className="header-phone desktop-only" href="tel:+380123456789">
-          +38 012 345 67 89
+        <a className="header-phone desktop-only" href="tel:+380633017165">
+          +38 063 301 7165
         </a>
         <LeadModalButton className="btn btn-primary desktop-only">
           {text.common.buildSystem}

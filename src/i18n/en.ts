@@ -156,6 +156,7 @@ export const en: Messages = {
       { value: "marketing", label: "Marketing" },
       { value: "development", label: "IT development" },
       { value: "content", label: "Content" },
+      { value: "other", label: "Other" },
     ],
     phoneShort: "+38 0__",
     close: "Close",

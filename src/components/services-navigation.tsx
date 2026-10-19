@@ -174,15 +174,16 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
       aria-label="Service directions"
       aria-hidden={isHidden}
     >
-      <button
-        type="button"
-        className="services-tabs-arrow is-prev"
-        aria-label="Попередні напрями"
-        disabled={!canPrev}
-        onClick={() => scrollByDirection(-1)}
-      >
-        <ServicesArrowPrevious />
-      </button>
+      {canPrev && (
+        <button
+          type="button"
+          className="services-tabs-arrow is-prev"
+          aria-label="Попередні напрями"
+          onClick={() => scrollByDirection(-1)}
+        >
+          <ServicesArrowPrevious />
+        </button>
+      )}
       <div
         className="container"
         ref={scrollerRef}
@@ -204,15 +205,16 @@ export function ServicesNavigation({ items }: { items: NavigationItem[] }) {
           </a>
         ))}
       </div>
-      <button
-        type="button"
-        className="services-tabs-arrow is-next"
-        aria-label="Наступні напрями"
-        disabled={!canNext}
-        onClick={() => scrollByDirection(1)}
-      >
-        <ServicesArrowNext />
-      </button>
+      {canNext && (
+        <button
+          type="button"
+          className="services-tabs-arrow is-next"
+          aria-label="Наступні напрями"
+          onClick={() => scrollByDirection(1)}
+        >
+          <ServicesArrowNext />
+        </button>
+      )}
     </nav>
   );
 }

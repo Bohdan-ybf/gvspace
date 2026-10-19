@@ -155,6 +155,7 @@ export const uk = {
       { value: "marketing", label: "Маркетинг" },
       { value: "development", label: "IT-розробка" },
       { value: "content", label: "Контент" },
+      { value: "other", label: "Інше" },
     ],
     phoneShort: "+38 0__",
     close: "Закрити",
