@@ -123,7 +123,7 @@ export function Footer({
       </div>
       <div className="legal container">
         <span>
-          © 2022 - {currentYear} GVSPACE. {footer.copyright}
+          © 2022-{currentYear} GVSPACE. {footer.copyright}
         </span>
         <nav aria-label={t.legalNavigationLabel}>
           <Link href="/sitemap">{footer.sitemap}</Link>

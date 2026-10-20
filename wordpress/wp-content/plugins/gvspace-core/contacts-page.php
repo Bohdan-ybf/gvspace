@@ -301,15 +301,15 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
         );
 
         echo '<h4>Офіси</h4>';
+        echo '<div data-gvspace-offices>';
         foreach ($offices as $index => $office) {
-            echo '<fieldset style="margin:12px 0;padding:12px;border:1px solid #dcdcde">';
-            echo '<legend><strong>Офіс ' . esc_html((string) ($index + 1)) . '</strong></legend>';
-            echo '<p><label>Місто / країна<br><input type="text" name="gvspace_contacts_office_title_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($office['title'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '<p><label>Адреса<br><textarea name="gvspace_contacts_office_address_' . esc_attr($locale) . '[]" rows="3" style="width:100%">' . esc_textarea((string) ($office['address'] ?? '')) . '</textarea></label></p>';
-            echo '<p><label>Телефон<br><input type="text" name="gvspace_contacts_office_phone_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($office['phone'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '<p><label>Email<br><input type="text" name="gvspace_contacts_office_email_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($office['email'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '</fieldset>';
+            gvspace_render_contacts_office_fields($locale, $office, $index + 1);
         }
+        echo '<template data-gvspace-office-template>';
+        gvspace_render_contacts_office_fields($locale, [], 0);
+        echo '</template>';
+        echo '<button type="button" class="button" data-gvspace-add-office>Додати адресу</button>';
+        echo '</div>';
 
         echo '<h4>Соцмережі</h4>';
         echo '<p><label><strong>Підпис блоку соцмереж</strong><br>';
@@ -329,7 +329,40 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
         }
         echo '</div>';
     }
+    gvspace_render_contacts_office_script();
     gvspace_render_language_switcher_script();
+}
+
+function gvspace_render_contacts_office_fields(string $locale, array $office, int $index): void
+{
+    echo '<fieldset style="margin:12px 0;padding:12px;border:1px solid #dcdcde">';
+    echo '<legend><strong>Адреса ' . esc_html((string) $index) . '</strong></legend>';
+    echo '<p><label>Місто / країна<br><input type="text" name="gvspace_contacts_office_title_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($office['title'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '<p><label>Адреса<br><textarea name="gvspace_contacts_office_address_' . esc_attr($locale) . '[]" rows="3" style="width:100%">' . esc_textarea((string) ($office['address'] ?? '')) . '</textarea></label></p>';
+    echo '<p><label>Телефон<br><input type="text" name="gvspace_contacts_office_phone_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($office['phone'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '<p><label>Email<br><input type="text" name="gvspace_contacts_office_email_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($office['email'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '</fieldset>';
+}
+
+function gvspace_render_contacts_office_script(): void
+{
+    ?>
+    <script>
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-gvspace-add-office]');
+        if (!button) return;
+
+        var offices = button.closest('[data-gvspace-offices]');
+        var template = offices && offices.querySelector('[data-gvspace-office-template]');
+        if (!offices || !template) return;
+
+        var index = offices.querySelectorAll('fieldset').length + 1;
+        var office = template.content.cloneNode(true);
+        office.querySelector('legend strong').textContent = 'Адреса ' + index;
+        offices.insertBefore(office, template);
+    });
+    </script>
+    <?php
 }
 
 add_action('save_post_gv_contacts_page', function (int $post_id): void {

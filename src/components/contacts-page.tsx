@@ -144,15 +144,19 @@ export async function ContactsPage({ locale }: { locale: Locale }) {
 
       {page.offices.length ? (
         <section className="contacts-offices container">
-          {page.offices.map((office) => (
-            <article key={office.title}>
-              <h3>{office.title}</h3>
-              <p>{office.address}</p>
-              {office.phone ? (
-                <a href={`tel:${office.phone.replace(/[^\d+]/g, "")}`}>{office.phone}</a>
-              ) : null}
-              {office.email ? <a href={`mailto:${office.email}`}>{office.email}</a> : null}
-            </article>
+          {Array.from({ length: Math.ceil(page.offices.length / 3) }, (_, rowIndex) => (
+            <div className="contacts-offices-row" key={rowIndex}>
+              {page.offices.slice(rowIndex * 3, rowIndex * 3 + 3).map((office) => (
+                <article key={office.title}>
+                  <h3>{office.title}</h3>
+                  <p>{office.address}</p>
+                  {office.phone ? (
+                    <a href={`tel:${office.phone.replace(/[^\d+]/g, "")}`}>{office.phone}</a>
+                  ) : null}
+                  {office.email ? <a href={`mailto:${office.email}`}>{office.email}</a> : null}
+                </article>
+              ))}
+            </div>
           ))}
         </section>
       ) : null}
