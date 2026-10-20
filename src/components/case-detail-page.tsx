@@ -174,7 +174,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
             </div>
             {data.logo ? (
               <div className="case-sheet-logo">
-                <Image alt={`${title} logo`} height={259} src={data.logo} width={326} />
+                <Image alt={`${title} logo`} height={259} preload src={data.logo} width={326} />
               </div>
             ) : null}
           </div>

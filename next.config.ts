@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ["image/webp"],
     remotePatterns: [
       {
         protocol: wordpressUrl.protocol.replace(":", "") as "http" | "https",

@@ -102,7 +102,7 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
           />
           <div className="container service-detail-hero-grid">
             <div className="service-detail-icon">
-              {item.image && <Image src={item.image} alt={item.title} fill sizes="520px" />}
+              {item.image && <Image src={item.image} alt={item.title} fill preload sizes="520px" />}
             </div>
             <div className="service-detail-copy">
               <span className="mono service-detail-eyebrow">{item.title}</span>
