@@ -56,7 +56,7 @@ export async function getDynamicSeo(
         }`,
         variables: { locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return undefined;
     const result = (await response.json()) as {
@@ -104,7 +104,7 @@ export async function getStaticPageSeo(pageKey: string, locale: Locale): Promise
         }`,
         variables: { locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return undefined;
     const result = (await response.json()) as {

@@ -105,9 +105,11 @@ function Metrics({ metrics, divided = false }: { metrics: CaseMetric[]; divided?
 }
 
 export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
-  const data = await getCaseStudy(slug, locale);
+  const [data, seo] = await Promise.all([
+    getCaseStudy(slug, locale),
+    getDynamicSeo("case", slug, locale),
+  ]);
   if (!data) notFound();
-  const seo = await getDynamicSeo("case", slug, locale);
   const t = getTranslations("cases", locale).detail;
   const contact = {
     ...getTranslations("global", locale).contact,

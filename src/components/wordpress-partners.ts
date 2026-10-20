@@ -37,7 +37,7 @@ export async function getPartners(locale: Locale): Promise<Partner[]> {
           }
         }`,
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
 
     if (!response.ok) return [];

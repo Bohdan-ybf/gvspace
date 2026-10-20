@@ -340,7 +340,7 @@ export async function getContactsPage(locale: Locale): Promise<ContactsPageConte
         }`,
         variables: { locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return fallback;
     const payload = (await response.text()).trim();

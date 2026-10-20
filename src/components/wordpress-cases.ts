@@ -244,7 +244,7 @@ export async function getCaseStudies(locale: Locale): Promise<CaseStudy[]> {
         query: `query CasesV2($locale: String!) { projectCases(first: 100) { nodes { ${fields} } } }`,
         variables: { locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return [];
     const result = (await response.json()) as {

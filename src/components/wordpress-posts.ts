@@ -77,7 +77,7 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
         query: `query Posts($locale: String!) { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date modified gvspaceLocalization { locale translationGroup status } gvspaceBlog(locale: $locale) { title excerpt content isPublished } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name slug gvspaceNameEn } } } } }`,
         variables: { locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return [];
     const result = (await response.json()) as { data?: { posts?: { nodes?: WordPressPost[] } } };
@@ -138,7 +138,7 @@ export async function getBlogPostsByAuthor(
         query: `query AuthorPosts($slug: ID!, $locale: String!) { user(id: $slug, idType: SLUG) { posts(first: 100) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } gvspaceBlog(locale: $locale) { title excerpt content isPublished } author { node { name } } featuredImage { node { sourceUrl } } categories { nodes { name slug gvspaceNameEn } } } } } }`,
         variables: { slug, locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return [];
     const result = (await response.json()) as {
@@ -197,7 +197,7 @@ export async function getBlogPost(slug: string, locale: Locale): Promise<BlogPos
           query: `query PostsForRoute($locale: String!) { posts(first: 100, where: { status: PUBLISH }) { nodes { slug title excerpt content date gvspaceLocalization { locale translationGroup status } gvspaceBlog(locale: $locale) { title excerpt content isPublished } author { node { slug name avatar { url } gvspaceAuthorProfile { role } } } categories { nodes { name slug gvspaceNameEn } } tags { nodes { name } } featuredImage { node { sourceUrl } } } } }`,
           variables: { locale },
         }),
-        cache: "no-store",
+        next: { revalidate: 300 },
       });
       const result = (await response.json()) as {
         data?: { posts?: { nodes?: WordPressPost[] } };

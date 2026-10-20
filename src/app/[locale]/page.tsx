@@ -7,6 +7,12 @@ import { buildSeoMetadata, normalizeSeoData } from "@/seo";
 import { getStaticPageSeo } from "@/wordpress-seo";
 import { StructuredData } from "@/components/structured-data";
 
+export const revalidate = 300;
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
 const localizedMetadata = {
   uk: {
     title: "GVSPACE — простір вашого масштабування",
@@ -35,9 +41,6 @@ export async function generateMetadata({
     seo: normalizeSeoData(adminSeo, pageMetadata),
     alternateLocales: locales,
   });
-}
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
 }
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
@@ -29,10 +30,12 @@ function localizeStageLabel(label: string, locale: Locale): string {
 }
 
 export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slugs: string[] }) {
-  const result = await getServiceOffering(locale, slugs);
+  const [result, seo] = await Promise.all([
+    getServiceOffering(locale, slugs),
+    getDynamicSeo("service", slugs.at(-1) ?? "", locale),
+  ]);
   if (!result) notFound();
   const { item, children } = result;
-  const seo = await getDynamicSeo("service", item.slug, locale);
   const t = getTranslations("services", locale).detail;
   const isDirection = slugs.length === 1;
   const steps = item.steps.length
@@ -191,28 +194,42 @@ export async function ServiceDetailPage({ locale, slugs }: { locale: Locale; slu
         )}
         {isDirection ? (
           <>
-            <TechnologyShowcaseSection locale={locale} />
-            <CasesShowcaseSection
-              locale={locale}
-              eyebrow={t.casesEyebrow}
-              actionLabel={t.casesAction}
-            />
+            <Suspense fallback={null}>
+              <TechnologyShowcaseSection locale={locale} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <CasesShowcaseSection
+                locale={locale}
+                eyebrow={t.casesEyebrow}
+                actionLabel={t.casesAction}
+              />
+            </Suspense>
           </>
         ) : (
           <>
-            <CasesShowcaseSection
-              locale={locale}
-              eyebrow={t.casesEyebrow}
-              actionLabel={t.casesAction}
-            />
-            <TechnologyShowcaseSection locale={locale} />
+            <Suspense fallback={null}>
+              <CasesShowcaseSection
+                locale={locale}
+                eyebrow={t.casesEyebrow}
+                actionLabel={t.casesAction}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <TechnologyShowcaseSection locale={locale} />
+            </Suspense>
           </>
         )}
-        <ReviewsSection
-          locale={locale}
-          tags={[item.parentSlug, item.slug].filter((tag): tag is string => Boolean(tag))}
-        />
-        {!isDirection && <ServiceInsightsSection locale={locale} />}
+        <Suspense fallback={null}>
+          <ReviewsSection
+            locale={locale}
+            tags={[item.parentSlug, item.slug].filter((tag): tag is string => Boolean(tag))}
+          />
+        </Suspense>
+        {!isDirection && (
+          <Suspense fallback={null}>
+            <ServiceInsightsSection locale={locale} />
+          </Suspense>
+        )}
         {faqs.length > 0 && (
           <section className="section container service-faq">
             <div>

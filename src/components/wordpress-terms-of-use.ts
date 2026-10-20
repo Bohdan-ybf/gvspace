@@ -55,7 +55,7 @@ export async function getTermsOfUse(locale: Locale): Promise<TermsOfUse | undefi
         }`,
         variables: { locale },
       }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return undefined;
 

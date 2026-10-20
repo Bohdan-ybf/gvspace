@@ -23,7 +23,7 @@ export async function getBlogAuthor(slug: string, locale: Locale): Promise<BlogA
           query: `query Author($slug: ID!) { user(id: $slug, idType: SLUG) { slug name description avatar { url } gvspaceAuthorProfile { role headline experience projects } } }`,
           variables: { slug },
         }),
-        cache: "no-store",
+        next: { revalidate: 300 },
       });
       const result = (await response.json()) as {
         data?: {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ServicesPage } from "@/components/services-page";
 import { ServiceDetailPage } from "@/components/service-detail-page";
@@ -78,7 +79,13 @@ const staticRoutes = new Set([
   "blog",
 ]);
 
-async function getResolvedDynamicSeo(
+export const revalidate = 300;
+
+export function generateStaticParams() {
+  return locales.flatMap((locale) => [...staticRoutes].map((route) => ({ locale, slug: [route] })));
+}
+
+const getResolvedDynamicSeo = cache(async function getResolvedDynamicSeo(
   kind: DynamicSeoKind,
   publicSlug: string,
   locale: Locale,
@@ -144,7 +151,7 @@ async function getResolvedDynamicSeo(
         description: technology.intro || technology.description,
       })
     : undefined;
-}
+});
 
 export async function generateMetadata({
   params,
@@ -212,16 +219,6 @@ export default async function RoutedPage({
     permanentRedirect("/blog");
   }
 
-  const dynamicRoute = getDynamicRoute(slug);
-  if (dynamicRoute) {
-    const exists = await getResolvedDynamicSeo(
-      dynamicRoute.kind,
-      dynamicRoute.publicSlug,
-      locale,
-      slug,
-    );
-    if (!exists) notFound();
-  }
   const section = (key: keyof (typeof routeSeo)[Locale], content: React.ReactNode) => (
     <>
       <Breadcrumbs

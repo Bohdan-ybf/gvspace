@@ -71,7 +71,7 @@ async function queryWordPress<T>(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, variables }),
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return null;
 

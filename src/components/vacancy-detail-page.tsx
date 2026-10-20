@@ -9,9 +9,11 @@ import { getDynamicSeo } from "@/wordpress-seo";
 import { Breadcrumbs } from "./breadcrumbs";
 import { StructuredData } from "./structured-data";
 export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug: string }) {
-  const vacancy = await getVacancyBySlug(slug, locale);
+  const [vacancy, seo] = await Promise.all([
+    getVacancyBySlug(slug, locale),
+    getDynamicSeo("vacancy", slug, locale),
+  ]);
   if (!vacancy) notFound();
-  const seo = await getDynamicSeo("vacancy", slug, locale);
   const t = getTranslations("vacancies", locale).detail;
   const sectionTitles = {
     role: t.roleTitle,

@@ -26,7 +26,20 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    const staticAssetHeaders = [
+      { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
+    ];
+
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      { source: "/images/:path*", headers: staticAssetHeaders },
+      { source: "/icon.svg", headers: staticAssetHeaders },
+      { source: "/favicon.ico", headers: staticAssetHeaders },
+      { source: "/favicon-96x96.png", headers: staticAssetHeaders },
+      { source: "/apple-icon.png", headers: staticAssetHeaders },
+      { source: "/web-app-manifest-192x192.png", headers: staticAssetHeaders },
+      { source: "/web-app-manifest-512x512.png", headers: staticAssetHeaders },
+    ];
   },
 };
 

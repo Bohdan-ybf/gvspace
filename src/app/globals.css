@@ -17546,3 +17546,28 @@ nav.seo-breadcrumbs.mono > span > span[aria-current="page"] {
     flex-wrap: wrap;
   }
 }
+/* Immediate navigation feedback while a server-rendered route is streaming. */
+.route-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  pointer-events: none;
+}
+
+.route-loading span {
+  display: block;
+  width: 35%;
+  height: 3px;
+  background: #5300ff;
+  box-shadow: 0 0 12px rgb(83 0 255 / 55%);
+  animation: route-loading-progress 0.9s ease-in-out infinite;
+}
+
+@keyframes route-loading-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(385%);
+  }
+}

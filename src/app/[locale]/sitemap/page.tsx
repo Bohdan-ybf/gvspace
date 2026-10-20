@@ -3,6 +3,12 @@ import { SitemapPage } from "@/components/sitemap-page";
 import { locales, type Locale } from "@/i18n";
 import { buildSeoMetadata, normalizeSeoData } from "@/seo";
 
+export const revalidate = 300;
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
 export async function generateMetadata({
   params,
 }: {
