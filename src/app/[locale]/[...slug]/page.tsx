@@ -9,6 +9,7 @@ import { TeamPage } from "@/components/team-page";
 import { CareersPage } from "@/components/careers-page";
 import { VacancyDetailPage } from "@/components/vacancy-detail-page";
 import { getVacancyBySlug } from "@/components/wordpress-vacancies";
+import { stripOpenGraphLabel } from "@/components/blog-open-graph";
 import { getBlogPost } from "@/components/wordpress-posts";
 import { getCaseStudy } from "@/components/wordpress-cases";
 import { getServiceOffering } from "@/components/wordpress-services";
@@ -125,13 +126,31 @@ const getResolvedDynamicSeo = cache(async function getResolvedDynamicSeo(
       { title: result.item.title, description },
     );
   }
-  if (configuredSeo) return configuredSeo;
   if (kind === "blog") {
     const post = await getBlogPost(publicSlug, locale);
-    return post
-      ? normalizeSeoData(undefined, { title: post.title, description: post.excerpt })
-      : undefined;
+    const title = stripOpenGraphLabel(configuredSeo?.title || post?.title || "");
+    const description = stripOpenGraphLabel(configuredSeo?.description || post?.excerpt || "");
+    const h1 = stripOpenGraphLabel(configuredSeo?.h1 || post?.title || "");
+    const openGraphTitle =
+      stripOpenGraphLabel(configuredSeo?.openGraphTitle || "") || post?.openGraphTitle || title;
+    const openGraphDescription =
+      stripOpenGraphLabel(configuredSeo?.openGraphDescription || "") ||
+      post?.openGraphDescription ||
+      description;
+    if (!post && !configuredSeo) return undefined;
+    return normalizeSeoData(
+      {
+        ...configuredSeo,
+        title,
+        description,
+        h1,
+        openGraphTitle,
+        openGraphDescription,
+      },
+      { title: post?.title || title, description: post?.excerpt || description },
+    );
   }
+  if (configuredSeo) return configuredSeo;
   if (kind === "case") {
     const item = await getCaseStudy(publicSlug, locale);
     return item
@@ -274,15 +293,7 @@ export default async function RoutedPage({
     return <BlogArticleDesignPage locale={locale} slug={slug[1]} />;
   }
   if (isLocale(locale) && slug.length === 3 && slug[0] === "blog" && slug[1] === "author") {
-    return (
-      <>
-        <Breadcrumbs
-          locale={locale}
-          items={[{ label: routeSeo[locale].blog[0], pathname: "/blog" }, { label: slug[2] }]}
-        />
-        <BlogAuthorPage locale={locale} slug={slug[2]} />
-      </>
-    );
+    return <BlogAuthorPage locale={locale} slug={slug[2]} />;
   }
   return notFound();
 }

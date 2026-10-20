@@ -1,19 +1,32 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ContactSection } from "./contact-section";
 import type { Locale } from "@/i18n";
 import { getBlogAuthor } from "./wordpress-authors";
 import { getBlogPostsByAuthor } from "./wordpress-posts";
 
 import { getTranslations } from "@/i18n/pages";
+import { BlogFeaturedPost, BlogPostCard } from "./blog-post-cards";
+import { toLatinSlug } from "./latin-slug";
+import { Breadcrumbs } from "./breadcrumbs";
+import { InstagramIcon, LinkedinIcon } from "./icons/social-icons";
 import { LeadModalButton } from "./lead-modal";
 import { StructuredData } from "./structured-data";
 export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: string }) {
-  const author = await getBlogAuthor(slug, locale);
+  const latinSlug = toLatinSlug(slug);
+  if (latinSlug && latinSlug !== slug) permanentRedirect(`/${locale}/blog/author/${latinSlug}`);
+  const author = await getBlogAuthor(latinSlug || slug, locale);
   if (!author) notFound();
   const wordpressPosts = await getBlogPostsByAuthor(slug, locale);
-  const t = getTranslations("blog", locale).author;
+  const copy = getTranslations("blog", locale);
+  const t = copy.author;
   const featured = wordpressPosts[0];
+  const bio = author.bio
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  const sameAs = [author.linkedinHref, author.instagramHref].filter((href): href is string =>
+    Boolean(href),
+  );
 
   return (
     <>
@@ -28,14 +41,17 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
             description: author.bio,
             image: author.photo,
             worksFor: { "@type": "Organization", name: "GVSPACE" },
+            ...(sameAs.length ? { sameAs } : {}),
           },
         }}
       />
       <main className="author-page">
         <section className="container author-profile">
           <header>
-            <h1>{author.name}</h1>
-            <p className="mono">{author.role}</p>
+            <div className="author-heading">
+              <h1>{author.name}</h1>
+              {author.role ? <p>{author.role}</p> : null}
+            </div>
           </header>
           <div
             className="author-photo"
@@ -43,85 +59,100 @@ export async function BlogAuthorPage({ locale, slug }: { locale: Locale; slug: s
             role="img"
             aria-label={author.name}
           />
+          {author.linkedinHref || author.instagramHref ? (
+            <div className="author-socials">
+              {author.linkedinHref ? (
+                <a href={author.linkedinHref} target="_blank" rel="noreferrer">
+                  <span className="author-social-linkedin">
+                    <LinkedinIcon />
+                  </span>
+                  {author.linkedinLabel}
+                </a>
+              ) : null}
+              {author.instagramHref ? (
+                <a href={author.instagramHref} target="_blank" rel="noreferrer">
+                  <span className="author-social-instagram">
+                    <InstagramIcon />
+                  </span>
+                  {author.instagramLabel}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
           <div className="author-bio">
             <span className="mono">● {t.aboutLabel}</span>
-            <h2>{author.headline}</h2>
-            <p>{author.bio}</p>
-            <dl>
-              <div>
-                <dt>{author.experience}</dt>
-                <dd>{t.experienceLabel}</dd>
+            {author.headline ? <h2>{author.headline}</h2> : null}
+            {author.quote ? (
+              <blockquote className="author-quote">
+                <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true">
+                  <path
+                    d="M8.456 0L5.432 8.848H9.128V17.472H0V9.8L3.92 0H8.456ZM20.552 0L17.528 8.848H21.168V17.472H12.04V9.8L15.96 0H20.552Z"
+                    fill="#E2DFF0"
+                  />
+                </svg>
+                <p>{author.quote}</p>
+                <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true">
+                  <path
+                    d="M12.712 17.416L15.736 8.568H12.096V0H21.224V7.672L17.304 17.416H12.712ZM0.616 17.416L3.64 8.568H0V0H9.128V7.672L5.208 17.416H0.616Z"
+                    fill="#E2DFF0"
+                  />
+                </svg>
+              </blockquote>
+            ) : null}
+            {bio.length > 0 ? (
+              <div className="author-bio-copy">
+                {bio.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
               </div>
-              <div>
-                <dt>{author.projects}</dt>
-                <dd>{t.projectsLabel}</dd>
-              </div>
-            </dl>
+            ) : null}
+            {author.experience || author.projects ? (
+              <dl>
+                {author.experience ? (
+                  <div>
+                    <dt>{author.experience}</dt>
+                    <dd>{t.experienceLabel}</dd>
+                  </div>
+                ) : null}
+                {author.projects ? (
+                  <div>
+                    <dt>{author.projects}</dt>
+                    <dd>{t.projectsLabel}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : null}
           </div>
           <aside>
             <h2>{t.questionTitle}</h2>
             <p>{t.questionDescription}</p>
-            <LeadModalButton variant="question">{t.askAuthor} →</LeadModalButton>
+            <LeadModalButton variant="question">
+              {t.askAuthor} <span aria-hidden="true">→</span>
+            </LeadModalButton>
           </aside>
         </section>
         <section className="container author-posts">
           <h2>{t.articlesTitle}</h2>
           {featured ? (
-            <article className="author-featured">
-              <div
-                className="author-post-image"
-                style={
-                  featured.image
-                    ? {
-                        backgroundImage: `url(${featured.image})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }
-                    : undefined
-                }
-              >
-                <b>{featured.category}</b>
-              </div>
-              <div>
-                <small className="mono">
-                  {featured.publishedAt} · {featured.readingTime} хв
-                </small>
-                <h3>{featured.title}</h3>
-                <p>{featured.excerpt}</p>
-                <Link href={`/blog/${featured.slug}`}>{t.readArticle} →</Link>
-              </div>
-            </article>
+            <>
+              <BlogFeaturedPost post={featured} locale={locale} />
+              {wordpressPosts.length > 1 ? (
+                <div className="blog-grid">
+                  {wordpressPosts.slice(1).map((post) => (
+                    <BlogPostCard key={post.slug} post={post} locale={locale} />
+                  ))}
+                </div>
+              ) : null}
+            </>
           ) : (
             <p className="blog-empty">{t.emptyState}</p>
           )}
-          {wordpressPosts.length > 1 && (
-            <div className="author-post-grid">
-              {wordpressPosts.slice(1).map((card) => (
-                <article key={card.slug}>
-                  <div
-                    className="author-post-image"
-                    style={
-                      card.image
-                        ? {
-                            backgroundImage: `url(${card.image})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }
-                        : undefined
-                    }
-                  >
-                    <b>{card.category}</b>
-                  </div>
-                  <small className="mono">
-                    {card.publishedAt} · {card.readingTime} хв
-                  </small>
-                  <h3>{card.title}</h3>
-                  <Link href={`/blog/${card.slug}`}>{t.readMore} →</Link>
-                </article>
-              ))}
-            </div>
-          )}
         </section>
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: copy.content.breadcrumb, pathname: "/blog" }, { label: author.name }]}
+          visible
+        />
         <ContactSection locale={locale} text={getTranslations("global", locale).contact} />
       </main>
     </>

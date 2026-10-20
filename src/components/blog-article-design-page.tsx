@@ -7,8 +7,10 @@ import { Breadcrumbs } from "./breadcrumbs";
 import { LeadModalButton } from "./lead-modal";
 import { ContactSection } from "./contact-section";
 import { StructuredData } from "./structured-data";
+import { stripOpenGraphLabel } from "./blog-open-graph";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
 import { ArticleToc } from "./article-toc";
+import { BlogPostCard } from "./blog-post-cards";
 
 function prepareArticleContent(content: string) {
   const headings: Array<{ id: string; label: string; level: 2 | 3 }> = [];
@@ -49,8 +51,8 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    headline: seo?.h1 || post.title,
-    description: seo?.description || post.excerpt,
+    headline: stripOpenGraphLabel(seo?.h1 || post.title),
+    description: stripOpenGraphLabel(seo?.description || post.excerpt),
     datePublished: seo?.datePublished,
     dateModified: seo?.dateModified,
     image: seo?.openGraphImage || post.image,
@@ -67,8 +69,8 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
           <small className="mono">
             {post.publishedAt} · {post.readingTime} {text.read}
           </small>
-          <h1>{seo?.h1 || post.title}</h1>
-          <p>{post.excerpt}</p>
+          <h1>{stripOpenGraphLabel(seo?.h1 || post.title)}</h1>
+          <p>{stripOpenGraphLabel(post.excerpt)}</p>
           <div className="article-author">
             <i
               style={
@@ -95,12 +97,14 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
 
         <div className="article-main">
           {lead && <div className="article-lead" dangerouslySetInnerHTML={{ __html: lead }} />}
-          <div
-            className={`article-cover${post.image ? "" : " is-placeholder"}`}
-            style={{ backgroundImage: `url(${cardImage(post.image)})` }}
-            role="img"
-            aria-label={post.title}
-          />
+          {post.image ? (
+            <div
+              className="article-cover"
+              style={{ backgroundImage: `url(${cardImage(post.image)})` }}
+              role="img"
+              aria-label={post.title}
+            />
+          ) : null}
           <article className="article-content" dangerouslySetInnerHTML={{ __html: body }} />
 
           <div className="article-meta">
@@ -122,10 +126,12 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
               <div>
                 <b>{post.author.name}</b>
                 <small>{post.author.role}</small>
-                <p>{t.authorBio}</p>
+                <p>{post.author.cardBio || t.authorBio}</p>
               </div>
             </div>
-            <Link href={`/blog/author/${post.author.slug}`}>{text.author} →</Link>
+            {post.author.slug ? (
+              <Link href={`/blog/author/${post.author.slug}`}>{text.author} →</Link>
+            ) : null}
           </section>
 
           <section className="article-rating" aria-label={t.ratingLabel}>
@@ -157,27 +163,9 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
       {related.length > 0 && (
         <section className="container article-related">
           <span className="mono">{text.related}</span>
-          <div>
+          <div className="blog-grid">
             {related.map((item) => (
-              <article key={item.slug}>
-                <Link
-                  className="article-related-image"
-                  href={`/blog/${item.slug}`}
-                  style={{ backgroundImage: `url(${cardImage(item.image)})` }}
-                  aria-label={item.title}
-                >
-                  <b>{item.category}</b>
-                </Link>
-                <small className="mono">
-                  {item.publishedAt} · {item.readingTime} {text.read}
-                </small>
-                <h3>
-                  <Link href={`/blog/${item.slug}`}>{item.title}</Link>
-                </h3>
-                <small>
-                  {t.authorLabel}: {item.authorName}
-                </small>
-              </article>
+              <BlogPostCard key={item.slug} post={item} locale={locale} />
             ))}
           </div>
         </section>
@@ -185,7 +173,10 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
 
       <Breadcrumbs
         locale={locale}
-        items={[{ label: t.blogBreadcrumb, pathname: "/blog" }, { label: seo?.h1 || post.title }]}
+        items={[
+          { label: t.blogBreadcrumb, pathname: "/blog" },
+          { label: stripOpenGraphLabel(seo?.h1 || post.title) },
+        ]}
         visible
       />
       <ContactSection locale={locale} text={getTranslations("global", locale).contact} />
