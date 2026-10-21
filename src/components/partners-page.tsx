@@ -96,9 +96,9 @@ export function PartnersPage({ locale }: { locale: Locale }) {
       </section>
 
       <section className="container partners-proof" aria-labelledby="partners-proof-title">
+        <span className="mono">{t.proofEyebrow}</span>
         <div className="partners-proof-card">
           <div>
-            <span className="mono">{t.proofEyebrow}</span>
             <blockquote id="partners-proof-title">{t.quote}</blockquote>
             <div className="partners-proof-author">
               <span aria-hidden="true" />
@@ -178,10 +178,6 @@ export function PartnersPage({ locale }: { locale: Locale }) {
               <br />
               {t.ctaDescription}
             </p>
-            <LeadModalButton className="btn" variant="partner">
-              {t.ctaAction}
-              <ArrowRight />
-            </LeadModalButton>
           </div>
         </div>
         <div className="partners-cta-cards">
@@ -192,6 +188,10 @@ export function PartnersPage({ locale }: { locale: Locale }) {
             </article>
           ))}
         </div>
+        <LeadModalButton className="btn" variant="partner">
+          {t.ctaAction}
+          <ArrowRight />
+        </LeadModalButton>
       </section>
 
       <Breadcrumbs

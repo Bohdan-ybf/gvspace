@@ -15,7 +15,7 @@ export default {
     casesAction: "Дивитись кейси",
     processEyebrow: "ПРОЦЕС РОБОТИ",
     processTitle: "Як ми працюємо",
-    processStat: "[50+] проєктів",
+    processStat: "50+ проєктів",
     processStatNote: "за 4 роки роботи",
     projectsAction: "Наші проєкти",
     casesEyebrow: "КЕЙСИ",

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { ContentPhoto } from "./content-image-label";
 import type { TeamMember } from "./wordpress-team";
 
 type AboutTeamSliderProps = {
@@ -77,13 +78,22 @@ export function AboutTeamSlider({
     >
       <article className="about-team-card" aria-live="polite" aria-atomic="true">
         <div className="about-team-card-photo" key={`photo-${member.id}`}>
-          <Image
-            src={member.image || "/images/team/user-none.jpg"}
-            alt={member.imageAlt}
-            fill
-            sizes="(max-width: 768px) 180px, 302px"
-            unoptimized={!member.image || isLocalUpload(member.image)}
-          />
+          {member.image ? (
+            <ContentPhoto
+              src={member.image}
+              fill
+              sizes="(max-width: 768px) 180px, 302px"
+              unoptimized={isLocalUpload(member.image)}
+            />
+          ) : (
+            <Image
+              src="/images/team/user-none.jpg"
+              alt=""
+              fill
+              sizes="(max-width: 768px) 180px, 302px"
+              unoptimized
+            />
+          )}
         </div>
         <div className="about-team-card-copy" key={`copy-${member.id}`}>
           {member.role ? <span className="about-team-card-role">{member.role}</span> : null}

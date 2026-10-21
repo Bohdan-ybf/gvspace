@@ -10,50 +10,54 @@ import { Breadcrumbs } from "./breadcrumbs";
 import { getTeamDirectory } from "./wordpress-team";
 
 import { getTranslations } from "@/i18n/pages";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 export async function TeamPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const t = getTranslations("team", locale).page;
   const directory = await getTeamDirectory(locale);
 
   return (
-    <main className="team-page">
-      <section className="team-hero">
-        <Image
-          className="team-hero-background"
-          src="/images/team/team.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
+    <ContentImageLabel label={contentImageLabel(t.heroTitle)}>
+      <main className="team-page">
+        <section className="team-hero">
+          <Image
+            className="team-hero-background"
+            src="/images/team/team.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="team-hero-object"
+            src="/images/team/team-object.webp"
+            alt=""
+            width={563}
+            height={535}
+            priority
+            sizes="(max-width: 600px) 360px, (max-width: 900px) 440px, 563px"
+          />
+          <div className="container team-hero-content">
+            <span className="mono">TEAM</span>
+            <h1>{t.heroTitle}</h1>
+            <p>{t.heroDescription}</p>
+            <LeadModalButton className="btn btn-primary">
+              {text.common.buildSystem}
+              <ArrowRight />
+            </LeadModalButton>
+          </div>
+        </section>
+        <TeamFounderSection locale={locale} />
+        <TeamDirectorySection locale={locale} {...directory} />
+        <CareersBanner locale={locale} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Команда" : "Team" }]}
+          visible
         />
-        <Image
-          className="team-hero-object"
-          src="/images/team/team-object.webp"
-          alt=""
-          width={563}
-          height={535}
-          priority
-          sizes="(max-width: 600px) 360px, (max-width: 900px) 440px, 563px"
-        />
-        <div className="container team-hero-content">
-          <span className="mono">TEAM</span>
-          <h1>{t.heroTitle}</h1>
-          <p>{t.heroDescription}</p>
-          <LeadModalButton className="btn btn-primary">
-            {text.common.buildSystem}
-            <ArrowRight />
-          </LeadModalButton>
-        </div>
-      </section>
-      <TeamFounderSection locale={locale} />
-      <TeamDirectorySection locale={locale} {...directory} />
-      <CareersBanner locale={locale} />
-      <Breadcrumbs
-        locale={locale}
-        items={[{ label: locale === "uk" ? "Команда" : "Team" }]}
-        visible
-      />
-      <ContactSection locale={locale} text={text.contact} />
-    </main>
+        <ContactSection locale={locale} text={text.contact} />
+      </main>
+    </ContentImageLabel>
   );
 }

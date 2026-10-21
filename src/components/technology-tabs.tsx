@@ -61,7 +61,7 @@ export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabs
               onKeyDown={(event) => handleTabKeyDown(event, index)}
               key={category.slug}
             >
-              [ {category.name.toUpperCase()} ]
+              {category.name.toUpperCase()}
             </button>
           );
         })}
@@ -79,7 +79,7 @@ export function TechnologyTabs({ categories, items, emptyLabel }: TechnologyTabs
               {item.image ? (
                 <Image src={item.image} alt="" fill sizes="84px" unoptimized />
               ) : (
-                <span aria-hidden="true">[ icon ]</span>
+                <span aria-hidden="true">icon</span>
               )}
             </div>
             <p className="mono">{item.title}</p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { ContentPhotoImg } from "./content-image-label";
 import type { BlogPostSummary } from "./wordpress-posts";
 
 const imageUrl = (image?: string) =>
@@ -13,9 +14,9 @@ export function BlogFeaturedPost({ post, locale }: { post: BlogPostSummary; loca
       <Link
         className={`blog-card-image${post.image ? "" : " is-placeholder"}`}
         href={`/blog/${post.slug}`}
-        style={{ backgroundImage: `url(${imageUrl(post.image)})` }}
         aria-label={post.title}
       >
+        <ContentPhotoImg src={imageUrl(post.image)} />
         <span>{post.category}</span>
       </Link>
       <div className="blog-featured-copy">
@@ -24,7 +25,7 @@ export function BlogFeaturedPost({ post, locale }: { post: BlogPostSummary; loca
             {post.publishedAt} · {post.readingTime} {text.minutesShort}
           </small>
           <small>
-            {text.author}: {post.authorName}
+            {text.author}: {post.authorName || "GVSPACE"}
           </small>
         </div>
         <h2>
@@ -43,9 +44,10 @@ export function BlogPostCard({ post, locale }: { post: BlogPostSummary; locale: 
       <Link
         className={`blog-card-image${post.image ? "" : " is-placeholder"}`}
         href={`/blog/${post.slug}`}
-        style={{ backgroundImage: `url(${imageUrl(post.image)})` }}
         aria-label={post.title}
-      />
+      >
+        <ContentPhotoImg src={imageUrl(post.image)} />
+      </Link>
       <div className="blog-card-meta mono">
         <span>{post.category}</span>
         <small>
@@ -56,7 +58,7 @@ export function BlogPostCard({ post, locale }: { post: BlogPostSummary; locale: 
         <Link href={`/blog/${post.slug}`}>{post.title}</Link>
       </h3>
       <small className="blog-card-author">
-        {text.author}: {post.authorName}
+        {text.author}: {post.authorName || "GVSPACE"}
       </small>
     </article>
   );

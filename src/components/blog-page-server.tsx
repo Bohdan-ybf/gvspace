@@ -1,11 +1,12 @@
 import type { Locale } from "@/i18n";
 import { BlogDesignPage } from "./blog-design-page";
 import { getBlogPosts } from "./wordpress-posts";
+import { getContactsPage, toFooterContacts } from "./wordpress-contacts";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
 
 export async function BlogPageServer({ locale }: { locale: Locale }) {
-  const posts = await getBlogPosts(locale);
+  const [posts, contacts] = await Promise.all([getBlogPosts(locale), getContactsPage(locale)]);
   return (
     <>
       <ItemListStructuredData
@@ -15,7 +16,7 @@ export async function BlogPageServer({ locale }: { locale: Locale }) {
           url: getLocalizedUrl(locale, `/blog/${post.slug}`),
         }))}
       />
-      <BlogDesignPage locale={locale} posts={posts} />
+      <BlogDesignPage locale={locale} posts={posts} socials={toFooterContacts(contacts).socials} />
     </>
   );
 }

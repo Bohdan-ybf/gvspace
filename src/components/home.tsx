@@ -15,71 +15,77 @@ import { getServiceOfferings } from "./wordpress-services";
 import { PartnersSlider } from "./partners-slider";
 import { getPartners } from "./wordpress-partners";
 import { getHomeFaqs, type FaqItem } from "./wordpress-faqs";
+import { MissionText } from "./mission-text";
 import { getHomeSeoText } from "./wordpress-home-seo-text";
 
 import { getTranslations } from "@/i18n/pages";
+import { ContentImageLabel, ContentPhotoImg } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 const problemIcons = ["no-clarity", "no-system", "no-scale"] as const;
 const approachIcons = ["clarity", "system", "scale"] as const;
 
 export function Home({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
+  const imageLabel = contentImageLabel(text.hero.title, text.hero.titleSecond);
 
   return (
-    <>
-      <section className="hero">
-        <Image
-          src="/images/hero/hero-main.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="hero-img"
-        />
-        <div className="hero-copy">
-          <span className="tag mono">{text.hero.eyebrow}</span>
-          <h1>
-            {text.hero.title}
-            <br /> {text.hero.titleSecond}
-          </h1>
-        </div>
-        <p className="hero-note">{text.hero.description}</p>
-        <LeadModalButton className="hero-cta btn btn-primary">
-          <span>{text.common.buildSystem}</span>
-          <ArrowRight />
-        </LeadModalButton>
-      </section>
-      <main>
-        <Problems text={text} />
-        <Approach text={text} />
-        <Suspense fallback={null}>
-          <HomeServices text={text} locale={locale} />
-        </Suspense>
-        <MobileClarity text={text} />
-        <Suspense fallback={null}>
-          <TechnologySection locale={locale} title={text.technology.title} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <CasesSection text={text.cases} locale={locale} />
-        </Suspense>
-        <People text={text} />
-        <Suspense fallback={null}>
-          <HomePartners text={text} locale={locale} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <ReviewsSection locale={locale} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <HomeBlog text={text} locale={locale} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <HomeFaq text={text} locale={locale} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <HomeMission text={text} locale={locale} />
-        </Suspense>
-        <ContactSection locale={locale} text={text.contact} />
-      </main>
-    </>
+    <ContentImageLabel label={imageLabel}>
+      <>
+        <section className="hero">
+          <Image
+            src="/images/hero/hero-main.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="hero-img"
+          />
+          <div className="hero-copy">
+            <span className="tag mono">{text.hero.eyebrow}</span>
+            <h1>
+              {text.hero.title}
+              <br /> {text.hero.titleSecond}
+            </h1>
+          </div>
+          <p className="hero-note">{text.hero.description}</p>
+          <LeadModalButton className="hero-cta btn btn-primary">
+            <span>{text.common.buildSystem}</span>
+            <ArrowRight />
+          </LeadModalButton>
+        </section>
+        <main>
+          <Problems text={text} />
+          <Approach text={text} />
+          <Suspense fallback={null}>
+            <HomeServices text={text} locale={locale} />
+          </Suspense>
+          <MobileClarity text={text} />
+          <Suspense fallback={null}>
+            <TechnologySection locale={locale} title={text.technology.title} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <CasesSection text={text.cases} locale={locale} />
+          </Suspense>
+          <People text={text} />
+          <Suspense fallback={null}>
+            <HomePartners text={text} locale={locale} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <ReviewsSection locale={locale} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <HomeBlog text={text} locale={locale} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <HomeFaq text={text} locale={locale} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <HomeMission text={text} locale={locale} />
+          </Suspense>
+          <ContactSection locale={locale} text={text.contact} />
+        </main>
+      </>
+    </ContentImageLabel>
   );
 }
 
@@ -119,10 +125,9 @@ async function HomeFaq({ text, locale }: { text: Messages; locale: Locale }) {
 async function HomeMission({ text, locale }: { text: Messages; locale: Locale }) {
   const homeSeoText = await getHomeSeoText(locale);
   return (
-    <section className="mission container">
-      <b>{homeSeoText?.title ?? text.mission.statement}</b>
+    <MissionText title={homeSeoText?.title ?? text.mission.statement}>
       <p>{homeSeoText?.content ?? text.mission.description}</p>
-    </section>
+    </MissionText>
   );
 }
 
@@ -143,7 +148,7 @@ function Problems({ text }: { text: Messages }) {
                 width={96}
                 height={96}
               />
-              <span className="mono">[ 0{index + 1} ]</span>
+              <span className="mono">0{index + 1}</span>
             </div>
             <h3>{item[0]}</h3>
             <p className="muted">{item[1]}</p>
@@ -169,7 +174,7 @@ function Approach({ text }: { text: Messages }) {
                 width={96}
                 height={96}
               />
-              <span className="mono">[ {item[0]} ]</span>
+              <span className="mono">{item[0]}</span>
             </div>
             <h3>{item[1]}</h3>
             <p className="muted">{text.approach.description}</p>
@@ -206,7 +211,9 @@ function People({ text }: { text: Messages }) {
         <h2>{text.people.title}</h2>
         <div className="people-profile-grid">
           <div className="people-founder">
-            <div className="people-founder-photo" role="img" aria-label={text.people.name} />
+            <div className="people-founder-photo">
+              <ContentPhotoImg src="/images/home/founder.webp" />
+            </div>
             <Link className="btn btn-primary people-team-link" href="/team">
               <span>{text.people.teamAction}</span>
               <ArrowRight />
@@ -274,26 +281,22 @@ function Blog({
                 aria-label={post.title}
                 className={`home-blog-image${post.image ? "" : " is-placeholder"}`}
                 href={`/blog/${post.slug}`}
-                style={{ backgroundImage: `url(${image})` }}
-              />
+              >
+                <ContentPhotoImg src={image} />
+              </Link>
               <div className="home-blog-body">
                 <div className="home-blog-meta mono">
                   <span className="home-blog-category">{post.category}</span>
-                  <span>{post.publishedAt}</span>
-                  {index === 0 && (
-                    <>
-                      <span aria-hidden="true">•</span>
-                      <span>
-                        {post.readingTime} {t.minutesLabel}
-                      </span>
-                    </>
-                  )}
+                  <span>
+                    {post.publishedAt}
+                    {index === 0 ? ` · ${post.readingTime} ${t.minutesLabel}` : ""}
+                  </span>
                 </div>
                 <h3>
                   <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                 </h3>
                 <small className="home-blog-card-author mono">
-                  {t.cardAuthorLabel}: {post.authorName}
+                  {t.cardAuthorLabel}: {post.authorName || "GVSPACE"}
                 </small>
               </div>
             </article>

@@ -11,6 +11,8 @@ import { TechnologiesOverviewSection } from "./technologies-overview-section";
 import { getTechnologyStack } from "./wordpress-technologies";
 
 import { getTranslations } from "@/i18n/pages";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 export async function TechnologiesPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const t = getTranslations("technologies", locale).page;
@@ -23,45 +25,47 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
   };
 
   return (
-    <main className="technologies-page">
-      <section className="technologies-hero">
-        <Image
-          className="technologies-hero-background"
-          src="/images/technologies/technologies.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
+    <ContentImageLabel label={contentImageLabel(t.heroTitle)}>
+      <main className="technologies-page">
+        <section className="technologies-hero">
+          <Image
+            className="technologies-hero-background"
+            src="/images/technologies/technologies.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="technologies-hero-object"
+            src="/images/technologies/technologies-object.webp"
+            alt=""
+            width={488}
+            height={459}
+            priority
+            sizes="(max-width: 600px) 340px, (max-width: 900px) 400px, 488px"
+          />
+          <div className="container technologies-hero-content">
+            <span className="mono">TECHNOLOGIES</span>
+            <h1>{t.heroTitle}</h1>
+            <p>{t.heroDescription}</p>
+            <Link className="btn btn-primary" href="/contacts">
+              {t.heroAction}
+              <ArrowRight />
+            </Link>
+          </div>
+        </section>
+        <TechnologiesOverviewSection locale={locale} />
+        <TechnologiesCatalog locale={locale} categories={stack.categories} items={stack.items} />
+        <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} cardVariant="related" />
+        <ReviewsSection locale={locale} eyebrow={t.reviewsEyebrow} title={t.reviewsTitle} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Технології" : "Technologies" }]}
+          visible
         />
-        <Image
-          className="technologies-hero-object"
-          src="/images/technologies/technologies-object.webp"
-          alt=""
-          width={488}
-          height={459}
-          priority
-          sizes="(max-width: 600px) 340px, (max-width: 900px) 400px, 488px"
-        />
-        <div className="container technologies-hero-content">
-          <span className="mono">TECHNOLOGIES</span>
-          <h1>{t.heroTitle}</h1>
-          <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href="/contacts">
-            {t.heroAction}
-            <ArrowRight />
-          </Link>
-        </div>
-      </section>
-      <TechnologiesOverviewSection locale={locale} />
-      <TechnologiesCatalog locale={locale} categories={stack.categories} items={stack.items} />
-      <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} cardVariant="related" />
-      <ReviewsSection locale={locale} eyebrow={t.reviewsEyebrow} title={t.reviewsTitle} />
-      <Breadcrumbs
-        locale={locale}
-        items={[{ label: locale === "uk" ? "Технології" : "Technologies" }]}
-        visible
-      />
-      <ContactSection locale={locale} text={contactText} />
-    </main>
+        <ContactSection locale={locale} text={contactText} />
+      </main>
+    </ContentImageLabel>
   );
 }

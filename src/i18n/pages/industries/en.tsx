@@ -15,7 +15,7 @@ export default {
     casesAction: "View cases",
     processEyebrow: "WORK PROCESS",
     processTitle: "How we work",
-    processStat: "[50+] projects",
+    processStat: "50+ projects",
     processStatNote: "over 4 years of work",
     projectsAction: "Our projects",
     casesEyebrow: "CASES",

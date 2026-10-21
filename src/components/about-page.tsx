@@ -11,62 +11,66 @@ import { SystemTransitionSection } from "./system-transition-section";
 import { getTeamDirectory } from "./wordpress-team";
 
 import { getTranslations } from "@/i18n/pages";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 export async function AboutPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const t = getTranslations("about", locale).page;
   const team = await getTeamDirectory(locale);
 
   return (
-    <main className="about-page">
-      <section className="about-hero">
-        <Image
-          className="about-hero-background"
-          src="/images/about/about-bg.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
+    <ContentImageLabel label={contentImageLabel("GVSPACE", t.heroTitle)}>
+      <main className="about-page">
+        <section className="about-hero">
+          <Image
+            className="about-hero-background"
+            src="/images/about/about-bg.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="about-hero-pattern"
+            src="/images/about/about-object.svg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            unoptimized
+          />
+          <Image
+            className="about-hero-mobile"
+            src="/images/about/about-mob.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <div className="container about-hero-content">
+            <span className="mono">ABOUT US</span>
+            <h1>
+              <span className="about-hero-brand">GVSPACE</span>
+              <span>{t.heroTitle}</span>
+            </h1>
+            <p>{t.heroDescription}</p>
+            <LeadModalButton className="btn btn-primary">
+              {text.common.buildSystem}
+              <ArrowRight />
+            </LeadModalButton>
+          </div>
+        </section>
+        <AboutStatsSection locale={locale} />
+        <SystemTransitionSection locale={locale} />
+        <AboutPrinciplesSection locale={locale} members={team.members} />
+        <AgencyComparisonSection locale={locale} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Про компанію" : "About us" }]}
+          visible
         />
-        <Image
-          className="about-hero-pattern"
-          src="/images/about/about-object.svg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          unoptimized
-        />
-        <Image
-          className="about-hero-mobile"
-          src="/images/about/about-mob.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-        />
-        <div className="container about-hero-content">
-          <span className="mono">ABOUT US</span>
-          <h1>
-            <span className="about-hero-brand">GVSPACE</span>
-            <span>{t.heroTitle}</span>
-          </h1>
-          <p>{t.heroDescription}</p>
-          <LeadModalButton className="btn btn-primary">
-            {text.common.buildSystem}
-            <ArrowRight />
-          </LeadModalButton>
-        </div>
-      </section>
-      <AboutStatsSection locale={locale} />
-      <SystemTransitionSection locale={locale} />
-      <AboutPrinciplesSection locale={locale} members={team.members} />
-      <AgencyComparisonSection locale={locale} />
-      <Breadcrumbs
-        locale={locale}
-        items={[{ label: locale === "uk" ? "Про компанію" : "About us" }]}
-        visible
-      />
-      <ContactSection locale={locale} text={text.contact} />
-    </main>
+        <ContactSection locale={locale} text={text.contact} />
+      </main>
+    </ContentImageLabel>
   );
 }

@@ -12,6 +12,8 @@ import { getClientReviews, type ClientReview } from "./wordpress-reviews";
 import { getTranslations } from "@/i18n/pages";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 export async function ReviewsPage({ locale }: { locale: Locale }) {
   const reviews = await getClientReviews(locale);
   const text = getTranslations("global", locale);
@@ -20,103 +22,105 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
   const clients = reviewClients(reviews);
 
   return (
-    <>
-      <ItemListStructuredData
-        name={locale === "uk" ? "Відгуки клієнтів GVSPACE" : "GVSPACE client reviews"}
-        items={reviews.map((review) => ({
-          name: review.name,
-          url: getLocalizedUrl(locale, `/reviews#${review.slug}`),
-        }))}
-      />
-      <main className="reviews-page">
-        <section className="reviews-hero">
-          <Image
-            className="reviews-hero-background"
-            src="/images/reviews/reviews.webp"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-          />
-          <Image
-            className="reviews-hero-object"
-            src="/images/reviews/reviews-object.webp"
-            alt=""
-            width={259}
-            height={245}
-            priority
-            sizes="(max-width: 600px) 190px, (max-width: 900px) 220px, 259px"
-          />
-          <div className="container reviews-hero-content">
-            <span className="mono">CLIENTS &amp; REVIEWS</span>
-            <div className="reviews-hero-heading">
-              <div>
-                <h1>{t.heroTitle}</h1>
-                <p>{t.heroDescription}</p>
+    <ContentImageLabel label={contentImageLabel(t.heroTitle)}>
+      <>
+        <ItemListStructuredData
+          name={locale === "uk" ? "Відгуки клієнтів GVSPACE" : "GVSPACE client reviews"}
+          items={reviews.map((review) => ({
+            name: review.name,
+            url: getLocalizedUrl(locale, `/reviews#${review.slug}`),
+          }))}
+        />
+        <main className="reviews-page">
+          <section className="reviews-hero">
+            <Image
+              className="reviews-hero-background"
+              src="/images/reviews/reviews.webp"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+            />
+            <Image
+              className="reviews-hero-object"
+              src="/images/reviews/reviews-object.webp"
+              alt=""
+              width={259}
+              height={245}
+              priority
+              sizes="(max-width: 600px) 190px, (max-width: 900px) 220px, 259px"
+            />
+            <div className="container reviews-hero-content">
+              <span className="mono">CLIENTS &amp; REVIEWS</span>
+              <div className="reviews-hero-heading">
+                <div>
+                  <h1>{t.heroTitle}</h1>
+                  <p>{t.heroDescription}</p>
+                </div>
+                <Link className="btn btn-primary" href="#leave-review">
+                  {t.heroAction}
+                  <ArrowRight />
+                </Link>
               </div>
-              <Link className="btn btn-primary" href="#leave-review">
-                {t.heroAction}
-                <ArrowRight />
-              </Link>
-            </div>
-            <dl>
-              <div>
-                <dd>50+</dd>
-                <dt>{t.projectsLabel}</dt>
-              </div>
-              <div>
-                <dd>$10M+</dd>
-                <dt>{t.capitalizationLabel}</dt>
-              </div>
-              <div>
-                <dd>4</dd>
-                <dt>{t.directionsLabel}</dt>
-              </div>
-              <div>
-                <dd>87%</dd>
-                <dt>{t.recommendationLabel}</dt>
-              </div>
-            </dl>
-          </div>
-        </section>
-
-        {clients.length > 0 && (
-          <section className="container review-clients">
-            <span className="mono">{t.clientsEyebrow}</span>
-            <div>
-              {clients.map((client) =>
-                client.logo ? (
-                  <span className="review-client is-logo" key={client.slug}>
-                    <Image
-                      src={client.logo}
-                      alt={client.company || client.name}
-                      width={140}
-                      height={36}
-                      unoptimized={client.logo.endsWith(".svg")}
-                    />
-                  </span>
-                ) : (
-                  <span key={client.slug}>{client.company}</span>
-                ),
-              )}
+              <dl>
+                <div>
+                  <dd>50+</dd>
+                  <dt>{t.projectsLabel}</dt>
+                </div>
+                <div>
+                  <dd>$10M+</dd>
+                  <dt>{t.capitalizationLabel}</dt>
+                </div>
+                <div>
+                  <dd>4</dd>
+                  <dt>{t.directionsLabel}</dt>
+                </div>
+                <div>
+                  <dd>87%</dd>
+                  <dt>{t.recommendationLabel}</dt>
+                </div>
+              </dl>
             </div>
           </section>
-        )}
 
-        <ReviewsCatalog locale={locale} reviews={reviews} />
-        <CasesShowcaseSection locale={locale} />
-        <ReviewSubmitForm copy={reviewsText.form} />
-        <Breadcrumbs locale={locale} items={[{ label: reviewsText.summary.title }]} visible />
-        <ContactSection
-          locale={locale}
-          text={{
-            ...text.contact,
-            title: t.contactTitle,
-            titleSecond: t.contactTitleSecond,
-          }}
-        />
-      </main>
-    </>
+          {clients.length > 0 && (
+            <section className="container review-clients">
+              <span className="mono">{t.clientsEyebrow}</span>
+              <div>
+                {clients.map((client) =>
+                  client.logo ? (
+                    <span className="review-client is-logo" key={client.slug}>
+                      <Image
+                        src={client.logo}
+                        alt={client.company || client.name}
+                        width={140}
+                        height={36}
+                        unoptimized={client.logo.endsWith(".svg")}
+                      />
+                    </span>
+                  ) : (
+                    <span key={client.slug}>{client.company}</span>
+                  ),
+                )}
+              </div>
+            </section>
+          )}
+
+          <ReviewsCatalog locale={locale} reviews={reviews} />
+          <CasesShowcaseSection locale={locale} />
+          <ReviewSubmitForm copy={reviewsText.form} />
+          <Breadcrumbs locale={locale} items={[{ label: reviewsText.summary.title }]} visible />
+          <ContactSection
+            locale={locale}
+            text={{
+              ...text.contact,
+              title: t.contactTitle,
+              titleSecond: t.contactTitleSecond,
+            }}
+          />
+        </main>
+      </>
+    </ContentImageLabel>
   );
 }
 

@@ -6,8 +6,11 @@ import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
 import { ArrowRight } from "./icons/arrow-right";
 import { Breadcrumbs } from "./breadcrumbs";
+import { MissionText } from "./mission-text";
 import { CaseArrow } from "./icons/case-arrow";
 import { ReviewsSection } from "./reviews-section";
+import { ContentImageLabel, ContentPhoto } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 import { StructuredData } from "./structured-data";
 import { TechnologyMeetSection } from "./technology-meet-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
@@ -173,224 +176,227 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
     : undefined;
 
   return (
-    <>
-      <StructuredData data={faqSchema ? [technologySchema, faqSchema] : technologySchema} />
-      <main className="technology-detail-page">
-        <section className="technology-detail-hero">
-          <div className="container technology-detail-hero-grid">
-            <div className="technology-detail-hero-copy">
-              <h1>{heading}</h1>
-              {lead ? <p>{lead}</p> : null}
-            </div>
-            {logo ? (
-              <div className="technology-detail-logo">
-                <Image
-                  src={logo}
-                  alt={technology.imageAlt || technology.title}
-                  width={220}
-                  height={220}
-                  priority
-                  unoptimized={logo.endsWith(".svg")}
-                />
+    <ContentImageLabel label={contentImageLabel(heading)}>
+      <>
+        <StructuredData data={faqSchema ? [technologySchema, faqSchema] : technologySchema} />
+        <main className="technology-detail-page">
+          <section className="technology-detail-hero">
+            <div className="container technology-detail-hero-grid">
+              <div className="technology-detail-hero-copy">
+                <h1>{heading}</h1>
+                {lead ? <p>{lead}</p> : null}
               </div>
-            ) : null}
-          </div>
-        </section>
-
-        {technology.why ? (
-          <section className="technology-detail-why">
-            <div className="container">
-              <span className="mono">{t.detail.whyEyebrow}</span>
-              <p>
-                <EmphasisText text={technology.why} />
-              </p>
-            </div>
-          </section>
-        ) : null}
-
-        {technology.triggers.length ? (
-          <section className="section container technology-detail-triggers">
-            <span className="mono">{t.detail.triggersEyebrow}</span>
-            <div>
-              {technology.triggers.map((trigger, index) => (
-                <article key={`${trigger.title}-${index}`}>
-                  <small className="mono">
-                    {t.detail.triggerLabel} {index + 1}
-                  </small>
-                  <h2>{trigger.title}</h2>
-                  <p>{trigger.description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {technology.uses.length ? (
-          <section className="section container technology-detail-uses">
-            <span className="mono">{t.detail.usesEyebrow}</span>
-            <div>
-              {technology.uses.map((use, index) => (
-                <article key={`${use.title}-${index}`}>
-                  <span className="mono">{String(index + 1).padStart(2, "0")}</span>
-                  <h2>{use.title}</h2>
-                  <p>{use.description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {relatedServices.length ? (
-          <section className="section container technology-detail-services">
-            {directionIcon ? (
-              <span className="technology-detail-services-visual">
-                <Image
-                  src={directionIcon}
-                  alt=""
-                  width={1000}
-                  height={800}
-                  sizes="(max-width: 600px) 229px, (max-width: 900px) 360px, 360px"
-                  unoptimized
-                />
-              </span>
-            ) : (
-              <ServicesChevron />
-            )}
-            <div>
-              <span className="mono">{t.detail.servicesEyebrow}</span>
-              <div>
-                {relatedServices.map((service) => (
-                  <Link href={`/services/${directionSlug}/${service.slug}`} key={service.id}>
-                    <span>{service.title}</span>
-                    <ArrowRight />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        {relatedCase ? (
-          <section className="section container technology-detail-case">
-            <div className="technology-detail-case-head">
-              <span className="mono">{t.detail.caseEyebrow}</span>
-              <Link className="btn btn-primary" href="/cases">
-                {t.detail.allCases}
-                <ArrowRight />
-              </Link>
-            </div>
-            <div className="technology-detail-case-grid">
-              {relatedCase.metrics.length ? (
-                <div className="technology-detail-case-metrics">
-                  {relatedCase.metrics.slice(0, 3).map((metric) => (
-                    <article key={`${metric.value}-${metric.label}`}>
-                      <strong>
-                        {metric.value}
-                        {metric.label ? <span>{metric.label}</span> : null}
-                      </strong>
-                    </article>
-                  ))}
+              {logo ? (
+                <div className="technology-detail-logo">
+                  <Image
+                    src={logo}
+                    alt={technology.imageAlt || technology.title}
+                    width={220}
+                    height={220}
+                    priority
+                    unoptimized={logo.endsWith(".svg")}
+                  />
                 </div>
               ) : null}
-              <article className="technology-detail-case-card">
-                <Link className="technology-detail-case-media" href={`/cases/${relatedCase.slug}`}>
-                  {relatedCase.image ? (
-                    <Image
-                      src={relatedCase.image}
-                      alt={relatedCase.catalogTitle}
-                      fill
-                      sizes="(max-width: 900px) 100vw, 720px"
-                    />
-                  ) : null}
-                  <span className="technology-detail-case-labels mono">
-                    {caseDate ? <span>{caseDate}</span> : null}
-                    {caseCategories.length ? <span>[ {caseCategories.join(" / ")} ]</span> : null}
-                  </span>
-                </Link>
-                <div className="technology-detail-case-copy">
-                  <h3>
-                    <Link href={`/cases/${relatedCase.slug}`}>{relatedCase.catalogTitle}</Link>
-                  </h3>
-                  {relatedCase.excerpt ? <p>{relatedCase.excerpt}</p> : null}
-                  <Link
-                    className="technology-detail-case-arrow"
-                    href={`/cases/${relatedCase.slug}`}
-                    aria-label={casesCatalog.openCase}
-                  >
-                    <CaseArrow />
-                  </Link>
+            </div>
+          </section>
+
+          {technology.why ? (
+            <section className="technology-detail-why">
+              <div className="container">
+                <span className="mono">{t.detail.whyEyebrow}</span>
+                <p>
+                  <EmphasisText text={technology.why} />
+                </p>
+              </div>
+            </section>
+          ) : null}
+
+          {technology.triggers.length ? (
+            <section className="section container technology-detail-triggers">
+              <span className="mono">{t.detail.triggersEyebrow}</span>
+              <div>
+                {technology.triggers.map((trigger, index) => (
+                  <article key={`${trigger.title}-${index}`}>
+                    <small className="mono">
+                      {t.detail.triggerLabel} {index + 1}
+                    </small>
+                    <h2>{trigger.title}</h2>
+                    <p>{trigger.description}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {technology.uses.length ? (
+            <section className="section container technology-detail-uses">
+              <span className="mono">{t.detail.usesEyebrow}</span>
+              <div>
+                {technology.uses.map((use, index) => (
+                  <article key={`${use.title}-${index}`}>
+                    <span className="mono">{String(index + 1).padStart(2, "0")}</span>
+                    <h2>{use.title}</h2>
+                    <p>{use.description}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {relatedServices.length ? (
+            <section className="section container technology-detail-services">
+              {directionIcon ? (
+                <span className="technology-detail-services-visual">
+                  <Image
+                    src={directionIcon}
+                    alt=""
+                    width={1000}
+                    height={800}
+                    sizes="(max-width: 600px) 229px, (max-width: 900px) 360px, 360px"
+                    unoptimized
+                  />
+                </span>
+              ) : (
+                <ServicesChevron />
+              )}
+              <div>
+                <span className="mono">{t.detail.servicesEyebrow}</span>
+                <div>
+                  {relatedServices.map((service) => (
+                    <Link href={`/services/${directionSlug}/${service.slug}`} key={service.id}>
+                      <span>{service.title}</span>
+                      <ArrowRight />
+                    </Link>
+                  ))}
                 </div>
-              </article>
-            </div>
-          </section>
-        ) : null}
+              </div>
+            </section>
+          ) : null}
 
-        <TechnologyMeetSection
-          locale={locale}
-          title={t.detail.meetTitle}
-          people={meetPeople}
-          clarityTitle={text.clarity.title}
-          clarityDescription={text.clarity.description}
-          clarityAction={text.clarity.action}
-          yearsLabel={t.detail.meetYearsLabel}
-          projectsLabel={t.detail.meetProjectsLabel}
-        />
+          {relatedCase ? (
+            <section className="section container technology-detail-case">
+              <div className="technology-detail-case-head">
+                <span className="mono">{t.detail.caseEyebrow}</span>
+                <Link className="btn btn-primary" href="/cases">
+                  {t.detail.allCases}
+                  <ArrowRight />
+                </Link>
+              </div>
+              <div className="technology-detail-case-grid">
+                {relatedCase.metrics.length ? (
+                  <div className="technology-detail-case-metrics">
+                    {relatedCase.metrics.slice(0, 3).map((metric) => (
+                      <article key={`${metric.value}-${metric.label}`}>
+                        <strong>
+                          {metric.value}
+                          {metric.label ? <span>{metric.label}</span> : null}
+                        </strong>
+                      </article>
+                    ))}
+                  </div>
+                ) : null}
+                <article className="technology-detail-case-card">
+                  <Link
+                    className="technology-detail-case-media"
+                    href={`/cases/${relatedCase.slug}`}
+                  >
+                    {relatedCase.image ? (
+                      <ContentPhoto
+                        src={relatedCase.image}
+                        fill
+                        sizes="(max-width: 900px) 100vw, 720px"
+                      />
+                    ) : null}
+                    <span className="technology-detail-case-labels mono">
+                      {caseDate ? <span>{caseDate}</span> : null}
+                      {caseCategories.length ? <span>{caseCategories.join(" / ")}</span> : null}
+                    </span>
+                  </Link>
+                  <div className="technology-detail-case-copy">
+                    <h3>
+                      <Link href={`/cases/${relatedCase.slug}`}>{relatedCase.catalogTitle}</Link>
+                    </h3>
+                    {relatedCase.excerpt ? <p>{relatedCase.excerpt}</p> : null}
+                    <Link
+                      className="technology-detail-case-arrow"
+                      href={`/cases/${relatedCase.slug}`}
+                      aria-label={casesCatalog.openCase}
+                    >
+                      <CaseArrow />
+                    </Link>
+                  </div>
+                </article>
+              </div>
+            </section>
+          ) : null}
 
-        <ReviewsSection
-          locale={locale}
-          eyebrow={t.page.reviewsEyebrow}
-          title={t.page.reviewsTitle}
-          tags={[...technology.categorySlugs, directionSlug, technology.slug]}
-          slugs={technology.relatedReviews}
-        />
+          <TechnologyMeetSection
+            locale={locale}
+            title={t.detail.meetTitle}
+            people={meetPeople}
+            clarityTitle={text.clarity.title}
+            clarityDescription={text.clarity.description}
+            clarityAction={text.clarity.action}
+            yearsLabel={t.detail.meetYearsLabel}
+            projectsLabel={t.detail.meetProjectsLabel}
+          />
 
-        <TechnologyShowcaseSection
-          locale={locale}
-          title={t.detail.otherTitle}
-          excludeSlug={technology.slug}
-          initialCategory={technology.categorySlugs[0]}
-        />
+          <ReviewsSection
+            locale={locale}
+            eyebrow={t.page.reviewsEyebrow}
+            title={t.page.reviewsTitle}
+            tags={[...technology.categorySlugs, directionSlug, technology.slug]}
+            slugs={technology.relatedReviews}
+          />
 
-        {faqs.length ? (
-          <section className="section container faq">
-            <div className="faq-intro">
-              <h2>{text.faq.title}</h2>
-              <p>{text.faq.subtitle}</p>
-              <Link className="btn btn-primary" href="/contacts">
-                {text.faq.action}
-              </Link>
-            </div>
-            <div className="faq-list">
-              {faqs.map((item, index) => (
-                <details key={item.id} name="technology-faq" open={index === 1}>
-                  <summary>
-                    {item.question}
-                    <span>+</span>
-                  </summary>
-                  <p>{item.answer}</p>
-                </details>
-              ))}
-            </div>
-          </section>
-        ) : null}
+          <TechnologyShowcaseSection
+            locale={locale}
+            title={t.detail.otherTitle}
+            excludeSlug={technology.slug}
+            initialCategory={technology.categorySlugs[0]}
+          />
 
-        {technology.seoLead || technology.seoText ? (
-          <section className="mission container">
-            {technology.seoLead ? <b>{technology.seoLead}</b> : null}
-            {technology.seoText ? <p>{technology.seoText}</p> : null}
-          </section>
-        ) : null}
+          {faqs.length ? (
+            <section className="section container faq">
+              <div className="faq-intro">
+                <h2>{text.faq.title}</h2>
+                <p>{text.faq.subtitle}</p>
+                <Link className="btn btn-primary" href="/contacts">
+                  {text.faq.action}
+                </Link>
+              </div>
+              <div className="faq-list">
+                {faqs.map((item, index) => (
+                  <details key={item.id} name="technology-faq" open={index === 1}>
+                    <summary>
+                      {item.question}
+                      <span>+</span>
+                    </summary>
+                    <p>{item.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-        <Breadcrumbs
-          locale={locale}
-          items={[
-            { label: t.detail.catalogLabel, pathname: "/technologies" },
-            { label: categoryName },
-            { label: technology.title },
-          ]}
-          visible
-        />
-      </main>
-    </>
+          {technology.seoLead || technology.seoText ? (
+            <MissionText title={technology.seoLead || undefined}>
+              {technology.seoText ? <p>{technology.seoText}</p> : null}
+            </MissionText>
+          ) : null}
+
+          <Breadcrumbs
+            locale={locale}
+            items={[
+              { label: t.detail.catalogLabel, pathname: "/technologies" },
+              { label: categoryName },
+              { label: technology.title },
+            ]}
+            visible
+          />
+        </main>
+      </>
+    </ContentImageLabel>
   );
 }

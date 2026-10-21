@@ -20,7 +20,7 @@ function TechnologyTools({ items, emptyState }: { items: TechnologyItem[]; empty
               {item.image ? (
                 <Image src={item.image} alt="" fill sizes="72px" unoptimized />
               ) : (
-                <span aria-hidden="true">[ icon ]</span>
+                <span aria-hidden="true">icon</span>
               )}
             </div>
             <div>

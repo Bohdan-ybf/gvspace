@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { ContentPhoto } from "./content-image-label";
 import { LeadModalButton } from "./lead-modal";
 import type { Locale } from "@/i18n";
 
@@ -56,13 +57,22 @@ export function TechnologyMeetSection({
         {person ? (
           <>
             <div className="technology-meet-photo" key={`${person.name}-photo`}>
-              <Image
-                src={person.photo || "/images/team/user-none.jpg"}
-                alt={person.name}
-                fill
-                sizes="(max-width: 900px) 100vw, 300px"
-                unoptimized={!person.photo || person.photo.startsWith("http")}
-              />
+              {person.photo ? (
+                <ContentPhoto
+                  src={person.photo}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 300px"
+                  unoptimized={person.photo.startsWith("http")}
+                />
+              ) : (
+                <Image
+                  src="/images/team/user-none.jpg"
+                  alt=""
+                  fill
+                  sizes="(max-width: 900px) 100vw, 300px"
+                  unoptimized
+                />
+              )}
             </div>
             <article className="technology-meet-profile" key={`${person.name}-profile`}>
               {canCycle ? (

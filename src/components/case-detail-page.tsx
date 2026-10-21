@@ -8,6 +8,8 @@ import { getCaseStudy, type CaseMedia, type CaseMetric, type CaseTagLink } from 
 import { getTranslations } from "@/i18n/pages";
 import { getDynamicSeo } from "@/wordpress-seo";
 import { Breadcrumbs } from "./breadcrumbs";
+import { ContentImageLabel, ContentPhoto } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 import { StructuredData } from "./structured-data";
 
 function paragraphs(text: string) {
@@ -21,15 +23,7 @@ function hasMedia(media?: CaseMedia) {
   return Boolean(media?.url);
 }
 
-function Slot({
-  media,
-  className = "",
-  alt,
-}: {
-  media?: CaseMedia;
-  className?: string;
-  alt: string;
-}) {
+function Slot({ media, className = "" }: { media?: CaseMedia; className?: string }) {
   const url = media?.url ?? "";
   if (!url) return null;
   if (media?.kind === "video") {
@@ -41,7 +35,7 @@ function Slot({
   }
   return (
     <div className={`case-slot ${className}`}>
-      <Image alt={alt} fill sizes="(max-width: 900px) 100vw, 1200px" src={url} />
+      <ContentPhoto fill sizes="(max-width: 900px) 100vw, 1200px" src={url} />
     </div>
   );
 }
@@ -142,305 +136,301 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
   );
 
   return (
-    <>
-      <StructuredData
-        data={{
-          "@context": "https://schema.org",
-          "@type": "CreativeWork",
-          name: title,
-          description: seo?.description || data.excerpt,
-          image: seo?.openGraphImage || data.cover || data.image,
-          datePublished: seo?.datePublished,
-          dateModified: seo?.dateModified,
-          author: { "@type": "Organization", name: "GVSPACE" },
-        }}
-      />
-      <main className="case-detail-page case-sheet">
-        <header className="container case-sheet-hero">
-          <div className={`case-sheet-hero-top${data.logo ? "" : " is-text-only"}`}>
-            <div>
-              {data.projectType || data.serviceBadge ? (
-                <div className="case-sheet-kickers">
-                  {data.projectType ? (
-                    <p className="case-sheet-kicker">{data.projectType}</p>
-                  ) : null}
-                  {data.serviceBadge && data.serviceBadge !== data.projectType ? (
-                    <p className="case-sheet-kicker is-solid">{data.serviceBadge}</p>
-                  ) : null}
+    <ContentImageLabel label={contentImageLabel(title)}>
+      <>
+        <StructuredData
+          data={{
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            name: title,
+            description: seo?.description || data.excerpt,
+            image: seo?.openGraphImage || data.cover || data.image,
+            datePublished: seo?.datePublished,
+            dateModified: seo?.dateModified,
+            author: { "@type": "Organization", name: "GVSPACE" },
+          }}
+        />
+        <main className="case-detail-page case-sheet">
+          <header className="container case-sheet-hero">
+            <div className={`case-sheet-hero-top${data.logo ? "" : " is-text-only"}`}>
+              <div>
+                {data.projectType || data.serviceBadge ? (
+                  <div className="case-sheet-kickers">
+                    {data.projectType ? (
+                      <p className="case-sheet-kicker">{data.projectType}</p>
+                    ) : null}
+                    {data.serviceBadge && data.serviceBadge !== data.projectType ? (
+                      <p className="case-sheet-kicker is-solid">{data.serviceBadge}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+                <h1>{title}</h1>
+                {data.subtitle ? <p>{data.subtitle}</p> : null}
+              </div>
+              {data.logo ? (
+                <div className="case-sheet-logo">
+                  <Image alt={`${title} logo`} height={259} preload src={data.logo} width={326} />
                 </div>
               ) : null}
-              <h1>{title}</h1>
-              {data.subtitle ? <p>{data.subtitle}</p> : null}
             </div>
-            {data.logo ? (
-              <div className="case-sheet-logo">
-                <Image alt={`${title} logo`} height={259} preload src={data.logo} width={326} />
-              </div>
+            <Metrics metrics={data.metrics} />
+          </header>
+
+          <div className="container case-sheet-body">
+            {data.cover ? (
+              <Slot
+                className="case-sheet-cover"
+                media={{ url: data.cover, kind: data.coverKind || "image" }}
+              />
+            ) : null}
+
+            {data.lead || showFacts ? (
+              <section className={`case-sheet-intro${showFacts ? "" : " is-text-only"}`}>
+                <div>
+                  {paragraphs(data.lead).map((part) => (
+                    <p key={part}>{part}</p>
+                  ))}
+                </div>
+                {showFacts ? (
+                  <dl>
+                    {facts.map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                    {data.serviceTags.length > 0 ? (
+                      <div>
+                        <dt>{t.factServices}</dt>
+                        <FactTags tags={data.serviceTags} />
+                      </div>
+                    ) : null}
+                    {data.techTags.length > 0 ? (
+                      <div>
+                        <dt>{t.factTechnologies}</dt>
+                        <FactTags tags={data.techTags} />
+                      </div>
+                    ) : null}
+                  </dl>
+                ) : null}
+              </section>
             ) : null}
           </div>
-          <Metrics metrics={data.metrics} />
-        </header>
 
-        <div className="container case-sheet-body">
-          {data.cover ? (
-            <Slot
-              alt={title}
-              className="case-sheet-cover"
-              media={{ url: data.cover, kind: data.coverKind || "image" }}
-            />
-          ) : null}
-
-          {data.lead || showFacts ? (
-            <section className={`case-sheet-intro${showFacts ? "" : " is-text-only"}`}>
-              <div>
-                {paragraphs(data.lead).map((part) => (
-                  <p key={part}>{part}</p>
-                ))}
-              </div>
-              {showFacts ? (
-                <dl>
-                  {facts.map(([label, value]) => (
-                    <div key={label}>
-                      <dt>{label}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                  {data.serviceTags.length > 0 ? (
-                    <div>
-                      <dt>{t.factServices}</dt>
-                      <FactTags tags={data.serviceTags} />
-                    </div>
-                  ) : null}
-                  {data.techTags.length > 0 ? (
-                    <div>
-                      <dt>{t.factTechnologies}</dt>
-                      <FactTags tags={data.techTags} />
-                    </div>
-                  ) : null}
-                </dl>
-              ) : null}
-            </section>
-          ) : null}
-        </div>
-
-        {data.challenge || data.problems.length > 0 ? (
-          <section className="case-sheet-brief">
-            <div className="container">
-              <div>
-                <span className="mono">{t.briefEyebrow}</span>
-                <h2>{t.challengeTitle}</h2>
-                {paragraphs(data.challenge).map((part) => (
-                  <p key={part}>{part}</p>
-                ))}
-              </div>
-              {data.problems.length > 0 ? (
-                <div className="case-sheet-brief-aside">
-                  <h3>{t.problemsTitle}</h3>
-                  <ul>
-                    {data.problems.map((problem) => (
-                      <li key={problem}>{problem}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {briefMedia.length > 0 ? (
-                <div className={`case-sheet-pair${briefMedia.length === 1 ? " is-single" : ""}`}>
-                  {briefMedia.map((media, index) => (
-                    <Slot alt={title} key={media.url || index} media={media} />
+          {data.challenge || data.problems.length > 0 ? (
+            <section className="case-sheet-brief">
+              <div className="container">
+                <div>
+                  <span className="mono">{t.briefEyebrow}</span>
+                  <h2>{t.challengeTitle}</h2>
+                  {paragraphs(data.challenge).map((part) => (
+                    <p key={part}>{part}</p>
                   ))}
                 </div>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        <div className="container case-sheet-body">
-          {data.goalsTitle || data.goals.length > 0 ? (
-            <section className="case-sheet-goals">
-              <span className="mono">{t.goalsEyebrow}</span>
-              {data.goalsTitle ? <h2>{data.goalsTitle}</h2> : null}
-              <ol>
-                {data.goals.map((goal, index) => (
-                  <li key={`${goal.title}-${index}`}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <h3>{goal.title}</h3>
-                    {goal.description ? <p>{goal.description}</p> : null}
-                  </li>
-                ))}
-              </ol>
+                {data.problems.length > 0 ? (
+                  <div className="case-sheet-brief-aside">
+                    <h3>{t.problemsTitle}</h3>
+                    <ul>
+                      {data.problems.map((problem) => (
+                        <li key={problem}>{problem}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {briefMedia.length > 0 ? (
+                  <div className={`case-sheet-pair${briefMedia.length === 1 ? " is-single" : ""}`}>
+                    {briefMedia.map((media, index) => (
+                      <Slot key={media.url || index} media={media} />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </section>
           ) : null}
-        </div>
 
-        {showProcess ? (
-          <section className="case-sheet-process">
-            <div className="container">
-              <div>
-                <span className="mono">{t.processEyebrow}</span>
-                <h2>{data.processTitle || t.processHeading}</h2>
-              </div>
-              {showStep1 ? (
-                <article
-                  className={stepLayout(
-                    hasMedia(data.stepMedia[0]),
-                    Boolean(data.step1Result.title || data.step1Result.description),
-                  )}
-                >
-                  <div>
-                    <h3>{step1Title}</h3>
-                    {paragraphs(data.step1).map((part) => (
-                      <p key={part}>{part}</p>
-                    ))}
+          <div className="container case-sheet-body">
+            {data.goalsTitle || data.goals.length > 0 ? (
+              <section className="case-sheet-goals">
+                <span className="mono">{t.goalsEyebrow}</span>
+                {data.goalsTitle ? <h2>{data.goalsTitle}</h2> : null}
+                <ol>
+                  {data.goals.map((goal, index) => (
+                    <li key={`${goal.title}-${index}`}>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <h3>{goal.title}</h3>
+                      {goal.description ? <p>{goal.description}</p> : null}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
+          </div>
+
+          {showProcess ? (
+            <section className="case-sheet-process">
+              <div className="container">
+                <div>
+                  <span className="mono">{t.processEyebrow}</span>
+                  <h2>{data.processTitle || t.processHeading}</h2>
+                </div>
+                {showStep1 ? (
+                  <article
+                    className={stepLayout(
+                      hasMedia(data.stepMedia[0]),
+                      Boolean(data.step1Result.title || data.step1Result.description),
+                    )}
+                  >
+                    <div>
+                      <h3>{step1Title}</h3>
+                      {paragraphs(data.step1).map((part) => (
+                        <p key={part}>{part}</p>
+                      ))}
+                      {hasMedia(data.stepMedia[0]) ? (
+                        <StageResult
+                          description={data.step1Result.description}
+                          label={t.stageResult}
+                          title={data.step1Result.title}
+                        />
+                      ) : null}
+                    </div>
                     {hasMedia(data.stepMedia[0]) ? (
+                      <Slot media={data.stepMedia[0]} />
+                    ) : (
                       <StageResult
                         description={data.step1Result.description}
                         label={t.stageResult}
                         title={data.step1Result.title}
                       />
-                    ) : null}
-                  </div>
-                  {hasMedia(data.stepMedia[0]) ? (
-                    <Slot alt={title} media={data.stepMedia[0]} />
-                  ) : (
-                    <StageResult
-                      description={data.step1Result.description}
-                      label={t.stageResult}
-                      title={data.step1Result.title}
-                    />
-                  )}
-                </article>
-              ) : null}
-              {showStep2 ? (
-                <article
-                  className={hasMedia(data.stepMedia[1]) ? "is-media-left" : "is-vectors-row"}
-                >
-                  <Slot alt={title} media={data.stepMedia[1]} />
-                  <div>
-                    <h3>{step2Title}</h3>
-                    {paragraphs(data.step2).map((part) => (
-                      <p key={part}>{part}</p>
-                    ))}
-                    {data.architecture.length > 0 ? (
-                      <div className="case-sheet-vectors">
-                        {data.architecture.map((vector) => (
-                          <div key={vector.title}>
-                            <b>
-                              {t.vectorPrefix} {vector.title}
-                            </b>
-                            <p>{vector.description}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </article>
-              ) : null}
-              {showStep3 ? (
-                <article
-                  className={stepLayout(
-                    hasMedia(data.stepMedia[2]),
-                    Boolean(data.step3Result.title || data.step3Result.description),
-                  )}
-                >
-                  <div>
-                    <h3>{step3Title}</h3>
-                    {paragraphs(data.step3).map((part) => (
-                      <p key={part}>{part}</p>
-                    ))}
+                    )}
+                  </article>
+                ) : null}
+                {showStep2 ? (
+                  <article
+                    className={hasMedia(data.stepMedia[1]) ? "is-media-left" : "is-vectors-row"}
+                  >
+                    <Slot media={data.stepMedia[1]} />
+                    <div>
+                      <h3>{step2Title}</h3>
+                      {paragraphs(data.step2).map((part) => (
+                        <p key={part}>{part}</p>
+                      ))}
+                      {data.architecture.length > 0 ? (
+                        <div className="case-sheet-vectors">
+                          {data.architecture.map((vector) => (
+                            <div key={vector.title}>
+                              <b>
+                                {t.vectorPrefix} {vector.title}
+                              </b>
+                              <p>{vector.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </article>
+                ) : null}
+                {showStep3 ? (
+                  <article
+                    className={stepLayout(
+                      hasMedia(data.stepMedia[2]),
+                      Boolean(data.step3Result.title || data.step3Result.description),
+                    )}
+                  >
+                    <div>
+                      <h3>{step3Title}</h3>
+                      {paragraphs(data.step3).map((part) => (
+                        <p key={part}>{part}</p>
+                      ))}
+                      {hasMedia(data.stepMedia[2]) ? (
+                        <StageResult
+                          description={data.step3Result.description}
+                          emphasis
+                          label={t.stageResult}
+                          title={data.step3Result.title}
+                        />
+                      ) : null}
+                    </div>
                     {hasMedia(data.stepMedia[2]) ? (
+                      <Slot media={data.stepMedia[2]} />
+                    ) : (
                       <StageResult
                         description={data.step3Result.description}
                         emphasis
                         label={t.stageResult}
                         title={data.step3Result.title}
                       />
-                    ) : null}
-                  </div>
-                  {hasMedia(data.stepMedia[2]) ? (
-                    <Slot alt={title} media={data.stepMedia[2]} />
-                  ) : (
-                    <StageResult
-                      description={data.step3Result.description}
-                      emphasis
-                      label={t.stageResult}
-                      title={data.step3Result.title}
-                    />
-                  )}
-                </article>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        <div className="container case-sheet-body">
-          {showResult ? (
-            <section className="case-sheet-outcome">
-              <span className="mono">{t.resultEyebrow}</span>
-              {data.resultTitle ? <h2>{data.resultTitle}</h2> : null}
-              {paragraphs(data.resultLead).map((part) => (
-                <p key={part}>{part}</p>
-              ))}
-              <Metrics divided metrics={data.metrics} />
-              {resultMedia.length > 0 ? (
-                <div className={`case-sheet-gallery is-${data.resultLayout}`}>
-                  {resultMedia.map((media, index) => (
-                    <Slot alt={title} key={media.url || index} media={media} />
-                  ))}
-                </div>
-              ) : null}
+                    )}
+                  </article>
+                ) : null}
+              </div>
             </section>
           ) : null}
-        </div>
 
-        {testimonial ? (
-          <section className="case-sheet-quote">
-            <div className="container">
-              <div>
-                <span className="mono">{t.testimonialEyebrow}</span>
-                <h2>{t.testimonialTitle}</h2>
-              </div>
-              <blockquote>
-                <p>{testimonial}</p>
-                {showQuoteAuthor ? (
-                  <footer>
-                    {data.authorPhoto ? (
-                      <Image
-                        alt={data.testimonialAuthor || title}
-                        height={72}
-                        src={data.authorPhoto}
-                        width={72}
-                      />
-                    ) : null}
-                    <cite>
-                      {data.testimonialAuthor ? <b>{data.testimonialAuthor}</b> : null}
-                      {data.testimonialCompany ? <small>{data.testimonialCompany}</small> : null}
-                    </cite>
-                  </footer>
+          <div className="container case-sheet-body">
+            {showResult ? (
+              <section className="case-sheet-outcome">
+                <span className="mono">{t.resultEyebrow}</span>
+                {data.resultTitle ? <h2>{data.resultTitle}</h2> : null}
+                {paragraphs(data.resultLead).map((part) => (
+                  <p key={part}>{part}</p>
+                ))}
+                <Metrics divided metrics={data.metrics} />
+                {resultMedia.length > 0 ? (
+                  <div className={`case-sheet-gallery is-${data.resultLayout}`}>
+                    {resultMedia.map((media, index) => (
+                      <Slot key={media.url || index} media={media} />
+                    ))}
+                  </div>
                 ) : null}
-              </blockquote>
-            </div>
-          </section>
-        ) : null}
+              </section>
+            ) : null}
+          </div>
 
-        <CasesShowcaseSection
-          actionLabel={t.relatedAction}
-          allowExcludedFallback
-          cardVariant="related"
-          excludeSlug={data.slug}
-          eyebrow={t.relatedEyebrow}
-          locale={locale}
-          title={t.relatedTitle}
-        />
-        <Breadcrumbs
-          items={[
-            { label: "Cases", pathname: "/cases" },
-            { label: `${title}${data.direction ? ` — ${data.direction}` : ""}` },
-          ]}
-          locale={locale}
-          visible
-        />
-        <ContactSection locale={locale} text={contact} />
-      </main>
-    </>
+          {testimonial ? (
+            <section className="case-sheet-quote">
+              <div className="container">
+                <div>
+                  <span className="mono">{t.testimonialEyebrow}</span>
+                  <h2>{t.testimonialTitle}</h2>
+                </div>
+                <blockquote>
+                  <p>{testimonial}</p>
+                  {showQuoteAuthor ? (
+                    <footer>
+                      {data.authorPhoto ? (
+                        <ContentPhoto height={72} src={data.authorPhoto} width={72} />
+                      ) : null}
+                      <cite>
+                        {data.testimonialAuthor ? <b>{data.testimonialAuthor}</b> : null}
+                        {data.testimonialCompany ? <small>{data.testimonialCompany}</small> : null}
+                      </cite>
+                    </footer>
+                  ) : null}
+                </blockquote>
+              </div>
+            </section>
+          ) : null}
+
+          <CasesShowcaseSection
+            actionLabel={t.relatedAction}
+            allowExcludedFallback
+            cardVariant="related"
+            excludeSlug={data.slug}
+            eyebrow={t.relatedEyebrow}
+            locale={locale}
+            title={t.relatedTitle}
+          />
+          <Breadcrumbs
+            items={[
+              { label: "Cases", pathname: "/cases" },
+              { label: `${title}${data.direction ? ` — ${data.direction}` : ""}` },
+            ]}
+            locale={locale}
+            visible
+          />
+          <ContactSection locale={locale} text={contact} />
+        </main>
+      </>
+    </ContentImageLabel>
   );
 }

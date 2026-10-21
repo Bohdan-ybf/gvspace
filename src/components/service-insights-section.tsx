@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { ArrowRight } from "./icons/arrow-right";
+import { ContentPhotoImg } from "./content-image-label";
 import { getBlogPosts } from "./wordpress-posts";
 
 export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
@@ -43,8 +44,9 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
               aria-label={post.title}
               className="service-insights-image"
               href={`/blog/${post.slug}`}
-              style={post.image ? { backgroundImage: `url(${post.image})` } : undefined}
-            />
+            >
+              {post.image ? <ContentPhotoImg src={post.image} /> : null}
+            </Link>
             <div className="service-insights-copy">
               <div className="service-insights-meta">
                 <span className="service-insights-category">{post.category}</span>
@@ -56,7 +58,7 @@ export async function ServiceInsightsSection({ locale }: { locale: Locale }) {
                 <Link href={`/blog/${post.slug}`}>{post.title}</Link>
               </h3>
               <p>
-                {copy.author}: {post.authorName}
+                {copy.author}: {post.authorName || "GVSPACE"}
               </p>
             </div>
           </article>

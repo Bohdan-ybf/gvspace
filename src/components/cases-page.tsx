@@ -10,6 +10,8 @@ import { getCaseStudies } from "./wordpress-cases";
 import { getTranslations } from "@/i18n/pages";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 
 export async function CasesPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
@@ -22,53 +24,55 @@ export async function CasesPage({ locale }: { locale: Locale }) {
   };
 
   return (
-    <>
-      <ItemListStructuredData
-        name={locale === "uk" ? "Кейси GVSPACE" : "GVSPACE case studies"}
-        items={projects.map((project) => ({
-          name: project.title,
-          url: getLocalizedUrl(locale, `/cases/${project.slug}`),
-        }))}
-      />
-      <main className="cases-page">
-        <section className="cases-hero">
-          <Image
-            className="cases-hero-background"
-            src="/images/cases/cases.webp"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-          />
-          <Image
-            className="cases-hero-object"
-            src="/images/cases/cases-object.webp"
-            alt=""
-            width={497}
-            height={474}
-            priority
-            sizes="(max-width: 600px) 340px, (max-width: 900px) 410px, 497px"
-          />
-          <div className="container cases-hero-content">
-            <span className="mono">{t.heroEyebrow}</span>
-            <h1>{t.heroTitle}</h1>
-            <p>{t.heroDescription}</p>
-            <LeadModalButton className="btn btn-primary">
-              {t.heroAction}
-              <ArrowRight />
-            </LeadModalButton>
-          </div>
-        </section>
-
-        <CasesCatalog locale={locale} projects={projects} />
-        <TechnologyShowcaseSection locale={locale} />
-        <Breadcrumbs
-          locale={locale}
-          items={[{ label: locale === "uk" ? "Кейси" : "Cases" }]}
-          visible
+    <ContentImageLabel label={contentImageLabel(t.heroTitle)}>
+      <>
+        <ItemListStructuredData
+          name={locale === "uk" ? "Кейси GVSPACE" : "GVSPACE case studies"}
+          items={projects.map((project) => ({
+            name: project.title,
+            url: getLocalizedUrl(locale, `/cases/${project.slug}`),
+          }))}
         />
-        <ContactSection locale={locale} text={contactText} />
-      </main>
-    </>
+        <main className="cases-page">
+          <section className="cases-hero">
+            <Image
+              className="cases-hero-background"
+              src="/images/cases/cases.webp"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+            />
+            <Image
+              className="cases-hero-object"
+              src="/images/cases/cases-object.webp"
+              alt=""
+              width={497}
+              height={474}
+              priority
+              sizes="(max-width: 600px) 340px, (max-width: 900px) 410px, 497px"
+            />
+            <div className="container cases-hero-content">
+              <span className="mono">{t.heroEyebrow}</span>
+              <h1>{t.heroTitle}</h1>
+              <p>{t.heroDescription}</p>
+              <LeadModalButton className="btn btn-primary">
+                {t.heroAction}
+                <ArrowRight />
+              </LeadModalButton>
+            </div>
+          </section>
+
+          <CasesCatalog locale={locale} projects={projects} />
+          <TechnologyShowcaseSection locale={locale} />
+          <Breadcrumbs
+            locale={locale}
+            items={[{ label: locale === "uk" ? "Кейси" : "Cases" }]}
+            visible
+          />
+          <ContactSection locale={locale} text={contactText} />
+        </main>
+      </>
+    </ContentImageLabel>
   );
 }

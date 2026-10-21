@@ -39,7 +39,7 @@ export function TechnologyShowcaseTabs({
             onClick={() => setActive(category.slug)}
             key={category.slug}
           >
-            [ {category.name.toUpperCase()} ]
+            {category.name.toUpperCase()}
           </button>
         ))}
       </div>
@@ -50,7 +50,7 @@ export function TechnologyShowcaseTabs({
               {item.image ? (
                 <Image src={item.image} alt="" fill sizes="70px" unoptimized />
               ) : (
-                <span aria-hidden="true">[ icon ]</span>
+                <span aria-hidden="true">icon</span>
               )}
             </div>
             <p className="mono">{item.title}</p>

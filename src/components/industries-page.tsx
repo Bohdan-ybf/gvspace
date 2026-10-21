@@ -9,6 +9,8 @@ import { CasesShowcaseSection } from "./cases-showcase-section";
 import { ContactSection } from "./contact-section";
 import { TechnologyShowcaseSection } from "./technology-showcase-section";
 import { getCaseStudies, type CaseStudy } from "./wordpress-cases";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 
 const industryAliases: Record<string, string[]> = {
   ecommerce: ["ecommerce", "e-commerce"],
@@ -32,140 +34,142 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
   };
 
   return (
-    <main className="industries-page">
-      <section className="industries-hero">
-        <Image
-          className="industries-hero-background"
-          src="/images/technologies/technologies-bg.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-        />
-        <Image
-          className="industries-hero-object"
-          src="/images/industries/industries-object.webp"
-          alt=""
-          width={447}
-          height={424}
-          priority
-        />
-        <div className="container industries-hero-content">
-          <span className="mono">INDUSTRIES</span>
-          <h1>
-            {t.heroTitle}
-            <br />
-            {t.heroTitleSecond}
-          </h1>
-          <p>{t.heroDescription}</p>
-          <Link className="btn btn-primary" href="/contacts">
-            {t.heroAction}
-            <ArrowRight />
-          </Link>
-        </div>
-      </section>
+    <ContentImageLabel label={contentImageLabel(t.heroTitle, t.heroTitleSecond)}>
+      <main className="industries-page">
+        <section className="industries-hero">
+          <Image
+            className="industries-hero-background"
+            src="/images/technologies/technologies-bg.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <Image
+            className="industries-hero-object"
+            src="/images/industries/industries-object.webp"
+            alt=""
+            width={447}
+            height={424}
+            priority
+          />
+          <div className="container industries-hero-content">
+            <span className="mono">INDUSTRIES</span>
+            <h1>
+              {t.heroTitle}
+              <br />
+              {t.heroTitleSecond}
+            </h1>
+            <p>{t.heroDescription}</p>
+            <Link className="btn btn-primary" href="/contacts">
+              {t.heroAction}
+              <ArrowRight />
+            </Link>
+          </div>
+        </section>
 
-      <section className="industries-statement">
-        <div className="container">
-          <span className="mono">{t.statementEyebrow}</span>
-          <p>
-            {t.statementLead} <b>{t.statementEmphasis}</b>
-          </p>
-        </div>
-      </section>
+        <section className="industries-statement">
+          <div className="container">
+            <span className="mono">{t.statementEyebrow}</span>
+            <p>
+              {t.statementLead} <b>{t.statementEmphasis}</b>
+            </p>
+          </div>
+        </section>
 
-      <section
-        className="section container industries-list"
-        aria-labelledby="industries-list-title"
-      >
-        <header>
-          <span className="mono">{t.listEyebrow}</span>
-          <h2 id="industries-list-title">{t.listTitle}</h2>
-        </header>
-        {t.items.map((item) => {
-          const projects = industryProjectCount(cases, item.slug);
-          return (
-            <article className="industry-row" id={item.slug} key={item.slug}>
-              <Image
-                className="industry-icon"
-                src={`/images/industries/icons/${item.slug}.png`}
-                alt=""
-                width={280}
-                height={280}
-              />
-              <div className="industry-copy">
-                <div className="industry-copy-head">
-                  <h3>{item.title}</h3>
-                  <span className="mono">
-                    [{projects}] {projectsWord(projects, locale)}
-                  </span>
+        <section
+          className="section container industries-list"
+          aria-labelledby="industries-list-title"
+        >
+          <header>
+            <span className="mono">{t.listEyebrow}</span>
+            <h2 id="industries-list-title">{t.listTitle}</h2>
+          </header>
+          {t.items.map((item) => {
+            const projects = industryProjectCount(cases, item.slug);
+            return (
+              <article className="industry-row" id={item.slug} key={item.slug}>
+                <Image
+                  className="industry-icon"
+                  src={`/images/industries/icons/${item.slug}.png`}
+                  alt=""
+                  width={280}
+                  height={280}
+                />
+                <div className="industry-copy">
+                  <div className="industry-copy-head">
+                    <h3>{item.title}</h3>
+                    <span className="mono">
+                      {projects} {projectsWord(projects, locale)}
+                    </span>
+                  </div>
+                  <p>{item.description}</p>
+                  <div className="industry-copy-foot">
+                    <ul>
+                      {item.tags.map((tag) => (
+                        <li className="mono" key={tag}>
+                          {tag}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link className="btn btn-primary" href="/cases">
+                      {t.casesAction}
+                      <ArrowRight />
+                    </Link>
+                  </div>
                 </div>
-                <p>{item.description}</p>
-                <div className="industry-copy-foot">
+              </article>
+            );
+          })}
+        </section>
+
+        <section className="industries-process">
+          <div className="container">
+            <span className="mono">{t.processEyebrow}</span>
+            <h2>{t.processTitle}</h2>
+            <div className="industries-process-grid">
+              {t.steps.map((step) => (
+                <article key={step.title}>
+                  <Image
+                    src={`/images/industries/steps/${step.icon}.png`}
+                    alt=""
+                    width={72}
+                    height={72}
+                  />
+                  <h3>{step.title}</h3>
                   <ul>
-                    {item.tags.map((tag) => (
-                      <li className="mono" key={tag}>
-                        {tag}
+                    {step.points.map((point) => (
+                      <li key={point}>
+                        <CheckMark />
+                        {point}
                       </li>
                     ))}
                   </ul>
-                  <Link className="btn btn-primary" href="/cases">
-                    {t.casesAction}
-                    <ArrowRight />
-                  </Link>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-      </section>
-
-      <section className="industries-process">
-        <div className="container">
-          <span className="mono">{t.processEyebrow}</span>
-          <h2>{t.processTitle}</h2>
-          <div className="industries-process-grid">
-            {t.steps.map((step) => (
-              <article key={step.title}>
-                <Image
-                  src={`/images/industries/steps/${step.icon}.png`}
-                  alt=""
-                  width={72}
-                  height={72}
-                />
-                <h3>{step.title}</h3>
-                <ul>
-                  {step.points.map((point) => (
-                    <li key={point}>
-                      <CheckMark />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
+            <div className="industries-process-footer">
+              <p className="industries-process-stat">
+                <strong>{t.processStat}</strong>
+                <span>{t.processStatNote}</span>
+              </p>
+              <Link className="btn btn-primary" href="/contacts">
+                {t.heroAction}
+              </Link>
+            </div>
           </div>
-          <div className="industries-process-footer">
-            <p className="industries-process-stat">
-              <strong>{t.processStat}</strong>
-              <span>{t.processStatNote}</span>
-            </p>
-            <Link className="btn btn-primary" href="/contacts">
-              {t.heroAction}
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} title={t.casesTitle} />
-      <TechnologyShowcaseSection locale={locale} />
-      <Breadcrumbs
-        locale={locale}
-        items={[{ label: locale === "uk" ? "Індустрії" : "Industries" }]}
-        visible
-      />
-      <ContactSection locale={locale} text={contactText} />
-    </main>
+        <CasesShowcaseSection locale={locale} eyebrow={t.casesEyebrow} title={t.casesTitle} />
+        <TechnologyShowcaseSection locale={locale} />
+        <Breadcrumbs
+          locale={locale}
+          items={[{ label: locale === "uk" ? "Індустрії" : "Industries" }]}
+          visible
+        />
+        <ContactSection locale={locale} text={contactText} />
+      </main>
+    </ContentImageLabel>
   );
 }
 

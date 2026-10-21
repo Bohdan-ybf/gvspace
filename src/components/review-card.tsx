@@ -2,7 +2,12 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { ContentPhotoImg } from "./content-image-label";
 import type { ClientReview } from "./wordpress-reviews";
+
+function ReviewAvatar({ image }: { image?: string }) {
+  return <span className="review-avatar">{image ? <ContentPhotoImg src={image} /> : null}</span>;
+}
 
 export function ReviewCard({
   review,
@@ -60,10 +65,7 @@ export function ReviewCard({
       )}
       {!compact && (
         <header>
-          <span
-            className="review-avatar"
-            style={review.image ? { backgroundImage: `url(${review.image})` } : undefined}
-          />
+          <ReviewAvatar image={review.image} />
           <span>
             <strong>{review.name}</strong>
             <small>
@@ -95,10 +97,7 @@ export function ReviewCard({
       )}
       {compact && (
         <div className="review-author">
-          <span
-            className="review-avatar"
-            style={review.image ? { backgroundImage: `url(${review.image})` } : undefined}
-          />
+          <ReviewAvatar image={review.image} />
           <span>
             <strong>{review.name}</strong>
             <small>
@@ -150,10 +149,7 @@ export function ReviewCard({
                   </blockquote>
                 </div>
                 <div className="review-modal-author">
-                  <span
-                    className="review-avatar"
-                    style={review.image ? { backgroundImage: `url(${review.image})` } : undefined}
-                  />
+                  <ReviewAvatar image={review.image} />
                   <span>
                     <strong id={titleId}>{review.name}</strong>
                     <small>

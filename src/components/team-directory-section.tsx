@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { ContentPhoto } from "./content-image-label";
 import { ArrowRight } from "./icons/arrow-right";
 import type { TeamCategory, TeamMember } from "./wordpress-team";
 
@@ -41,7 +42,7 @@ export function TeamDirectorySection({
             aria-selected={activeTab === category.slug}
             onClick={() => setActiveTab(category.slug)}
           >
-            [ {category.name} ]
+            {category.name}
           </button>
         ))}
       </div>
@@ -51,9 +52,8 @@ export function TeamDirectorySection({
           <article key={member.id}>
             <div className="team-member-photo">
               {member.image ? (
-                <Image
+                <ContentPhoto
                   src={member.image}
-                  alt={member.imageAlt}
                   fill
                   sizes="(max-width: 600px) 100vw, 320px"
                   unoptimized={

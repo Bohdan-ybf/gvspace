@@ -15,7 +15,7 @@ export type BlogPost = {
   category: string;
   publishedAt: string;
   readingTime: number;
-  author: { slug: string; name: string; role: string; avatar?: string; cardBio: string };
+  author?: { slug: string; name: string; role: string; avatar?: string; cardBio: string };
   tags: string[];
   image?: string;
   openGraphTitle?: string;
@@ -30,7 +30,7 @@ export type BlogPostSummary = {
   categorySlug: string;
   publishedAt: string;
   readingTime: number;
-  authorName: string;
+  authorName?: string;
   authorSlug?: string;
   image?: string;
   modifiedAt?: string;
@@ -102,11 +102,13 @@ type WordPressPost = {
 
 function authorFromPost(post: WordPressPost) {
   const profile = post.gvspaceBlogAuthor;
+  const name = profile?.name?.trim();
+  if (!name) return undefined;
   return {
     slug: profile?.slug ? toLatinSlug(profile.slug) : "",
-    name: profile?.name || post.author?.node?.name || "GVSPACE",
-    role: profile?.role || post.author?.node?.gvspaceAuthorProfile?.role || "GVSPACE",
-    avatar: profile?.photo || post.author?.node?.avatar?.url,
+    name,
+    role: profile?.role?.trim() || "",
+    avatar: profile?.photo || undefined,
     cardBio: profile?.cardBio ?? "",
   };
 }
@@ -161,8 +163,8 @@ export async function getBlogPosts(locale: Locale): Promise<BlogPostSummary[]> {
               1,
               Math.ceil(stripHtml(copy.content || copy.excerpt).split(" ").length / 200),
             ),
-            authorName: author.name,
-            authorSlug: author.slug || undefined,
+            authorName: author?.name,
+            authorSlug: author?.slug || undefined,
             image: post.featuredImage?.node?.sourceUrl,
             modifiedAt: post.modified,
           };

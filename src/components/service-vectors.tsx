@@ -101,9 +101,7 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
                 >
                   <span>{direction.title}</span>
                   <span className="vector-toggle" aria-hidden="true">
-                    <span>[</span>
                     <span className="vector-toggle-symbol">{isOpen ? "−" : "+"}</span>
-                    <span>]</span>
                   </span>
                 </button>
                 {direction.description ? (

@@ -11,7 +11,7 @@ export function CareersValuesSection({ locale }: { locale: Locale }) {
       <div className="careers-values-grid">
         {values.map(([title, description], index) => (
           <article key={title}>
-            <span className="mono">[ 0{index + 1} ]</span>
+            <span className="mono">0{index + 1}</span>
             <h3>{title}</h3>
             <p>{description}</p>
           </article>

@@ -14,6 +14,8 @@ import { getTranslations } from "@/i18n/pages";
 import { getLocalizedUrl } from "@/markets";
 import { ItemListStructuredData } from "./structured-data";
 import { Breadcrumbs } from "./breadcrumbs";
+import { ContentImageLabel } from "./content-image-label";
+import { contentImageLabel } from "@/content-images";
 export async function ServicesPage({ locale }: { locale: Locale }) {
   const t = getTranslations("services", locale).page;
   const serviceItems = await getServiceOfferings(locale);
@@ -40,106 +42,108 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
       }));
   const text = getTranslations("global", locale);
   return (
-    <>
-      <ItemListStructuredData
-        name={t.heroTitle}
-        items={serviceItems.map((service) => ({
-          name: service.title,
-          url: getLocalizedUrl(
-            locale,
-            service.parentSlug
-              ? `/services/${service.parentSlug}/${service.slug}`
-              : `/services/${service.slug}`,
-          ),
-        }))}
-      />
-      <main className="services-page">
-        <section className="services-hero">
-          <Image
-            className="services-hero-background"
-            src="/images/services/poslugi-l1.webp"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-          />
-          <Image
-            className="services-hero-object"
-            src="/images/services/services-object.webp"
-            alt=""
-            width={521}
-            height={490}
-            priority
-            sizes="(max-width: 600px) 360px, (max-width: 900px) 420px, 521px"
-          />
-          <div className="container services-hero-copy">
-            <span className="mono">SERVICES & SOLUTIONS</span>
-            <h1>{t.heroTitle}</h1>
-            <p>{t.heroDescription}</p>
-            <Link className="btn btn-primary" href="/contacts">
-              {t.heroAction}
-              <ArrowRight />
-            </Link>
-          </div>
-        </section>
-        <ServicesNavigation items={directions} />
-        <section className="service-directions">
-          {directions.map((direction, index) => (
-            <article
-              className="service-direction container"
-              id={direction.slug}
-              key={direction.slug}
-            >
-              <div className="service-direction-copy">
-                <div className="service-symbol" aria-hidden="true">
-                  <Image
-                    src={direction.image || `/images/services/icons/${direction.slug}.webp`}
-                    alt=""
-                    fill
-                    sizes="92px"
-                  />
-                </div>
-                <div>
-                  <span className="mono service-number">[0{index + 1}]</span>
-                  <h2>{direction.title}</h2>
-                  <Link className="btn" href={`/services/${direction.slug}`}>
-                    {t.detailsAction}
-                    <ArrowRight />
-                  </Link>
-                </div>
-                <p>{direction.description}</p>
-              </div>
-              <ul>
-                {direction.services.map((service) => (
-                  <li key={service.id || service.title}>
-                    {service.slug ? (
-                      <Link href={`/services/${direction.slug}/${service.slug}`}>
-                        <span>{service.title}</span>
-                        <ArrowRight />
-                      </Link>
-                    ) : (
-                      <>
-                        <span>{service.title}</span>
-                        <ArrowRight />
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </section>
-        <SystemTransitionSection locale={locale} />
-        <TechnologyShowcaseSection locale={locale} />
-        <CasesSection locale={locale} text={text.cases} />
-        <ReviewsSection locale={locale} />
-        <Breadcrumbs
-          locale={locale}
-          items={[{ label: locale === "uk" ? "Послуги" : "Services" }]}
-          visible
+    <ContentImageLabel label={contentImageLabel(t.heroTitle)}>
+      <>
+        <ItemListStructuredData
+          name={t.heroTitle}
+          items={serviceItems.map((service) => ({
+            name: service.title,
+            url: getLocalizedUrl(
+              locale,
+              service.parentSlug
+                ? `/services/${service.parentSlug}/${service.slug}`
+                : `/services/${service.slug}`,
+            ),
+          }))}
         />
-        <ContactSection locale={locale} text={text.contact} />
-      </main>
-    </>
+        <main className="services-page">
+          <section className="services-hero">
+            <Image
+              className="services-hero-background"
+              src="/images/services/poslugi-l1.webp"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+            />
+            <Image
+              className="services-hero-object"
+              src="/images/services/services-object.webp"
+              alt=""
+              width={521}
+              height={490}
+              priority
+              sizes="(max-width: 600px) 360px, (max-width: 900px) 420px, 521px"
+            />
+            <div className="container services-hero-copy">
+              <span className="mono">SERVICES & SOLUTIONS</span>
+              <h1>{t.heroTitle}</h1>
+              <p>{t.heroDescription}</p>
+              <Link className="btn btn-primary" href="/contacts">
+                {t.heroAction}
+                <ArrowRight />
+              </Link>
+            </div>
+          </section>
+          <ServicesNavigation items={directions} />
+          <section className="service-directions">
+            {directions.map((direction, index) => (
+              <article
+                className="service-direction container"
+                id={direction.slug}
+                key={direction.slug}
+              >
+                <div className="service-direction-copy">
+                  <div className="service-symbol" aria-hidden="true">
+                    <Image
+                      src={direction.image || `/images/services/icons/${direction.slug}.webp`}
+                      alt=""
+                      fill
+                      sizes="92px"
+                    />
+                  </div>
+                  <div>
+                    <span className="mono service-number">0{index + 1}</span>
+                    <h2>{direction.title}</h2>
+                    <Link className="btn" href={`/services/${direction.slug}`}>
+                      {t.detailsAction}
+                      <ArrowRight />
+                    </Link>
+                  </div>
+                  <p>{direction.description}</p>
+                </div>
+                <ul>
+                  {direction.services.map((service) => (
+                    <li key={service.id || service.title}>
+                      {service.slug ? (
+                        <Link href={`/services/${direction.slug}/${service.slug}`}>
+                          <span>{service.title}</span>
+                          <ArrowRight />
+                        </Link>
+                      ) : (
+                        <>
+                          <span>{service.title}</span>
+                          <ArrowRight />
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </section>
+          <SystemTransitionSection locale={locale} />
+          <TechnologyShowcaseSection locale={locale} />
+          <CasesSection locale={locale} text={text.cases} />
+          <ReviewsSection locale={locale} />
+          <Breadcrumbs
+            locale={locale}
+            items={[{ label: locale === "uk" ? "Послуги" : "Services" }]}
+            visible
+          />
+          <ContactSection locale={locale} text={text.contact} />
+        </main>
+      </>
+    </ContentImageLabel>
   );
 }

@@ -4,6 +4,8 @@ export default {
       contents: "CONTENTS",
       read: "min read",
       share: "Share",
+      copyLink: "Copy link",
+      copied: "Copied",
       author: "Author page",
       related: "READ ALSO",
     },
@@ -23,7 +25,8 @@ export default {
     commentEmail: "Email",
     commentText: "Your comment",
     commentSubmit: "Post comment",
-    commentConsent: "By submitting, you agree to the privacy policy.",
+    commentConsent:
+      'By clicking "Post comment", you agree to the processing of your personal data.',
     blogBreadcrumb: "Blog",
   },
   page: {
@@ -80,5 +83,8 @@ export default {
     noSpam: "No spam. Only ideas that help you make decisions.",
     email: "your@email.com",
     subscribe: "Subscribe",
+    consent: 'By clicking "Subscribe", you agree to the processing of your personal data.',
+    privacyLink: "Learn more",
+    follow: "Or follow us on social media:",
   },
 } as const;

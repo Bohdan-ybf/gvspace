@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { ContentPhoto } from "./content-image-label";
 import { CaseArrow } from "./icons/case-arrow";
 import type { CaseStudy } from "./wordpress-cases";
 
@@ -15,7 +15,7 @@ function caseDateLabel(date: string | undefined, locale: string) {
 
 function caseCategoryLabel(project: CaseStudy) {
   const parts = [project.projectType, project.direction].filter(Boolean);
-  return parts.length ? `[ ${parts.join(" / ")} ]` : "";
+  return parts.length ? parts.join(" / ") : "";
 }
 
 function metricUnit(label: string) {
@@ -67,12 +67,7 @@ export function CaseCard({
         </div>
         <Link className="case-image" href={href}>
           {project.image ? (
-            <Image
-              alt={project.catalogTitle}
-              fill
-              sizes="(max-width: 900px) 100vw, 50vw"
-              src={project.image}
-            />
+            <ContentPhoto fill sizes="(max-width: 900px) 100vw, 50vw" src={project.image} />
           ) : null}
           <span className="home-case-labels mono">
             {dateLabel ? <span>{dateLabel}</span> : null}
@@ -88,12 +83,7 @@ export function CaseCard({
       <article className="showcase-case-card">
         <Link className="showcase-case-image" href={href}>
           {project.image ? (
-            <Image
-              alt={project.catalogTitle}
-              fill
-              sizes="(max-width: 900px) 100vw, 33vw"
-              src={project.image}
-            />
+            <ContentPhoto fill sizes="(max-width: 900px) 100vw, 33vw" src={project.image} />
           ) : null}
           <span className="showcase-case-labels mono">
             {dateLabel ? <span>{dateLabel}</span> : null}
@@ -130,12 +120,7 @@ export function CaseCard({
     <article className="catalog-case-card">
       <Link className="catalog-case-image" href={href}>
         {project.image ? (
-          <Image
-            alt={project.catalogTitle}
-            fill
-            sizes="(max-width: 900px) 100vw, 50vw"
-            src={project.image}
-          />
+          <ContentPhoto fill sizes="(max-width: 900px) 100vw, 50vw" src={project.image} />
         ) : null}
         <span className="catalog-case-labels mono">
           {dateLabel ? <b>{dateLabel}</b> : null}
