@@ -112,10 +112,21 @@ function gvspace_ensure_case_term(string $name, string $taxonomy): string
     return $term && !is_wp_error($term) ? $term->slug : $slug;
 }
 
-function gvspace_case_term_name(int $post_id, string $taxonomy): string
+function gvspace_case_term_label(WP_Term $term, string $locale): string
 {
-    $terms = wp_get_object_terms($post_id, $taxonomy, ['fields' => 'names']);
-    return is_array($terms) && $terms ? (string) $terms[0] : '';
+    if ($locale !== 'uk') {
+        $localized = trim((string) get_term_meta($term->term_id, '_gvspace_name_' . $locale, true));
+        if ($localized !== '') return $localized;
+    }
+    return $term->name;
+}
+
+function gvspace_case_term_name(int $post_id, string $taxonomy, string $locale = 'uk'): string
+{
+    $terms = wp_get_object_terms($post_id, $taxonomy);
+    if (is_wp_error($terms) || !$terms) return '';
+    $term = $terms[0] ?? null;
+    return $term instanceof WP_Term ? gvspace_case_term_label($term, $locale) : '';
 }
 
 function gvspace_seed_case_filter_terms(): void
@@ -461,3 +472,83 @@ function gvspace_seed_cases(): void
 }
 add_action('init', 'gvspace_seed_cases', 21);
 add_action('admin_init', 'gvspace_seed_cases');
+
+function gvspace_case_term_taxonomies(): array
+{
+    return ['gv_case_direction', 'gv_case_project_type'];
+}
+
+add_action('init', function (): void {
+    foreach (gvspace_case_term_taxonomies() as $taxonomy) {
+        foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+            if ($locale === 'uk') continue;
+            register_term_meta($taxonomy, '_gvspace_name_' . $locale, [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'auth_callback' => static fn (): bool => current_user_can('manage_categories'),
+            ]);
+        }
+    }
+}, 20);
+
+function gvspace_render_case_term_translations(?WP_Term $term, bool $table): void
+{
+    $group = 'case-term-language';
+    $locales = GVSPACE_CONTENT_LOCALES;
+    unset($locales['uk']);
+    $active = (string) array_key_first($locales);
+    if ($table) {
+        echo '<tr class="form-field"><th scope="row"><label for="gvspace-case-term-language">Переклад назви</label></th><td>';
+    } else {
+        echo '<div class="form-field"><label for="gvspace-case-term-language">Переклад назви</label>';
+    }
+    echo '<select id="gvspace-case-term-language" data-gvspace-language-select="' . esc_attr($group) . '">';
+    foreach ($locales as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select>';
+    echo '<p class="description">Поле «Назва» — українська версія. Для інших мов заповніть переклад. Якщо переклад порожній, на сайті лишається українська назва.</p>';
+    if ($table) echo '</td></tr>';
+    else echo '</div>';
+
+    foreach ($locales as $locale => $label) {
+        $value = $term instanceof WP_Term ? (string) get_term_meta($term->term_id, '_gvspace_name_' . $locale, true) : '';
+        $field_id = 'gvspace_case_term_name_' . $locale;
+        $hidden = $locale === $active ? '' : ' hidden';
+        if ($table) {
+            echo '<tr class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<th scope="row"><label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label></th><td>';
+        } else {
+            echo '<div class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label>';
+        }
+        echo '<input type="text" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" value="' . esc_attr($value) . '">';
+        if ($table) echo '</td></tr>';
+        else echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
+
+function gvspace_save_case_term_translations(int $term_id): void
+{
+    if (!current_user_can('manage_categories')) return;
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        $key = 'gvspace_case_term_name_' . $locale;
+        if (!isset($_POST[$key])) continue;
+        update_term_meta($term_id, '_gvspace_name_' . $locale, sanitize_text_field(wp_unslash($_POST[$key])));
+    }
+}
+
+foreach (gvspace_case_term_taxonomies() as $gvspace_case_term_taxonomy) {
+    add_action($gvspace_case_term_taxonomy . '_add_form_fields', static function (): void {
+        gvspace_render_case_term_translations(null, false);
+    });
+    add_action($gvspace_case_term_taxonomy . '_edit_form_fields', static function (WP_Term $term): void {
+        gvspace_render_case_term_translations($term, true);
+    });
+    add_action('created_' . $gvspace_case_term_taxonomy, 'gvspace_save_case_term_translations');
+    add_action('edited_' . $gvspace_case_term_taxonomy, 'gvspace_save_case_term_translations');
+}

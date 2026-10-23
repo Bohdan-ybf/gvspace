@@ -329,17 +329,66 @@ function gvspace_technology_catalog(): array
     ];
 }
 
+add_action('init', function (): void {
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        register_term_meta('gv_technology_category', '_gvspace_name_' . $locale, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('manage_categories'),
+        ]);
+    }
+}, 20);
+
+function gvspace_render_technology_tab_translations(?WP_Term $term, bool $table): void
+{
+    $group = 'technology-tab-language';
+    $locales = GVSPACE_CONTENT_LOCALES;
+    unset($locales['uk']);
+    $active = (string) array_key_first($locales);
+    if ($table) {
+        echo '<tr class="form-field"><th scope="row"><label for="gvspace-technology-tab-language">Переклад назви</label></th><td>';
+    } else {
+        echo '<div class="form-field"><label for="gvspace-technology-tab-language">Переклад назви</label>';
+    }
+    echo '<select id="gvspace-technology-tab-language" data-gvspace-language-select="' . esc_attr($group) . '">';
+    foreach ($locales as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select>';
+    echo '<p class="description">Поле «Назва» — українська версія кнопки. Оберіть мову й заповніть переклад. Якщо переклад порожній, на сайті лишається українська назва.</p>';
+    if ($table) echo '</td></tr>';
+    else echo '</div>';
+
+    foreach ($locales as $locale => $label) {
+        $value = $term instanceof WP_Term ? (string) get_term_meta($term->term_id, '_gvspace_name_' . $locale, true) : '';
+        $field_id = 'gvspace_tab_name_' . $locale;
+        $hidden = $locale === $active ? '' : ' hidden';
+        if ($table) {
+            echo '<tr class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<th scope="row"><label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label></th><td>';
+        } else {
+            echo '<div class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label>';
+        }
+        echo '<input type="text" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" value="' . esc_attr($value) . '">';
+        if ($table) echo '</td></tr>';
+        else echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
+
 add_action('gv_technology_category_add_form_fields', function (): void {
-    echo '<div class="form-field"><label for="gvspace_tab_name_en">Назва англійською</label>';
-    echo '<input type="text" id="gvspace_tab_name_en" name="gvspace_tab_name_en">';
-    echo '<p>Українська назва задається в полі вище. Якщо англійську не вказати, на сайті використається українська.</p></div>';
+    gvspace_render_technology_tab_translations(null, false);
+    echo '<div class="form-field"><label for="gvspace_tab_order">Порядок</label>';
+    echo '<input type="number" id="gvspace_tab_order" name="gvspace_tab_order" value="0">';
+    echo '<p>Менше число показується раніше в табах.</p></div>';
 });
 add_action('gv_technology_category_edit_form_fields', function (WP_Term $term): void {
-    $en = (string) get_term_meta($term->term_id, '_gvspace_name_en', true);
     $order = (string) get_term_meta($term->term_id, '_gvspace_order', true);
-    echo '<tr class="form-field"><th><label for="gvspace_tab_name_en">Назва англійською</label></th><td>';
-    echo '<input type="text" id="gvspace_tab_name_en" name="gvspace_tab_name_en" value="' . esc_attr($en) . '">';
-    echo '</td></tr>';
+    gvspace_render_technology_tab_translations($term, true);
     echo '<tr class="form-field"><th><label for="gvspace_tab_order">Порядок</label></th><td>';
     echo '<input type="number" id="gvspace_tab_order" name="gvspace_tab_order" value="' . esc_attr($order) . '">';
     echo '<p class="description">Менше число показується раніше в табах.</p></td></tr>';
@@ -348,12 +397,16 @@ add_action('created_gv_technology_category', 'gvspace_save_technology_tab_meta')
 add_action('edited_gv_technology_category', 'gvspace_save_technology_tab_meta');
 function gvspace_save_technology_tab_meta(int $term_id): void
 {
+    if (!current_user_can('manage_categories')) return;
     $term = get_term($term_id, 'gv_technology_category');
     if ($term instanceof WP_Term) {
         update_term_meta($term_id, '_gvspace_name_uk', $term->name);
     }
-    if (isset($_POST['gvspace_tab_name_en'])) {
-        update_term_meta($term_id, '_gvspace_name_en', sanitize_text_field(wp_unslash((string) $_POST['gvspace_tab_name_en'])));
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        $key = 'gvspace_tab_name_' . $locale;
+        if (!isset($_POST[$key])) continue;
+        update_term_meta($term_id, '_gvspace_name_' . $locale, sanitize_text_field(wp_unslash($_POST[$key])));
     }
     if (isset($_POST['gvspace_tab_order'])) {
         update_term_meta($term_id, '_gvspace_order', (string) absint($_POST['gvspace_tab_order']));
@@ -371,10 +424,15 @@ function gvspace_seed_technology_tabs(): void
             $term = get_term((int) $created['term_id'], 'gv_technology_category');
         }
         if (!$term instanceof WP_Term) continue;
-        wp_update_term($term->term_id, 'gv_technology_category', ['name' => $names['uk']]);
-        update_term_meta($term->term_id, '_gvspace_name_uk', $names['uk']);
-        update_term_meta($term->term_id, '_gvspace_name_en', $names['en']);
-        update_term_meta($term->term_id, '_gvspace_order', (string) $order);
+        if (trim((string) get_term_meta($term->term_id, '_gvspace_name_uk', true)) === '') {
+            update_term_meta($term->term_id, '_gvspace_name_uk', $names['uk']);
+        }
+        if (trim((string) get_term_meta($term->term_id, '_gvspace_name_en', true)) === '') {
+            update_term_meta($term->term_id, '_gvspace_name_en', $names['en']);
+        }
+        if ((string) get_term_meta($term->term_id, '_gvspace_order', true) === '') {
+            update_term_meta($term->term_id, '_gvspace_order', (string) $order);
+        }
         $order++;
     }
 }

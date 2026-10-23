@@ -3719,6 +3719,10 @@ add_action('graphql_register_types', function (): void {
                 $description = $value('description') ?: $uk_value('description') ?: $fallback_description;
                 $featured_image = get_post_thumbnail_id($post_id);
                 $featured_image_url = $featured_image ? (string) wp_get_attachment_image_url($featured_image, 'full') : '';
+                if ($post->post_type === 'post' && function_exists('gvspace_blog_image_url')) {
+                    $localized_blog_image = gvspace_blog_image_url($post_id, $requested_locale);
+                    if ($localized_blog_image !== '') $featured_image_url = $localized_blog_image;
+                }
 
                 return [
                     'title' => $title,
@@ -4145,8 +4149,8 @@ add_action('graphql_register_types', function (): void {
                 $parts = array_map('trim', explode('|', $line, 3));
                 return ['name' => $parts[0] ?? '', 'role' => $parts[1] ?? '', 'photo' => $parts[2] ?? ''];
             }, $lines('team'));
-            $direction = gvspace_case_term_name($post_id, 'gv_case_direction');
-            $project_type = gvspace_case_term_name($post_id, 'gv_case_project_type');
+            $direction = gvspace_case_term_name($post_id, 'gv_case_direction', $locale);
+            $project_type = gvspace_case_term_name($post_id, 'gv_case_project_type', $locale);
             $gallery = gvspace_case_gallery_urls($post_id);
             if (!$gallery) $gallery = $lines('gallery');
             $excerpt = $field('excerpt') ?: $field('result');

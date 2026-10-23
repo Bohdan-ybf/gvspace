@@ -3,11 +3,14 @@
 if (!defined('ABSPATH')) exit;
 
 add_action('init', function (): void {
-    register_term_meta('category', '_gvspace_name_en', [
-        'type' => 'string', 'single' => true, 'show_in_rest' => true,
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => static fn (): bool => current_user_can('manage_categories'),
-    ]);
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        register_term_meta('category', '_gvspace_name_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('manage_categories'),
+        ]);
+    }
     foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
         foreach (['title', 'excerpt', 'content', 'markdown'] as $field) {
             register_post_meta('post', '_gvspace_blog_' . $field . '_' . $locale, [
@@ -15,6 +18,11 @@ add_action('init', function (): void {
                 'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
             ]);
         }
+        register_post_meta('post', '_gvspace_blog_image_' . $locale, [
+            'type' => 'integer', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'absint',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
     }
 }, 30);
 
@@ -268,9 +276,12 @@ function gvspace_blog_resolve_category_id(string $value, bool $create = true): i
         $needle = function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
         foreach (get_terms(['taxonomy' => 'category', 'hide_empty' => false]) as $candidate) {
             if (!$candidate instanceof WP_Term) continue;
-            $english = trim((string) get_term_meta($candidate->term_id, '_gvspace_name_en', true));
-            $haystack = function_exists('mb_strtolower') ? mb_strtolower($english, 'UTF-8') : strtolower($english);
-            if ($english !== '' && $haystack === $needle) return (int) $candidate->term_id;
+            foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+                if ($locale === 'uk') continue;
+                $translated = trim((string) get_term_meta($candidate->term_id, '_gvspace_name_' . $locale, true));
+                $haystack = function_exists('mb_strtolower') ? mb_strtolower($translated, 'UTF-8') : strtolower($translated);
+                if ($translated !== '' && $haystack === $needle) return (int) $candidate->term_id;
+            }
         }
     }
     if ($term instanceof WP_Term) return (int) $term->term_id;
@@ -296,14 +307,14 @@ add_action('admin_enqueue_scripts', function (string $hook_suffix): void {
 });
 
 add_action('add_meta_boxes', function (): void {
+    remove_meta_box('postimagediv', 'post', 'side');
     add_meta_box('gvspace-blog-content', 'Контент статті блогу', 'gvspace_render_blog_fields', 'post', 'normal', 'high');
 });
 
 function gvspace_render_blog_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_blog', 'gvspace_blog_nonce');
-    echo '<p class="description"><strong>Одна стаття — один запис.</strong> Оберіть мову та заповніть її заголовок, короткий опис і повний текст. У Markdown маркетолог має вказувати категорію окремим рядком: <code>**Category:** it-development</code>. Рекомендовано використовувати slug наявної категорії. Категорія, автор і головне зображення є спільними для всіх мов.</p>';
-    gvspace_render_blog_image_field($post);
+    echo '<p class="description"><strong>Одна стаття — один запис.</strong> Оберіть мову та заповніть її заголовок, короткий опис, зображення і повний текст. У Markdown маркетолог має вказувати категорію окремим рядком: <code>**Category:** it-development</code>. Рекомендовано використовувати slug наявної категорії. Категорія і автор є спільними для всіх мов. Зображення задається окремо для кожної мови.</p>';
     echo '<p><label for="gvspace_blog_category"><strong>Категорія статті</strong></label><br>';
     wp_dropdown_categories(['id' => 'gvspace_blog_category', 'name' => 'gvspace_blog_category', 'taxonomy' => 'category', 'hide_empty' => false, 'selected' => (int) (wp_get_post_categories($post->ID)[0] ?? 0), 'show_option_none' => 'Оберіть категорію', 'option_none_value' => 0]);
     echo '<br><span class="description">Можна обрати вручну. Якщо в Markdown є <code>**Category:**</code>, категорія з файла матиме пріоритет.</span></p>';
@@ -329,6 +340,7 @@ function gvspace_render_blog_fields(WP_Post $post): void
         }
         echo '<div data-gvspace-language-panel="blog-language" data-locale="' . esc_attr($locale) . '"' . ($locale === 'uk' ? '' : ' hidden') . '>';
         echo '<hr><h3>' . esc_html($label) . '</h3>';
+        gvspace_render_blog_image_field($post, $locale);
         echo '<p><label for="gvspace_blog_title_' . esc_attr($locale) . '"><strong>Заголовок статті</strong></label><br>';
         echo '<input type="text" id="gvspace_blog_title_' . esc_attr($locale) . '" name="gvspace_blog_title_' . esc_attr($locale) . '" value="' . esc_attr($title) . '" style="width:100%"></p>';
         echo '<p><label for="gvspace_blog_excerpt_' . esc_attr($locale) . '"><strong>Короткий опис для картки</strong></label><br>';
@@ -345,68 +357,103 @@ function gvspace_render_blog_fields(WP_Post $post): void
         echo '</details>';
         echo '</div>';
     }
+    gvspace_render_blog_image_script();
     gvspace_render_language_switcher_script();
 }
 
-function gvspace_render_blog_image_field(WP_Post $post): void
+function gvspace_blog_locale_image_id(int $post_id, string $locale): int
 {
-    $thumbnail_id = (int) get_post_thumbnail_id($post->ID);
-    $preview = $thumbnail_id ? wp_get_attachment_image($thumbnail_id, 'medium_large', false, [
+    $image_id = (int) get_post_meta($post_id, '_gvspace_blog_image_' . $locale, true);
+    if ($image_id > 0 && wp_attachment_is_image($image_id)) return $image_id;
+    if ($locale === 'uk') {
+        $thumbnail_id = (int) get_post_thumbnail_id($post_id);
+        if ($thumbnail_id > 0 && wp_attachment_is_image($thumbnail_id)) return $thumbnail_id;
+    }
+    return 0;
+}
+
+function gvspace_blog_image_url(int $post_id, string $locale, string $size = 'full'): string
+{
+    $image_id = gvspace_blog_locale_image_id($post_id, $locale);
+    if ($image_id <= 0 && $locale !== 'uk') $image_id = gvspace_blog_locale_image_id($post_id, 'uk');
+    return $image_id > 0 ? (string) wp_get_attachment_image_url($image_id, $size) : '';
+}
+
+function gvspace_render_blog_image_field(WP_Post $post, string $locale): void
+{
+    $image_id = gvspace_blog_locale_image_id($post->ID, $locale);
+    $preview = $image_id ? wp_get_attachment_image($image_id, 'medium_large', false, [
         'style' => 'width:100%;max-width:640px;height:auto;display:block;border-radius:8px;',
+        'data-gvspace-blog-image-preview-img' => '1',
     ]) : '';
+    $fallback = $locale === 'uk'
+        ? ''
+        : ' Якщо для цієї мови зображення не задано, на сайті використовується українське.';
     ?>
-    <div class="gvspace-blog-image-field" style="margin:18px 0;padding:18px;border:1px solid #dcdcde;background:#f6f7f7;">
-        <h3 style="margin-top:0;">Зображення статті</h3>
-        <p class="description">Спільне для всіх мов. Використовується у великій картці, каталозі, на сторінці статті та для Open Graph, якщо окремий SEO URL не заповнено. Рекомендовано WebP або JPEG, 1600 × 900 px (16:9).</p>
-        <input type="hidden" id="gvspace_blog_thumbnail_id" name="gvspace_blog_thumbnail_id" value="<?php echo esc_attr((string) $thumbnail_id); ?>">
-        <div id="gvspace-blog-image-preview" style="margin:14px 0;"><?php echo $preview; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-        <button type="button" class="button button-secondary" id="gvspace-blog-image-select"><?php echo $thumbnail_id ? 'Замінити зображення' : 'Завантажити зображення'; ?></button>
-        <button type="button" class="button-link-delete" id="gvspace-blog-image-remove" style="margin-left:12px;<?php echo $thumbnail_id ? '' : 'display:none;'; ?>">Видалити зображення</button>
+    <div class="gvspace-blog-image-field" data-gvspace-blog-image style="margin:18px 0;padding:18px;border:1px solid #dcdcde;background:#f6f7f7;">
+        <h4 style="margin-top:0;">Зображення статті</h4>
+        <p class="description">Для цієї мовної версії. Використовується у великій картці, каталозі, на сторінці статті та для Open Graph, якщо окремий SEO URL не заповнено. Рекомендовано WebP або JPEG, 1600 × 900 px (16:9).<?php echo esc_html($fallback); ?></p>
+        <input type="hidden" name="gvspace_blog_image_<?php echo esc_attr($locale); ?>" value="<?php echo esc_attr((string) $image_id); ?>" data-gvspace-blog-image-input>
+        <div data-gvspace-blog-image-preview style="margin:14px 0;"><?php echo $preview; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+        <button type="button" class="button button-secondary" data-gvspace-blog-image-select><?php echo $image_id ? 'Замінити зображення' : 'Завантажити зображення'; ?></button>
+        <button type="button" class="button-link-delete" data-gvspace-blog-image-remove style="margin-left:12px;<?php echo $image_id ? '' : 'display:none;'; ?>">Видалити зображення</button>
     </div>
+    <?php
+}
+
+function gvspace_render_blog_image_script(): void
+{
+    static $rendered = false;
+    if ($rendered) return;
+    $rendered = true;
+    ?>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const selectButton = document.getElementById('gvspace-blog-image-select');
-        const removeButton = document.getElementById('gvspace-blog-image-remove');
-        const input = document.getElementById('gvspace_blog_thumbnail_id');
-        const preview = document.getElementById('gvspace-blog-image-preview');
-        if (!selectButton || !removeButton || !input || !preview || !window.wp || !window.wp.media) return;
+        if (!window.wp || !window.wp.media) return;
+        document.querySelectorAll('[data-gvspace-blog-image]').forEach(function (root) {
+            const selectButton = root.querySelector('[data-gvspace-blog-image-select]');
+            const removeButton = root.querySelector('[data-gvspace-blog-image-remove]');
+            const input = root.querySelector('[data-gvspace-blog-image-input]');
+            const preview = root.querySelector('[data-gvspace-blog-image-preview]');
+            if (!selectButton || !removeButton || !input || !preview) return;
 
-        let frame;
-        selectButton.addEventListener('click', function () {
-            if (frame) {
+            let frame;
+            selectButton.addEventListener('click', function () {
+                if (frame) {
+                    frame.open();
+                    return;
+                }
+                frame = window.wp.media({
+                    title: 'Оберіть зображення статті',
+                    button: { text: 'Використати зображення' },
+                    library: { type: 'image' },
+                    multiple: false
+                });
+                frame.on('select', function () {
+                    const attachment = frame.state().get('selection').first().toJSON();
+                    const sizes = attachment.sizes || {};
+                    const imageUrl = (sizes.medium_large && sizes.medium_large.url)
+                        || (sizes.medium && sizes.medium.url)
+                        || attachment.url;
+                    input.value = attachment.id;
+                    preview.innerHTML = '';
+                    const image = document.createElement('img');
+                    image.src = imageUrl;
+                    image.alt = attachment.alt || attachment.title || '';
+                    image.style.cssText = 'width:100%;max-width:640px;height:auto;display:block;border-radius:8px;';
+                    preview.appendChild(image);
+                    selectButton.textContent = 'Замінити зображення';
+                    removeButton.style.display = '';
+                });
                 frame.open();
-                return;
-            }
-            frame = window.wp.media({
-                title: 'Оберіть зображення статті',
-                button: { text: 'Використати зображення' },
-                library: { type: 'image' },
-                multiple: false
             });
-            frame.on('select', function () {
-                const attachment = frame.state().get('selection').first().toJSON();
-                const sizes = attachment.sizes || {};
-                const imageUrl = (sizes.medium_large && sizes.medium_large.url)
-                    || (sizes.medium && sizes.medium.url)
-                    || attachment.url;
-                input.value = attachment.id;
-                preview.innerHTML = '';
-                const image = document.createElement('img');
-                image.src = imageUrl;
-                image.alt = attachment.alt || attachment.title || '';
-                image.style.cssText = 'width:100%;max-width:640px;height:auto;display:block;border-radius:8px;';
-                preview.appendChild(image);
-                selectButton.textContent = 'Замінити зображення';
-                removeButton.style.display = '';
-            });
-            frame.open();
-        });
 
-        removeButton.addEventListener('click', function () {
-            input.value = '';
-            preview.innerHTML = '';
-            selectButton.textContent = 'Завантажити зображення';
-            removeButton.style.display = 'none';
+            removeButton.addEventListener('click', function () {
+                input.value = '';
+                preview.innerHTML = '';
+                selectButton.textContent = 'Завантажити зображення';
+                removeButton.style.display = 'none';
+            });
         });
     });
     </script>
@@ -459,13 +506,20 @@ add_action('save_post_post', function (int $post_id): void {
         }
     }
 
-    if (isset($_POST['gvspace_blog_thumbnail_id'])) {
-        $thumbnail_id = absint(wp_unslash($_POST['gvspace_blog_thumbnail_id']));
-        if ($thumbnail_id > 0 && get_post_type($thumbnail_id) === 'attachment' && wp_attachment_is_image($thumbnail_id)) {
-            set_post_thumbnail($post_id, $thumbnail_id);
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $image_field = 'gvspace_blog_image_' . $locale;
+        if (!isset($_POST[$image_field])) continue;
+        $image_id = absint(wp_unslash($_POST[$image_field]));
+        if ($image_id > 0 && get_post_type($image_id) === 'attachment' && wp_attachment_is_image($image_id)) {
+            update_post_meta($post_id, '_gvspace_blog_image_' . $locale, $image_id);
         } else {
-            delete_post_thumbnail($post_id);
+            delete_post_meta($post_id, '_gvspace_blog_image_' . $locale);
         }
+    }
+    if (isset($_POST['gvspace_blog_image_uk'])) {
+        $uk_image_id = (int) get_post_meta($post_id, '_gvspace_blog_image_uk', true);
+        if ($uk_image_id > 0 && wp_attachment_is_image($uk_image_id)) set_post_thumbnail($post_id, $uk_image_id);
+        else delete_post_thumbnail($post_id);
     }
 
     update_post_meta($post_id, '_gvspace_content_locale', 'legacy');
@@ -491,27 +545,64 @@ add_action('save_post_post', function (int $post_id): void {
 
 add_filter('admin_post_thumbnail_html', function (string $content, int $post_id): string {
     if (get_post_type($post_id) !== 'post') return $content;
-    return $content . '<p class="description">Зображення використовується у великій картці, каталозі та Open Graph за відсутності окремого SEO-зображення. Рекомендований формат — WebP, пропорція 16:9.</p>';
+    return $content . '<p class="description">Це українське зображення статті. Інші мови задаються в блоці «Контент статті блогу».</p>';
 }, 10, 2);
 
-add_action('category_add_form_fields', function (): void { ?>
-    <div class="form-field"><label for="gvspace_name_en">English name</label>
-        <input name="gvspace_name_en" id="gvspace_name_en" type="text">
-        <p>Shown in the English version of the blog.</p>
-    </div>
-<?php });
+function gvspace_render_blog_category_translations(?WP_Term $term, bool $table): void
+{
+    $group = 'blog-category-language';
+    $locales = GVSPACE_CONTENT_LOCALES;
+    unset($locales['uk']);
+    $active = (string) array_key_first($locales);
+    if ($table) {
+        echo '<tr class="form-field"><th scope="row"><label for="gvspace-blog-category-language">Переклад назви</label></th><td>';
+    } else {
+        echo '<div class="form-field"><label for="gvspace-blog-category-language">Переклад назви</label>';
+    }
+    echo '<select id="gvspace-blog-category-language" data-gvspace-language-select="' . esc_attr($group) . '">';
+    foreach ($locales as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select>';
+    echo '<p class="description">Поле «Назва» — українська версія. Для інших мов заповніть переклад. Якщо переклад порожній, на сайті лишається українська назва.</p>';
+    if ($table) echo '</td></tr>';
+    else echo '</div>';
 
-add_action('category_edit_form_fields', function (WP_Term $term): void { ?>
-    <tr class="form-field"><th><label for="gvspace_name_en">English name</label></th><td>
-        <input name="gvspace_name_en" id="gvspace_name_en" type="text" value="<?php echo esc_attr((string) get_term_meta($term->term_id, '_gvspace_name_en', true)); ?>">
-        <p class="description">Shown in the English version of the blog.</p>
-    </td></tr>
-<?php });
+    foreach ($locales as $locale => $label) {
+        $value = $term instanceof WP_Term ? (string) get_term_meta($term->term_id, '_gvspace_name_' . $locale, true) : '';
+        $field_id = 'gvspace_category_name_' . $locale;
+        $hidden = $locale === $active ? '' : ' hidden';
+        if ($table) {
+            echo '<tr class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<th scope="row"><label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label></th><td>';
+        } else {
+            echo '<div class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label>';
+        }
+        echo '<input type="text" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" value="' . esc_attr($value) . '">';
+        if ($table) echo '</td></tr>';
+        else echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
+
+add_action('category_add_form_fields', static function (): void {
+    gvspace_render_blog_category_translations(null, false);
+});
+
+add_action('category_edit_form_fields', static function (WP_Term $term): void {
+    gvspace_render_blog_category_translations($term, true);
+});
 
 function gvspace_save_category_translation(int $term_id): void
 {
-    if (!current_user_can('manage_categories') || !isset($_POST['gvspace_name_en'])) return;
-    update_term_meta($term_id, '_gvspace_name_en', sanitize_text_field(wp_unslash($_POST['gvspace_name_en'])));
+    if (!current_user_can('manage_categories')) return;
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        $key = 'gvspace_category_name_' . $locale;
+        if (!isset($_POST[$key])) continue;
+        update_term_meta($term_id, '_gvspace_name_' . $locale, sanitize_text_field(wp_unslash($_POST[$key])));
+    }
 }
 add_action('created_category', 'gvspace_save_category_translation');
 add_action('edited_category', 'gvspace_save_category_translation');
@@ -660,6 +751,7 @@ add_action('graphql_register_types', function (): void {
             'title' => ['type' => 'String'],
             'excerpt' => ['type' => 'String'],
             'content' => ['type' => 'String'],
+            'image' => ['type' => 'String'],
             'isPublished' => ['type' => 'Boolean'],
         ],
     ]);
@@ -682,8 +774,22 @@ add_action('graphql_register_types', function (): void {
                 'title' => $title,
                 'excerpt' => $excerpt,
                 'content' => $content,
+                'image' => gvspace_blog_image_url($post_id, $locale),
                 'isPublished' => $title !== '' && trim(wp_strip_all_tags($content)) !== '',
             ];
+        },
+    ]);
+    register_graphql_field('Category', 'gvspaceName', [
+        'type' => 'String',
+        'description' => 'Localized blog category label. Ukrainian uses the category name.',
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($term, array $args): string {
+            $term_id = (int) ($term->term_id ?? $term->databaseId ?? 0);
+            $locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            if ($locale === 'legacy' || $locale === 'uk') return '';
+            $name = trim((string) get_term_meta($term_id, '_gvspace_name_' . $locale, true));
+            if ($name === '' && $locale !== 'en') $name = trim((string) get_term_meta($term_id, '_gvspace_name_en', true));
+            return $name;
         },
     ]);
     register_graphql_field('Category', 'gvspaceNameEn', [

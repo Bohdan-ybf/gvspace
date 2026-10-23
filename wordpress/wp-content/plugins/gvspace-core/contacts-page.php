@@ -229,28 +229,41 @@ add_action('init', function (): void {
 }, 11);
 
 add_action('add_meta_boxes', function (): void {
+    add_meta_box('gvspace-contacts-page-language', 'Мова', 'gvspace_render_contacts_language_box', 'gv_contacts_page', 'normal', 'high');
     add_meta_box('gvspace-contacts-page-content', 'Контент сторінки контактів', 'gvspace_render_contacts_page_fields', 'gv_contacts_page', 'normal', 'high');
 });
 
-function gvspace_render_contacts_page_fields(WP_Post $post): void
+function gvspace_contacts_active_locale(WP_Post $post): string
 {
-    wp_nonce_field('gvspace_save_contacts_page', 'gvspace_contacts_page_nonce');
     $stored_locale = gvspace_get_content_locale($post);
-    $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
-    echo '<p class="description"><strong>Одна сторінка контактів — один запис.</strong> Підпис «ЛОКАЦІЯ» — у блоці «Локація і карта» одразу під банером. Карту завантажте праворуч як «Карта локації». Якщо карти немає, на сайті буде заглушка. Оберіть мову та заповніть переклад.</p>';
-    echo '<p><label for="gvspace-contacts-page-language"><strong>Редагувати мовну версію</strong></label> ';
-    echo '<select id="gvspace-contacts-page-language" data-gvspace-language-select="contacts-page-language">';
+    return array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+}
+
+function gvspace_render_contacts_language_select(string $id, string $group, string $active_locale): void
+{
+    echo '<p><label for="' . esc_attr($id) . '"><strong>Редагувати мовну версію</strong></label> ';
+    echo '<select id="' . esc_attr($id) . '" data-gvspace-language-select="' . esc_attr($group) . '">';
     foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
         echo '<option value="' . esc_attr($locale) . '"' . selected($active_locale, $locale, false) . '>' . esc_html($label) . '</option>';
     }
     echo '</select></p>';
+}
+
+function gvspace_render_contacts_language_box(WP_Post $post): void
+{
+    echo '<p class="description">Мова стосується банера, форми, локації та соцмереж на цій сторінці. Картки й офіси редагуються окремо в меню «Контакти» і мають власний вибір мови.</p>';
+    gvspace_render_contacts_language_select('gvspace-contacts-page-language', 'contacts-page-language', gvspace_contacts_active_locale($post));
+    gvspace_render_language_switcher_script();
+}
+
+function gvspace_render_contacts_page_fields(WP_Post $post): void
+{
+    wp_nonce_field('gvspace_save_contacts_page', 'gvspace_contacts_page_nonce');
+    $active_locale = gvspace_contacts_active_locale($post);
+    echo '<p class="description"><strong>Одна сторінка контактів — один запис.</strong> Підпис «ЛОКАЦІЯ» — у блоці «Локація і карта» одразу під банером. Карту завантажте праворуч як «Карта локації». Якщо карти немає, на сайті буде заглушка. Картки зв’язку та офіси — у розділах <a href="' . esc_url(admin_url('edit.php?post_type=gv_contacts_page&page=gvspace-contacts-channels')) . '">Картки</a> та <a href="' . esc_url(admin_url('edit.php?post_type=gv_contacts_page&page=gvspace-contacts-offices')) . '">Офіси</a>.</p>';
 
     foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
-        $channels = gvspace_contacts_decode_list($post->ID, 'channels', $locale);
-        $offices = gvspace_contacts_decode_list($post->ID, 'offices', $locale);
         $socials = gvspace_contacts_decode_list($post->ID, 'socials', $locale);
-        while (count($channels) < 3) $channels[] = ['kind' => '', 'label' => '', 'value' => '', 'hint' => '', 'url' => ''];
-        while (count($offices) < 3) $offices[] = ['title' => '', 'address' => '', 'phone' => '', 'email' => ''];
         while (count($socials) < 6) $socials[] = ['name' => '', 'handle' => '', 'url' => '', 'network' => ''];
 
         echo '<div data-gvspace-language-panel="contacts-page-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
@@ -273,24 +286,6 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
             '_' . $locale
         );
 
-        echo '<h4>Написати напряму</h4>';
-        echo '<p><label><strong>Підпис лівої колонки</strong><br>';
-        echo '<input type="text" name="gvspace_contacts_' . esc_attr($locale) . '_direct_label" value="' . esc_attr(gvspace_contacts_locale_field($post->ID, 'direct_label', $locale)) . '" style="width:100%"></label></p>';
-        foreach ($channels as $index => $channel) {
-            echo '<fieldset style="margin:12px 0;padding:12px;border:1px solid #dcdcde">';
-            echo '<legend><strong>Картка ' . esc_html((string) ($index + 1)) . '</strong></legend>';
-            echo '<p><label>Тип<br><select name="gvspace_contacts_channel_kind_' . esc_attr($locale) . '[]">';
-            foreach (['telegram' => 'Telegram', 'email' => 'Email', 'phone' => 'Телефон'] as $kind => $kind_label) {
-                echo '<option value="' . esc_attr($kind) . '"' . selected(($channel['kind'] ?? '') === $kind, true, false) . '>' . esc_html($kind_label) . '</option>';
-            }
-            echo '</select></label></p>';
-            echo '<p><label>Підпис<br><input type="text" name="gvspace_contacts_channel_label_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['label'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '<p><label>Значення<br><input type="text" name="gvspace_contacts_channel_value_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['value'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '<p><label>Підказка<br><input type="text" name="gvspace_contacts_channel_hint_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['hint'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '<p><label>Посилання<br><input type="url" name="gvspace_contacts_channel_url_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['url'] ?? '')) . '" style="width:100%"></label></p>';
-            echo '</fieldset>';
-        }
-
         echo '<h4>Форма заявки</h4>';
         gvspace_render_field_set(
             $post,
@@ -299,17 +294,6 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
             '_gvspace_contacts_',
             '_' . $locale
         );
-
-        echo '<h4>Офіси</h4>';
-        echo '<div data-gvspace-offices>';
-        foreach ($offices as $index => $office) {
-            gvspace_render_contacts_office_fields($locale, $office, $index + 1);
-        }
-        echo '<template data-gvspace-office-template>';
-        gvspace_render_contacts_office_fields($locale, [], 0);
-        echo '</template>';
-        echo '<button type="button" class="button" data-gvspace-add-office>Додати адресу</button>';
-        echo '</div>';
 
         echo '<h4>Соцмережі</h4>';
         echo '<p><label><strong>Підпис блоку соцмереж</strong><br>';
@@ -329,8 +313,6 @@ function gvspace_render_contacts_page_fields(WP_Post $post): void
         }
         echo '</div>';
     }
-    gvspace_render_contacts_office_script();
-    gvspace_render_language_switcher_script();
 }
 
 function gvspace_render_contacts_office_fields(string $locale, array $office, int $index): void
@@ -365,6 +347,184 @@ function gvspace_render_contacts_office_script(): void
     <?php
 }
 
+function gvspace_contacts_editor_post(): ?WP_Post
+{
+    $existing = get_posts([
+        'post_type' => 'gv_contacts_page',
+        'post_status' => ['publish', 'draft', 'pending', 'private'],
+        'numberposts' => 1,
+        'meta_key' => '_gvspace_translation_group',
+        'meta_value' => 'contacts-page',
+    ]);
+    if (!$existing) {
+        $existing = get_posts([
+            'post_type' => 'gv_contacts_page',
+            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'numberposts' => 1,
+            'orderby' => 'ID',
+            'order' => 'ASC',
+        ]);
+    }
+    $post = $existing[0] ?? null;
+    return $post instanceof WP_Post ? $post : null;
+}
+
+function gvspace_contacts_save_channels(int $post_id, string $locale): void
+{
+    $label_key = 'gvspace_contacts_' . $locale . '_direct_label';
+    if (isset($_POST[$label_key])) {
+        update_post_meta($post_id, '_gvspace_contacts_direct_label_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$label_key])));
+    }
+
+    $channel_kinds = isset($_POST['gvspace_contacts_channel_kind_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_kind_' . $locale]) : [];
+    $channel_labels = isset($_POST['gvspace_contacts_channel_label_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_label_' . $locale]) : [];
+    $channel_values = isset($_POST['gvspace_contacts_channel_value_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_value_' . $locale]) : [];
+    $channel_hints = isset($_POST['gvspace_contacts_channel_hint_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_hint_' . $locale]) : [];
+    $channel_urls = isset($_POST['gvspace_contacts_channel_url_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_url_' . $locale]) : [];
+    $channels = [];
+    $channel_count = max(count($channel_kinds), count($channel_labels), count($channel_values));
+    for ($index = 0; $index < $channel_count; $index++) {
+        $value = sanitize_text_field((string) ($channel_values[$index] ?? ''));
+        $label = sanitize_text_field((string) ($channel_labels[$index] ?? ''));
+        if ($value === '' && $label === '') continue;
+        $kind = sanitize_key((string) ($channel_kinds[$index] ?? 'telegram'));
+        if (!in_array($kind, ['telegram', 'email', 'phone'], true)) $kind = 'telegram';
+        $channels[] = [
+            'kind' => $kind,
+            'label' => $label,
+            'value' => $value,
+            'hint' => sanitize_text_field((string) ($channel_hints[$index] ?? '')),
+            'url' => esc_url_raw((string) ($channel_urls[$index] ?? '')),
+        ];
+    }
+    update_post_meta($post_id, '_gvspace_contacts_channels_' . $locale, wp_slash(wp_json_encode($channels, JSON_UNESCAPED_UNICODE)));
+}
+
+function gvspace_contacts_save_offices(int $post_id, string $locale): void
+{
+    $office_titles = isset($_POST['gvspace_contacts_office_title_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_title_' . $locale]) : [];
+    $office_addresses = isset($_POST['gvspace_contacts_office_address_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_address_' . $locale]) : [];
+    $office_phones = isset($_POST['gvspace_contacts_office_phone_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_phone_' . $locale]) : [];
+    $office_emails = isset($_POST['gvspace_contacts_office_email_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_email_' . $locale]) : [];
+    $offices = [];
+    $office_count = max(count($office_titles), count($office_addresses));
+    for ($index = 0; $index < $office_count; $index++) {
+        $title = sanitize_text_field((string) ($office_titles[$index] ?? ''));
+        $address = sanitize_textarea_field((string) ($office_addresses[$index] ?? ''));
+        if ($title === '' && $address === '') continue;
+        $offices[] = [
+            'title' => $title,
+            'address' => $address,
+            'phone' => sanitize_text_field((string) ($office_phones[$index] ?? '')),
+            'email' => sanitize_text_field((string) ($office_emails[$index] ?? '')),
+        ];
+    }
+    update_post_meta($post_id, '_gvspace_contacts_offices_' . $locale, wp_slash(wp_json_encode($offices, JSON_UNESCAPED_UNICODE)));
+}
+
+function gvspace_render_contacts_channel_fields(string $locale, array $channel, int $index): void
+{
+    echo '<fieldset style="margin:12px 0;padding:12px;border:1px solid #dcdcde">';
+    echo '<legend><strong>Картка ' . esc_html((string) $index) . '</strong></legend>';
+    echo '<p><label>Тип<br><select name="gvspace_contacts_channel_kind_' . esc_attr($locale) . '[]">';
+    foreach (['telegram' => 'Telegram', 'email' => 'Email', 'phone' => 'Телефон'] as $kind => $kind_label) {
+        echo '<option value="' . esc_attr($kind) . '"' . selected(($channel['kind'] ?? '') === $kind, true, false) . '>' . esc_html($kind_label) . '</option>';
+    }
+    echo '</select></label></p>';
+    echo '<p><label>Підпис<br><input type="text" name="gvspace_contacts_channel_label_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['label'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '<p><label>Значення<br><input type="text" name="gvspace_contacts_channel_value_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['value'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '<p><label>Підказка<br><input type="text" name="gvspace_contacts_channel_hint_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['hint'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '<p><label>Посилання<br><input type="url" name="gvspace_contacts_channel_url_' . esc_attr($locale) . '[]" value="' . esc_attr((string) ($channel['url'] ?? '')) . '" style="width:100%"></label></p>';
+    echo '</fieldset>';
+}
+
+function gvspace_contacts_section_saved(string $nonce_action, callable $save): bool
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') return false;
+    check_admin_referer($nonce_action);
+    $post = gvspace_contacts_editor_post();
+    if (!$post instanceof WP_Post || !current_user_can('edit_post', $post->ID)) {
+        wp_die('Недостатньо прав.');
+    }
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $save($post->ID, $locale);
+    }
+    return true;
+}
+
+add_action('admin_menu', function (): void {
+    add_submenu_page('edit.php?post_type=gv_contacts_page', 'Картки', 'Картки', 'edit_posts', 'gvspace-contacts-channels', 'gvspace_render_contacts_channels_page');
+    add_submenu_page('edit.php?post_type=gv_contacts_page', 'Офіси', 'Офіси', 'edit_posts', 'gvspace-contacts-offices', 'gvspace_render_contacts_offices_page');
+});
+
+function gvspace_render_contacts_channels_page(): void
+{
+    if (!current_user_can('edit_posts')) wp_die('Недостатньо прав.');
+    $saved = gvspace_contacts_section_saved('gvspace_save_contacts_channels', 'gvspace_contacts_save_channels');
+    $post = gvspace_contacts_editor_post();
+    echo '<div class="wrap"><h1>Картки</h1>';
+    if (!$post instanceof WP_Post) {
+        echo '<p>Спочатку створіть сторінку контактів.</p></div>';
+        return;
+    }
+    if ($saved) echo '<div class="notice notice-success"><p>Картки збережено.</p></div>';
+    $active_locale = gvspace_contacts_active_locale($post);
+    echo '<p class="description">Картки блоку «Написати напряму». Дані ті самі, що й раніше: окремий набір для кожної мови. Порожня картка не зберігається.</p>';
+    echo '<form method="post">';
+    wp_nonce_field('gvspace_save_contacts_channels');
+    gvspace_render_contacts_language_select('gvspace-contacts-channels-language', 'contacts-channels-language', $active_locale);
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $channels = gvspace_contacts_decode_list($post->ID, 'channels', $locale);
+        while (count($channels) < 3) $channels[] = ['kind' => '', 'label' => '', 'value' => '', 'hint' => '', 'url' => ''];
+        echo '<div data-gvspace-language-panel="contacts-channels-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h2>' . esc_html($label) . '</h2>';
+        echo '<p><label><strong>Підпис лівої колонки</strong><br>';
+        echo '<input type="text" name="gvspace_contacts_' . esc_attr($locale) . '_direct_label" value="' . esc_attr(gvspace_contacts_locale_field($post->ID, 'direct_label', $locale)) . '" style="width:100%;max-width:640px"></label></p>';
+        foreach ($channels as $index => $channel) {
+            gvspace_render_contacts_channel_fields($locale, $channel, $index + 1);
+        }
+        echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+    echo '<p class="submit"><button class="button button-primary">Зберегти картки</button></p></form></div>';
+}
+
+function gvspace_render_contacts_offices_page(): void
+{
+    if (!current_user_can('edit_posts')) wp_die('Недостатньо прав.');
+    $saved = gvspace_contacts_section_saved('gvspace_save_contacts_offices', 'gvspace_contacts_save_offices');
+    $post = gvspace_contacts_editor_post();
+    echo '<div class="wrap"><h1>Офіси</h1>';
+    if (!$post instanceof WP_Post) {
+        echo '<p>Спочатку створіть сторінку контактів.</p></div>';
+        return;
+    }
+    if ($saved) echo '<div class="notice notice-success"><p>Офіси збережено.</p></div>';
+    $active_locale = gvspace_contacts_active_locale($post);
+    echo '<p class="description">Адреси офісів. Дані ті самі, що й раніше: окремий набір для кожної мови. Порожня адреса не зберігається.</p>';
+    echo '<form method="post">';
+    wp_nonce_field('gvspace_save_contacts_offices');
+    gvspace_render_contacts_language_select('gvspace-contacts-offices-language', 'contacts-offices-language', $active_locale);
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $offices = gvspace_contacts_decode_list($post->ID, 'offices', $locale);
+        while (count($offices) < 3) $offices[] = ['title' => '', 'address' => '', 'phone' => '', 'email' => ''];
+        echo '<div data-gvspace-language-panel="contacts-offices-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h2>' . esc_html($label) . '</h2>';
+        echo '<div data-gvspace-offices>';
+        foreach ($offices as $index => $office) {
+            gvspace_render_contacts_office_fields($locale, $office, $index + 1);
+        }
+        echo '<template data-gvspace-office-template>';
+        gvspace_render_contacts_office_fields($locale, [], 0);
+        echo '</template>';
+        echo '<button type="button" class="button" data-gvspace-add-office>Додати адресу</button>';
+        echo '</div></div>';
+    }
+    gvspace_render_contacts_office_script();
+    gvspace_render_language_switcher_script();
+    echo '<p class="submit"><button class="button button-primary">Зберегти офіси</button></p></form></div>';
+}
+
 add_action('save_post_gv_contacts_page', function (int $post_id): void {
     static $saving_title = false;
     if ($saving_title) return;
@@ -382,49 +542,15 @@ add_action('save_post_gv_contacts_page', function (int $post_id): void {
             update_post_meta($post_id, '_gvspace_contacts_' . $field . '_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$key])));
         }
 
-        $channel_kinds = isset($_POST['gvspace_contacts_channel_kind_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_kind_' . $locale]) : [];
-        $channel_labels = isset($_POST['gvspace_contacts_channel_label_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_label_' . $locale]) : [];
-        $channel_values = isset($_POST['gvspace_contacts_channel_value_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_value_' . $locale]) : [];
-        $channel_hints = isset($_POST['gvspace_contacts_channel_hint_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_hint_' . $locale]) : [];
-        $channel_urls = isset($_POST['gvspace_contacts_channel_url_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_channel_url_' . $locale]) : [];
-        $channels = [];
-        $channel_count = max(count($channel_kinds), count($channel_labels), count($channel_values));
-        for ($index = 0; $index < $channel_count; $index++) {
-            $value = sanitize_text_field((string) ($channel_values[$index] ?? ''));
-            $label = sanitize_text_field((string) ($channel_labels[$index] ?? ''));
-            if ($value === '' && $label === '') continue;
-            $kind = sanitize_key((string) ($channel_kinds[$index] ?? 'telegram'));
-            if (!in_array($kind, ['telegram', 'email', 'phone'], true)) $kind = 'telegram';
-            $channels[] = [
-                'kind' => $kind,
-                'label' => $label,
-                'value' => $value,
-                'hint' => sanitize_text_field((string) ($channel_hints[$index] ?? '')),
-                'url' => esc_url_raw((string) ($channel_urls[$index] ?? '')),
-            ];
+        if (isset($_POST['gvspace_contacts_channel_kind_' . $locale])) {
+            gvspace_contacts_save_channels($post_id, $locale);
         }
-        update_post_meta($post_id, '_gvspace_contacts_channels_' . $locale, wp_slash(wp_json_encode($channels, JSON_UNESCAPED_UNICODE)));
-
-        $office_titles = isset($_POST['gvspace_contacts_office_title_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_title_' . $locale]) : [];
-        $office_addresses = isset($_POST['gvspace_contacts_office_address_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_address_' . $locale]) : [];
-        $office_phones = isset($_POST['gvspace_contacts_office_phone_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_phone_' . $locale]) : [];
-        $office_emails = isset($_POST['gvspace_contacts_office_email_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_office_email_' . $locale]) : [];
-        $offices = [];
-        $office_count = max(count($office_titles), count($office_addresses));
-        for ($index = 0; $index < $office_count; $index++) {
-            $title = sanitize_text_field((string) ($office_titles[$index] ?? ''));
-            $address = sanitize_textarea_field((string) ($office_addresses[$index] ?? ''));
-            if ($title === '' && $address === '') continue;
-            $offices[] = [
-                'title' => $title,
-                'address' => $address,
-                'phone' => sanitize_text_field((string) ($office_phones[$index] ?? '')),
-                'email' => sanitize_text_field((string) ($office_emails[$index] ?? '')),
-            ];
+        if (isset($_POST['gvspace_contacts_office_title_' . $locale])) {
+            gvspace_contacts_save_offices($post_id, $locale);
         }
-        update_post_meta($post_id, '_gvspace_contacts_offices_' . $locale, wp_slash(wp_json_encode($offices, JSON_UNESCAPED_UNICODE)));
 
-        $social_names = isset($_POST['gvspace_contacts_social_name_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_social_name_' . $locale]) : [];
+        if (!isset($_POST['gvspace_contacts_social_name_' . $locale])) continue;
+        $social_names = (array) wp_unslash($_POST['gvspace_contacts_social_name_' . $locale]);
         $social_handles = isset($_POST['gvspace_contacts_social_handle_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_social_handle_' . $locale]) : [];
         $social_urls = isset($_POST['gvspace_contacts_social_url_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_social_url_' . $locale]) : [];
         $social_networks = isset($_POST['gvspace_contacts_social_network_' . $locale]) ? (array) wp_unslash($_POST['gvspace_contacts_social_network_' . $locale]) : [];
