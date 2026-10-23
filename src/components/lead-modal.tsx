@@ -15,6 +15,8 @@ import {
 import { createPortal } from "react-dom";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { lockPageScroll } from "@/lock-page-scroll";
+import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
 import { FileUploadField } from "./file-upload-field";
 
 type LeadVariant = "lead" | "partner" | "question";
@@ -90,6 +92,8 @@ function LeadModal({
   const closeRef = useRef<HTMLButtonElement>(null);
   const [interest, setInterest] = useState("development");
   const [submitted, setSubmitted] = useState(false);
+  const { sending, error, submit } = useSiteForm(locale);
+  const formId = question ? "question" : partner ? "partner" : "lead";
 
   const onCloseRef = useRef(onClose);
 
@@ -98,8 +102,7 @@ function LeadModal({
   }, [onClose]);
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlockScroll = lockPageScroll();
     closeRef.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
@@ -108,7 +111,7 @@ function LeadModal({
 
     document.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockScroll();
       document.removeEventListener("keydown", onKey);
     };
   }, []);
@@ -170,12 +173,14 @@ function LeadModal({
 
             <form
               className="lead-modal-form"
-              onSubmit={(event) => {
-                event.preventDefault();
+              onSubmit={async (event) => {
+                const sent = await submit(event, formId);
+                if (!sent) return;
                 setSubmitted(true);
                 closeRef.current?.focus();
               }}
             >
+              <FormHoneypot />
               {question ? null : (
                 <>
                   <div
@@ -333,9 +338,16 @@ function LeadModal({
                 accept={partner ? ".pdf,application/pdf" : undefined}
               />
 
+              <FormSubmitError message={error} />
               <div className="lead-modal-submit">
-                <button type="submit">
-                  {question ? question.submit : partner ? partner.submit : text.submit}
+                <button type="submit" disabled={sending}>
+                  {sending
+                    ? sendingLabel(locale)
+                    : question
+                      ? question.submit
+                      : partner
+                        ? partner.submit
+                        : text.submit}
                 </button>
                 <p className="lead-modal-consent">
                   {question ? question.consent : text.consent}{" "}

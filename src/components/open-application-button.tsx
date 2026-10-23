@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
+import { lockPageScroll } from "@/lock-page-scroll";
 import { VacancyApplicationForm } from "./vacancy-application-form";
 
 export function OpenApplicationButton({
@@ -48,8 +49,7 @@ function VacancyApplicationModal({ locale, onClose }: { locale: Locale; onClose:
   }, [onClose]);
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlockScroll = lockPageScroll();
     dialogRef.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
@@ -58,7 +58,7 @@ function VacancyApplicationModal({ locale, onClose }: { locale: Locale; onClose:
 
     document.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockScroll();
       document.removeEventListener("keydown", onKey);
     };
   }, []);

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { lockPageScroll } from "@/lock-page-scroll";
 import { ContentPhotoImg } from "./content-image-label";
 import type { ClientReview } from "./wordpress-reviews";
 
@@ -28,15 +29,14 @@ export function ReviewCard({
 
   useEffect(() => {
     if (phase === "closed") return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlockScroll = lockPageScroll();
     if (phase === "open") closeRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setPhase("closing");
     };
     document.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockScroll();
       document.removeEventListener("keydown", onKey);
     };
   }, [phase]);

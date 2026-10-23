@@ -27,6 +27,7 @@ export function ContactMessageField({
   return (
     <textarea
       ref={fieldRef}
+      name="message"
       aria-label={label}
       placeholder={placeholder}
       required

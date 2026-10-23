@@ -18612,3 +18612,44 @@ nav.seo-breadcrumbs.mono > span > span[aria-current="page"] {
     font-size: 36px;
   }
 }
+
+.form-submit-error {
+  margin: 0;
+  color: #ffd0d0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.contacts-form .form-submit-error,
+.review-submit .form-submit-error,
+.vacancy-application-form .form-submit-error,
+.article-comments .form-submit-error,
+.blog-newsletter-aside .form-submit-error {
+  color: #8f1d1d;
+}
+
+.contact form button:disabled,
+.contacts-form button:disabled,
+.lead-modal-form button:disabled,
+.review-submit button:disabled,
+.vacancy-application-form button:disabled,
+.article-comments button:disabled,
+.blog-newsletter-aside button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+input[name="company_url_hp"] {
+  display: none;
+}
+
+html.scroll-locked .header,
+html.scroll-locked .header::after,
+html.scroll-locked .header .mobile-navigation {
+  right: var(--scrollbar-compensation, 0px);
+}
+
+html.scroll-locked .expertise-dropdown,
+html.scroll-locked .company-dropdown {
+  width: calc(100% - var(--scrollbar-compensation, 0px));
+}

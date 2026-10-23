@@ -9,6 +9,7 @@ import { ContactSection } from "./contact-section";
 import { StructuredData } from "./structured-data";
 import { stripOpenGraphLabel } from "./blog-open-graph";
 import { getBlogPost, getBlogPosts } from "./wordpress-posts";
+import { ArticleCommentForm } from "./article-comment-form";
 import { ArticleToc } from "./article-toc";
 import { BlogPostCard } from "./blog-post-cards";
 import { ArticleShareButton } from "./article-share-button";
@@ -149,19 +150,16 @@ export async function BlogArticleDesignPage({ locale, slug }: { locale: Locale; 
             <section className="article-comments">
               <h2>{t.commentsTitle}</h2>
               <p>{t.commentsEmpty}</p>
-              <form>
-                <div>
-                  <input aria-label={t.commentName} placeholder={t.commentName} />
-                  <input type="email" aria-label={t.commentEmail} placeholder={t.commentEmail} />
-                </div>
-                <textarea aria-label={t.commentText} placeholder={t.commentText} />
-                <div>
-                  <button type="button">{t.commentSubmit}</button>
-                  <small>
-                    {t.commentConsent} <Link href="/privacy-policy">{content.privacyLink}</Link>
-                  </small>
-                </div>
-              </form>
+              <ArticleCommentForm
+                locale={locale}
+                articleTitle={heading}
+                name={t.commentName}
+                email={t.commentEmail}
+                text={t.commentText}
+                submitLabel={t.commentSubmit}
+                consent={t.commentConsent}
+                privacyLink={content.privacyLink}
+              />
             </section>
           </div>
         </div>

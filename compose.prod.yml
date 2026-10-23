@@ -43,6 +43,12 @@ services:
       WORDPRESS_URL: https://${CMS_DOMAIN}
       WORDPRESS_GRAPHQL_URL: http://wordpress/graphql
       SITE_INDEXING_ENABLED: ${SITE_INDEXING_ENABLED:-false}
+      FORM_TO_EMAIL: ${FORM_TO_EMAIL:-bohdan.info.work@gmail.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
     depends_on:
       wordpress:
         condition: service_started

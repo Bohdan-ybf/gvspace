@@ -19,6 +19,8 @@ import { BlogFeaturedPost, BlogPostCard } from "./blog-post-cards";
 import { Pagination, scrollToBlockTop } from "./pagination";
 import { ContentImageLabel } from "./content-image-label";
 import { contentImageLabel } from "@/content-images";
+import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { FormSentModal } from "./form-sent-modal";
 
 const POSTS_PER_PAGE = 6;
 
@@ -43,6 +45,7 @@ export function BlogDesignPage({
 }) {
   const t = getTranslations("blog", locale).page;
   const text = getTranslations("blog", locale).content;
+  const { sending, success, error, formKey, submit, closeSuccess } = useSiteForm(locale);
   const [activeCategory, setActiveCategory] = useState("all");
   const [page, setPage] = useState(1);
   const catalogRef = useRef<HTMLElement>(null);
@@ -176,13 +179,34 @@ export function BlogDesignPage({
               <p>{text.noSpam}</p>
             </div>
             <div className="blog-newsletter-aside">
-              <form onSubmit={(event) => event.preventDefault()}>
+              <form key={formKey} onSubmit={(event) => submit(event, "newsletter")}>
+                <FormHoneypot />
                 <label className="sr-only" htmlFor="blog-email">
                   Email
                 </label>
-                <input id="blog-email" type="email" placeholder={text.email} />
-                <button type="submit">{text.subscribe}</button>
+                <input
+                  id="blog-email"
+                  name="email"
+                  type="email"
+                  placeholder={text.email}
+                  required
+                />
+                <button type="submit" disabled={sending}>
+                  {sending ? sendingLabel(locale) : text.subscribe}
+                </button>
               </form>
+              {success ? (
+                <FormSentModal
+                  locale={locale}
+                  lead={
+                    locale === "uk"
+                      ? "Дякуємо. Ми отримали ваш email."
+                      : "Thank you. We received your email."
+                  }
+                  onClose={closeSuccess}
+                />
+              ) : null}
+              <FormSubmitError message={error} />
               <p className="blog-newsletter-consent">
                 {text.consent} <Link href="/privacy-policy">{text.privacyLink}</Link>
               </p>

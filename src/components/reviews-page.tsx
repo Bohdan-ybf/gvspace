@@ -108,7 +108,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
 
           <ReviewsCatalog locale={locale} reviews={reviews} />
           <CasesShowcaseSection locale={locale} />
-          <ReviewSubmitForm copy={reviewsText.form} />
+          <ReviewSubmitForm copy={reviewsText.form} locale={locale} />
           <Breadcrumbs locale={locale} items={[{ label: reviewsText.summary.title }]} visible />
           <ContactSection
             locale={locale}

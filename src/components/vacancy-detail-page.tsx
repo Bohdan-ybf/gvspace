@@ -80,7 +80,7 @@ export async function VacancyDetailPage({ locale, slug }: { locale: Locale; slug
               accent
             />
           </div>
-          <VacancyApplicationForm locale={locale} />
+          <VacancyApplicationForm locale={locale} vacancyTitle={seo?.h1 || vacancy.title} />
         </div>
         <Breadcrumbs
           locale={locale}

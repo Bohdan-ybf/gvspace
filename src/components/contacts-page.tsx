@@ -14,6 +14,7 @@ import {
   XIcon,
 } from "./icons/social-icons";
 import { getContactsPage, type ContactsChannel, type ContactsSocial } from "./wordpress-contacts";
+import { ContactsForm } from "./contacts-form";
 
 const channelIcons = {
   telegram: TelegramIcon,
@@ -92,33 +93,17 @@ export async function ContactsPage({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <form className="contacts-form">
-          <h2 className="contact-label mono">{page.formLabel}</h2>
-          <div className="contacts-form-row">
-            <input aria-label={page.namePlaceholder} placeholder={page.namePlaceholder} required />
-            <input
-              aria-label={page.phonePlaceholder}
-              inputMode="tel"
-              placeholder={page.phonePlaceholder}
-            />
-          </div>
-          <input
-            aria-label={page.emailPlaceholder}
-            type="email"
-            placeholder={page.emailPlaceholder}
-            required
-          />
-          <input aria-label={page.topicPlaceholder} placeholder={page.topicPlaceholder} required />
-          <textarea
-            aria-label={page.messagePlaceholder}
-            placeholder={page.messagePlaceholder}
-            required
-          />
-          <button className="btn btn-primary" type="submit">
-            {page.submit}
-          </button>
-          <p className="mono">{page.consent}</p>
-        </form>
+        <ContactsForm
+          locale={locale}
+          formLabel={page.formLabel}
+          namePlaceholder={page.namePlaceholder}
+          phonePlaceholder={page.phonePlaceholder}
+          emailPlaceholder={page.emailPlaceholder}
+          topicPlaceholder={page.topicPlaceholder}
+          messagePlaceholder={page.messagePlaceholder}
+          submitLabel={page.submit}
+          consent={page.consent}
+        />
       </section>
 
       <section className="contacts-presence">

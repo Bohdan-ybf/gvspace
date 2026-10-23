@@ -203,7 +203,7 @@ export default {
     email: "Email*",
     website: "Website or portfolio",
     about: "Tell us about yourself and your approach",
-    attachment: "ATTACH A PRESENTATION (PDF UP TO 25 MB)",
+    attachment: "ATTACH A PRESENTATION (PDF UP TO 20 MB)",
     submit: "Send request",
   },
 } as const;

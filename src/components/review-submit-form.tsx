@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import type { Locale } from "@/i18n";
+import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { FormSentModal } from "./form-sent-modal";
 
 type ReviewSubmitCopy = {
   title: string;
@@ -18,19 +20,8 @@ type ReviewSubmitCopy = {
   success: string;
 };
 
-export function ReviewSubmitForm({ copy }: { copy: ReviewSubmitCopy }) {
-  const [sent, setSent] = useState(false);
-
-  if (sent) {
-    return (
-      <section className="container review-submit" id="leave-review">
-        <div>
-          <h2>{copy.title}</h2>
-          <p>{copy.success}</p>
-        </div>
-      </section>
-    );
-  }
+export function ReviewSubmitForm({ copy, locale }: { copy: ReviewSubmitCopy; locale: Locale }) {
+  const { sending, success, error, formKey, submit, closeSuccess } = useSiteForm(locale);
 
   return (
     <section className="container review-submit" id="leave-review">
@@ -39,12 +30,8 @@ export function ReviewSubmitForm({ copy }: { copy: ReviewSubmitCopy }) {
         <p>{copy.description}</p>
         <p>{copy.detail}</p>
       </div>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          setSent(true);
-        }}
-      >
+      <form key={formKey} onSubmit={(event) => submit(event, "review")}>
+        <FormHoneypot />
         <div className="review-submit-fields">
           <input name="name" aria-label={copy.name} placeholder={copy.name} required />
           <input name="company" aria-label={copy.company} placeholder={copy.company} />
@@ -64,15 +51,19 @@ export function ReviewSubmitForm({ copy }: { copy: ReviewSubmitCopy }) {
           />
         </div>
         <textarea name="text" aria-label={copy.text} placeholder={copy.text} required />
+        <FormSubmitError message={error} />
         <div className="review-submit-actions">
-          <button className="btn btn-primary" type="submit">
-            {copy.submit}
+          <button className="btn btn-primary" type="submit" disabled={sending}>
+            {sending ? sendingLabel(locale) : copy.submit}
           </button>
           <p>
             {copy.privacy} <Link href="/privacy-policy">{copy.privacyLink}</Link>
           </p>
         </div>
       </form>
+      {success ? (
+        <FormSentModal locale={locale} lead={copy.success} onClose={closeSuccess} />
+      ) : null}
     </section>
   );
 }

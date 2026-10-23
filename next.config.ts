@@ -11,6 +11,8 @@ const wordpressUrl = new URL(process.env.WORDPRESS_URL ?? "http://localhost:8080
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  agentRules: false,
+  serverExternalPackages: ["nodemailer"],
   allowedDevOrigins: ["gvspace.test", "ua.gvspace.test"],
   poweredByHeader: false,
   reactStrictMode: true,

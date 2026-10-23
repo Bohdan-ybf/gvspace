@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import type { ChangeEvent } from "react";
 import type { Locale } from "@/i18n";
 
-const DEFAULT_MAX_FILE_SIZE_MB = 25;
+const DEFAULT_MAX_FILE_SIZE_MB = 20;
 
 type FileUploadFieldProps = {
   className: string;
