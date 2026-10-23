@@ -195,7 +195,6 @@ export async function deliverForm(
       host: config.host,
       port: config.port,
       secure: config.port === 465,
-      family: 4,
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
       socketTimeout: 20_000,
