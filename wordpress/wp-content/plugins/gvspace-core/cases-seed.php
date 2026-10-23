@@ -131,15 +131,25 @@ function gvspace_case_term_name(int $post_id, string $taxonomy, string $locale =
 
 function gvspace_seed_case_filter_terms(): void
 {
-    foreach (gvspace_case_direction_defaults() as $slug => $name) {
-        if (!term_exists($slug, 'gv_case_direction')) wp_insert_term($name, 'gv_case_direction', ['slug' => $slug]);
+    if (get_option('gvspace_case_filter_terms_seeded') === '1') return;
+
+    $directions = get_terms(['taxonomy' => 'gv_case_direction', 'hide_empty' => false, 'fields' => 'ids']);
+    if (!is_wp_error($directions) && $directions === []) {
+        foreach (gvspace_case_direction_defaults() as $slug => $name) {
+            if (!term_exists($slug, 'gv_case_direction')) wp_insert_term($name, 'gv_case_direction', ['slug' => $slug]);
+        }
     }
-    foreach (gvspace_case_project_type_defaults() as $slug => $name) {
-        if (!term_exists($slug, 'gv_case_project_type')) wp_insert_term($name, 'gv_case_project_type', ['slug' => $slug]);
+    $types = get_terms(['taxonomy' => 'gv_case_project_type', 'hide_empty' => false, 'fields' => 'ids']);
+    if (!is_wp_error($types) && $types === []) {
+        foreach (gvspace_case_project_type_defaults() as $slug => $name) {
+            if (!term_exists($slug, 'gv_case_project_type')) wp_insert_term($name, 'gv_case_project_type', ['slug' => $slug]);
+        }
+    }
+    if (!is_wp_error($directions) && !is_wp_error($types)) {
+        update_option('gvspace_case_filter_terms_seeded', '1', false);
     }
 }
 add_action('init', 'gvspace_seed_case_filter_terms', 19);
-add_action('admin_init', 'gvspace_seed_case_filter_terms');
 
 function gvspace_existing_case_asset(string $filename): int
 {

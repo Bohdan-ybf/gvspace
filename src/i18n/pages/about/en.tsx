@@ -92,6 +92,7 @@ export default {
     title: "We build a space where every click and every dollar work toward scaling your business.",
   },
   page: {
+    heroEyebrow: "ABOUT US",
     heroTitle: "We build your digital ecosystems",
     heroDescription:
       "We are your strategic partner, turning marketing chaos into a predictable growth system.",

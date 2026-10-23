@@ -4,9 +4,11 @@ import { getTranslations } from "@/i18n/pages";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ArrowRight } from "./icons/arrow-right";
 import { LeadModalButton } from "./lead-modal";
+import { getPartners } from "./wordpress-partners";
 
-export function PartnersPage({ locale }: { locale: Locale }) {
+export async function PartnersPage({ locale }: { locale: Locale }) {
   const t = getTranslations("partners", locale).page;
+  const partners = (await getPartners(locale)).slice(0, 3);
 
   return (
     <main className="partners-page">
@@ -122,13 +124,26 @@ export function PartnersPage({ locale }: { locale: Locale }) {
       <section className="section container partners-logos" aria-label={t.logosEyebrow}>
         <span className="mono">{t.logosEyebrow}</span>
         <div className="partners-logos-grid">
-          {t.logos.map((logo) => (
-            <article key={logo.label}>
-              <i aria-hidden="true" />
+          {partners.map((partner) => (
+            <article key={partner.id}>
+              <span className={partner.image ? "partner-card-logo has-image" : "partner-card-logo"}>
+                {partner.image ? (
+                  <Image
+                    src={partner.image}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    unoptimized={
+                      partner.image.startsWith("http://localhost:") ||
+                      partner.image.endsWith(".svg")
+                    }
+                  />
+                ) : null}
+              </span>
               <div>
-                <span className="mono">{logo.label}</span>
-                <h3>{logo.name}</h3>
-                <p>{logo.description}</p>
+                <span className="mono">{partner.direction}</span>
+                <h3>{partner.name}</h3>
+                {partner.description ? <p>{partner.description}</p> : null}
               </div>
             </article>
           ))}
@@ -196,8 +211,8 @@ export function PartnersPage({ locale }: { locale: Locale }) {
 
       <Breadcrumbs
         locale={locale}
-        homeLabel="HOME"
-        items={[{ label: "PARTNERSHIP PROGRAM" }]}
+        homeLabel={locale === "uk" ? "ГОЛОВНА" : "HOME"}
+        items={[{ label: t.heroEyebrow }]}
         visible
       />
     </main>

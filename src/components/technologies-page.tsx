@@ -46,7 +46,7 @@ export async function TechnologiesPage({ locale }: { locale: Locale }) {
             sizes="(max-width: 600px) 340px, (max-width: 900px) 400px, 488px"
           />
           <div className="container technologies-hero-content">
-            <span className="mono">TECHNOLOGIES</span>
+            <span className="mono">{t.heroEyebrow}</span>
             <h1>{t.heroTitle}</h1>
             <p>{t.heroDescription}</p>
             <Link className="btn btn-primary" href="/contacts">

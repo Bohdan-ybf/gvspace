@@ -18,6 +18,7 @@ export default {
     eyebrow: "WHY GVSPACE",
   },
   page: {
+    heroEyebrow: "CAREERS",
     heroTitle: (
       <>
         Building a team

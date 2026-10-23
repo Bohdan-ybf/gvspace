@@ -1,5 +1,6 @@
 export default {
   page: {
+    heroEyebrow: "КЛІЄНТИ ТА ВІДГУКИ",
     heroTitle: (
       <>
         Бізнеси, які обрали систему

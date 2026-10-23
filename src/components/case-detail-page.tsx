@@ -422,7 +422,7 @@ export async function CaseDetailPage({ locale, slug }: { locale: Locale; slug: s
           />
           <Breadcrumbs
             items={[
-              { label: "Cases", pathname: "/cases" },
+              { label: getTranslations("cases", locale).page.heroEyebrow, pathname: "/cases" },
               { label: `${title}${data.direction ? ` — ${data.direction}` : ""}` },
             ]}
             locale={locale}

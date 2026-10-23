@@ -30,6 +30,7 @@ export default {
     blogBreadcrumb: "Blog",
   },
   page: {
+    heroEyebrow: "BLOG",
     filtersLabel: "Blog categories",
     emptyState: "There are no articles yet. Publish the first post in WordPress.",
   },

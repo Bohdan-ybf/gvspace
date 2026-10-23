@@ -25,6 +25,7 @@ export default {
     faqDescription: "and answers",
   },
   page: {
+    heroEyebrow: "SERVICES & SOLUTIONS",
     heroTitle: "Our vectors for manageable scaling",
     heroDescription:
       "We integrate marketing, IT, and content into one system where every element reinforces the others.",

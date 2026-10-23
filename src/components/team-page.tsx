@@ -8,6 +8,7 @@ import { TeamDirectorySection } from "./team-directory-section";
 import { TeamFounderSection } from "./team-founder-section";
 import { Breadcrumbs } from "./breadcrumbs";
 import { getTeamDirectory } from "./wordpress-team";
+import { getPartners } from "./wordpress-partners";
 
 import { getTranslations } from "@/i18n/pages";
 import { ContentImageLabel } from "./content-image-label";
@@ -15,7 +16,7 @@ import { contentImageLabel } from "@/content-images";
 export async function TeamPage({ locale }: { locale: Locale }) {
   const text = getTranslations("global", locale);
   const t = getTranslations("team", locale).page;
-  const directory = await getTeamDirectory(locale);
+  const [directory, partners] = await Promise.all([getTeamDirectory(locale), getPartners(locale)]);
 
   return (
     <ContentImageLabel label={contentImageLabel(t.heroTitle)}>
@@ -39,7 +40,7 @@ export async function TeamPage({ locale }: { locale: Locale }) {
             sizes="(max-width: 600px) 360px, (max-width: 900px) 440px, 563px"
           />
           <div className="container team-hero-content">
-            <span className="mono">TEAM</span>
+            <span className="mono">{t.heroEyebrow}</span>
             <h1>{t.heroTitle}</h1>
             <p>{t.heroDescription}</p>
             <LeadModalButton className="btn btn-primary">
@@ -49,7 +50,7 @@ export async function TeamPage({ locale }: { locale: Locale }) {
           </div>
         </section>
         <TeamFounderSection locale={locale} />
-        <TeamDirectorySection locale={locale} {...directory} />
+        <TeamDirectorySection locale={locale} {...directory} partners={partners.slice(0, 3)} />
         <CareersBanner locale={locale} />
         <Breadcrumbs
           locale={locale}

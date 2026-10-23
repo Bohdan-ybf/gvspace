@@ -1,6 +1,6 @@
 export default {
   page: {
-    heroEyebrow: "PARTNERSHIP PROGRAM",
+    heroEyebrow: "ПАРТНЕРСЬКА ПРОГРАМА",
     heroTitle: "Приєднуйтесь до GVSPACE",
     heroTitleSecond: "Partners",
     heroDescription:

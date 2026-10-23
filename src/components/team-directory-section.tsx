@@ -8,15 +8,18 @@ import { getTranslations } from "@/i18n/pages";
 import { ContentPhoto } from "./content-image-label";
 import { ArrowRight } from "./icons/arrow-right";
 import type { TeamCategory, TeamMember } from "./wordpress-team";
+import type { Partner } from "./wordpress-partners";
 
 export function TeamDirectorySection({
   locale,
   categories,
   members,
+  partners,
 }: {
   locale: Locale;
   categories: TeamCategory[];
   members: TeamMember[];
+  partners: Partner[];
 }) {
   const t = getTranslations("team", locale).directory;
   const [activeTab, setActiveTab] = useState(categories[0]?.slug ?? "core-team");
@@ -81,13 +84,26 @@ export function TeamDirectorySection({
       <div className="team-partners">
         <span className="mono section-label">{t.partnersEyebrow}</span>
         <div className="partner-grid">
-          {["IT-РОЗРОБКА", "ПРОДАКШН", "SEO & GEO"].map((partner) => (
-            <article key={partner}>
-              <i aria-hidden="true" />
+          {partners.map((partner) => (
+            <article key={partner.id}>
+              <span className={partner.image ? "partner-card-logo has-image" : "partner-card-logo"}>
+                {partner.image ? (
+                  <Image
+                    src={partner.image}
+                    alt=""
+                    fill
+                    sizes="82px"
+                    unoptimized={
+                      partner.image.startsWith("http://localhost:") ||
+                      partner.image.endsWith(".svg")
+                    }
+                  />
+                ) : null}
+              </span>
               <div>
-                <span className="mono">{partner}</span>
-                <h2>{t.partnerName}</h2>
-                <p>{t.partnerDescription}</p>
+                <span className="mono">{partner.direction}</span>
+                <h2>{partner.name}</h2>
+                {partner.description ? <p>{partner.description}</p> : null}
               </div>
             </article>
           ))}

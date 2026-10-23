@@ -76,7 +76,7 @@ export async function ServicesPage({ locale }: { locale: Locale }) {
               sizes="(max-width: 600px) 360px, (max-width: 900px) 420px, 521px"
             />
             <div className="container services-hero-copy">
-              <span className="mono">SERVICES & SOLUTIONS</span>
+              <span className="mono">{t.heroEyebrow}</span>
               <h1>{t.heroTitle}</h1>
               <p>{t.heroDescription}</p>
               <Link className="btn btn-primary" href="/contacts">

@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n";
 import { filterPublishedForLocale, type ContentLocalization } from "@/content-localization";
 
-export type TeamCategory = { name: string; slug: string };
+export type TeamCategory = { name: string; slug: string; localizedName?: string | null };
 export type TeamMember = {
   id: number;
   name: string;
@@ -59,12 +59,12 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: `query TeamDirectory {
-        teamMemberCategories(first: 100, where: { hideEmpty: false }) { nodes { name slug } }
+        teamMemberCategories(first: 100, where: { hideEmpty: false }) { nodes { name slug localizedName(locale: "${locale}") } }
         teamMembers(first: 100) { nodes {
           databaseId title menuOrder gvspaceLocalization { locale translationGroup status }
           featuredImage { node { sourceUrl altText } }
           teamMemberDetails(locale: "${locale}") { name role tags years projects quote }
-          teamMemberCategories { nodes { name slug } }
+          teamMemberCategories { nodes { name slug localizedName(locale: "${locale}") } }
         } }
       }`,
       }),
@@ -95,7 +95,12 @@ export async function getTeamDirectory(locale: Locale): Promise<TeamDirectory> {
       }))
       .sort((a, b) => a.order - b.order || a.id - b.id);
     return {
-      categories: sortCategories(result.data?.teamMemberCategories?.nodes ?? fallbackCategories),
+      categories: sortCategories(
+        (result.data?.teamMemberCategories?.nodes ?? fallbackCategories).map((category) => ({
+          ...category,
+          name: category.localizedName || category.name,
+        })),
+      ),
       members,
     };
   } catch {

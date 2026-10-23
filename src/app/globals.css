@@ -6683,12 +6683,20 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   gap: 18px;
   border: 1px solid var(--line);
 }
-.partner-grid i {
+.partner-grid .partner-card-logo {
   width: 82px;
   height: 82px;
+  position: relative;
   display: block;
+  overflow: hidden;
   border-radius: 18px;
   background: var(--violet);
+}
+.partner-card-logo.has-image {
+  background: #fff;
+}
+.partner-card-logo img {
+  object-fit: contain;
 }
 .partner-grid article span {
   color: #5500ff;
@@ -6794,7 +6802,7 @@ body:has(.not-found-page) .header .mobile-header-cta:hover {
   .partner-grid article {
     grid-template-columns: 60px 1fr;
   }
-  .partner-grid i {
+  .partner-grid .partner-card-logo {
     width: 60px;
     height: 60px;
   }
@@ -14951,10 +14959,14 @@ footer {
     color 180ms ease,
     background-color 180ms ease;
 }
-.team-tabs button:hover,
-.team-tabs button.is-active {
+.team-tabs button:hover {
+  color: var(--violet);
+  background: #5500ff1a;
+}
+.team-tabs button.is-active,
+.team-tabs button.is-active:hover {
   color: #fff;
-  background: var(--violet);
+  background: #5500ff;
 }
 .team-members {
   margin-top: 24px;
@@ -17348,9 +17360,12 @@ footer {
   border: 1px solid var(--line);
   border-radius: 12px;
 }
-.partners-logos-grid i {
+.partners-logos-grid .partner-card-logo {
   width: 64px;
   height: 64px;
+  position: relative;
+  display: block;
+  overflow: hidden;
   border-radius: 14px;
   background: var(--violet);
 }

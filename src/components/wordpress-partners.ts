@@ -4,6 +4,7 @@ export type Partner = {
   id: number;
   name: string;
   direction: string;
+  description: string;
   image?: string;
   imageAlt: string;
   order: number;
@@ -14,7 +15,7 @@ type PartnerNode = {
   title: string;
   menuOrder?: number;
   featuredImage?: { node?: { sourceUrl?: string; altText?: string } };
-  partnerDetails?: { directionUk?: string; directionEn?: string };
+  partnerDetails?: { direction?: string; description?: string };
 };
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_URL;
@@ -32,7 +33,7 @@ export async function getPartners(locale: Locale): Promise<Partner[]> {
             nodes {
               databaseId title menuOrder
               featuredImage { node { sourceUrl altText } }
-              partnerDetails { directionUk directionEn }
+              partnerDetails(locale: "${locale}") { direction description }
             }
           }
         }`,
@@ -51,9 +52,8 @@ export async function getPartners(locale: Locale): Promise<Partner[]> {
       .map((node) => ({
         id: node.databaseId,
         name: node.title,
-        direction:
-          (locale === "en" ? node.partnerDetails?.directionEn : node.partnerDetails?.directionUk) ??
-          "",
+        direction: node.partnerDetails?.direction ?? "",
+        description: node.partnerDetails?.description ?? "",
         image: node.featuredImage?.node?.sourceUrl,
         imageAlt: node.featuredImage?.node?.altText || node.title,
         order: node.menuOrder ?? 0,

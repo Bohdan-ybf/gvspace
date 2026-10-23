@@ -48,7 +48,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             sizes="100vw"
           />
           <div className="container about-hero-content">
-            <span className="mono">ABOUT US</span>
+            <span className="mono">{t.heroEyebrow}</span>
             <h1>
               <span className="about-hero-brand">GVSPACE</span>
               <span>{t.heroTitle}</span>

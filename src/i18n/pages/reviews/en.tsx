@@ -1,5 +1,6 @@
 export default {
   page: {
+    heroEyebrow: "CLIENTS & REVIEWS",
     heroTitle: (
       <>
         Businesses that chose a system

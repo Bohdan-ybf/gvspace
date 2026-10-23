@@ -1,5 +1,6 @@
 export default {
   page: {
+    heroEyebrow: "ІНДУСТРІЇ",
     heroTitle: "Ніші, де ми знаємо специфіку",
     heroTitleSecond: "зсередини",
     heroDescription:

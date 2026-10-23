@@ -186,6 +186,7 @@ function gvspace_case_import_assign_field(array &$record, string $scope, string 
         'slug' => 'slug',
         'напрямок' => 'direction',
         'тип проєкту' => 'project_type',
+        'індустрія' => 'project_type',
         'логотип клієнта - файл' => 'logo_file',
         'обкладинка сторінки - файл' => 'cover_file',
         'фото картки каталогу - файл' => 'card_file',

@@ -54,7 +54,7 @@ export async function IndustriesPage({ locale }: { locale: Locale }) {
             priority
           />
           <div className="container industries-hero-content">
-            <span className="mono">INDUSTRIES</span>
+            <span className="mono">{t.heroEyebrow}</span>
             <h1>
               {t.heroTitle}
               <br />

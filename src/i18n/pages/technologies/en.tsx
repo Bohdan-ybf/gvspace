@@ -3,6 +3,7 @@ export default {
     contactEyebrow: "WANT TO UNDERSTAND WHICH TOOLS YOUR BUSINESS NEEDS?",
     contactTitle: "Let’s break down your project",
     contactTitleSecond: "on a Clarity Session",
+    heroEyebrow: "TECHNOLOGIES",
     heroTitle: "The right tool for every task",
     heroDescription:
       "We do not use one stack for everything. Every tool in our arsenal solves a specific task — and only that task.",

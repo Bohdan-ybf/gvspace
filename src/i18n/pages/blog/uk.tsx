@@ -30,6 +30,7 @@ export default {
     blogBreadcrumb: "Блог",
   },
   page: {
+    heroEyebrow: "БЛОГ",
     filtersLabel: "Категорії блогу",
     emptyState: "Статей ще немає. Опублікуйте перший запис у WordPress.",
   },

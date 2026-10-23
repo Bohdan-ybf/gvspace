@@ -51,7 +51,7 @@ export async function ReviewsPage({ locale }: { locale: Locale }) {
               sizes="(max-width: 600px) 190px, (max-width: 900px) 220px, 259px"
             />
             <div className="container reviews-hero-content">
-              <span className="mono">CLIENTS &amp; REVIEWS</span>
+              <span className="mono">{t.heroEyebrow}</span>
               <div className="reviews-hero-heading">
                 <div>
                   <h1>{t.heroTitle}</h1>

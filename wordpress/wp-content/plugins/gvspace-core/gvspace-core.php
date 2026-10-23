@@ -72,11 +72,6 @@ const GVSPACE_LOCALIZED_TEAM_MEMBER_FIELDS = [
     'tags' => ['label' => 'Компетенції (кожна з нового рядка)', 'type' => 'textarea'],
 ];
 
-const GVSPACE_PARTNER_FIELDS = [
-    'direction_uk' => ['label' => 'Напрямок українською (наприклад, IT-РОЗРОБКА)', 'type' => 'text'],
-    'direction_en' => ['label' => 'Напрямок англійською (наприклад, IT DEVELOPMENT)', 'type' => 'text'],
-];
-
 const GVSPACE_FAQ_FIELDS = [
     'placement' => ['label' => 'Розміщення', 'type' => 'text'],
 ];
@@ -131,7 +126,7 @@ const GVSPACE_CASE_FIELDS = [
     'gallery' => ['label' => 'Галерея кейсу', 'type' => 'textarea'],
     'testimonial' => ['label' => 'Текст відгуку', 'type' => 'textarea'],
     'testimonial_author' => ['label' => 'Автор відгуку', 'type' => 'text'],
-    'project_type' => ['label' => 'Тип проєкту (ecommerce, strategy, development, marketing)', 'type' => 'text'],
+    'project_type' => ['label' => 'Індустрія (ecommerce, fintech, seo)', 'type' => 'text'],
     'industry' => ['label' => 'Індустрія (retail, services, technology)', 'type' => 'text'],
     'badge' => ['label' => 'Бейдж результату для картки', 'type' => 'text'],
 ];
@@ -435,13 +430,13 @@ add_action('init', function (): void {
 
     register_taxonomy('gv_case_project_type', ['gv_case'], [
         'labels' => [
-            'name' => 'Типи проєктів',
-            'singular_name' => 'Тип проєкту',
-            'menu_name' => 'Типи проєктів',
-            'all_items' => 'Усі типи',
-            'edit_item' => 'Редагувати тип проєкту',
-            'add_new_item' => 'Додати тип проєкту',
-            'search_items' => 'Шукати типи проєктів',
+            'name' => 'Індустрії',
+            'singular_name' => 'Індустрія',
+            'menu_name' => 'Індустрії',
+            'all_items' => 'Усі індустрії',
+            'edit_item' => 'Редагувати індустрію',
+            'add_new_item' => 'Додати індустрію',
+            'search_items' => 'Шукати індустрії',
         ],
         'public' => false,
         'show_ui' => true,
@@ -885,10 +880,15 @@ add_action('init', function (): void {
         }
     }
 
-    foreach (array_keys(GVSPACE_PARTNER_FIELDS) as $field) {
-        register_post_meta('gv_partner', '_gvspace_partner_' . $field, [
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        register_post_meta('gv_partner', '_gvspace_partner_direction_' . $locale, [
             'type' => 'string', 'single' => true, 'show_in_rest' => true,
             'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+        ]);
+        register_post_meta('gv_partner', '_gvspace_partner_description_' . $locale, [
+            'type' => 'string', 'single' => true, 'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_textarea_field',
             'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
         ]);
     }
@@ -2015,11 +2015,46 @@ add_action('save_post_gv_home_seo_text', function (int $post_id): void {
     }
 });
 
+function gvspace_partner_localized_field(int $post_id, string $field, string $locale): string
+{
+    $value = trim((string) get_post_meta($post_id, '_gvspace_partner_' . $field . '_' . $locale, true));
+    if ($value !== '') return $value;
+    if ($locale !== 'uk') {
+        $ukrainian = trim((string) get_post_meta($post_id, '_gvspace_partner_' . $field . '_uk', true));
+        if ($ukrainian !== '') return $ukrainian;
+    }
+    if ($field === 'direction') {
+        return trim((string) get_post_meta($post_id, '_gvspace_partner_direction', true));
+    }
+    return '';
+}
+
 function gvspace_render_partner_fields(WP_Post $post): void
 {
     wp_nonce_field('gvspace_save_partner', 'gvspace_partner_nonce');
-    echo '<p class="description">Назву компанії вкажіть у заголовку, логотип завантажте як «Головне зображення», позицію у слайдері задайте в полі «Порядок».</p>';
-    gvspace_render_field_set($post, GVSPACE_PARTNER_FIELDS, 'gvspace_partner_', '_gvspace_partner_');
+    $stored_locale = gvspace_get_content_locale($post);
+    $active_locale = array_key_exists($stored_locale, GVSPACE_CONTENT_LOCALES) ? $stored_locale : 'uk';
+    echo '<p class="description"><strong>Один партнер — один запис.</strong> Назва компанії, логотип і порядок спільні для всіх мов. Назву вкажіть у заголовку, логотип завантажте як «Головне зображення», позицію задайте в полі «Порядок». На головній показуються всі партнери, на сторінках команди та партнерства — перші три.</p>';
+    echo '<p><label for="gvspace-partner-language"><strong>Редагувати мовну версію</strong></label> ';
+    echo '<select id="gvspace-partner-language" data-gvspace-language-select="partner-language">';
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active_locale, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select></p>';
+
+    foreach (GVSPACE_CONTENT_LOCALES as $locale => $label) {
+        $direction = (string) get_post_meta($post->ID, '_gvspace_partner_direction_' . $locale, true);
+        $description = (string) get_post_meta($post->ID, '_gvspace_partner_description_' . $locale, true);
+        echo '<div data-gvspace-language-panel="partner-language" data-locale="' . esc_attr($locale) . '"' . ($locale === $active_locale ? '' : ' hidden') . '>';
+        echo '<hr><h3>' . esc_html($label) . '</h3>';
+        echo '<p><label for="gvspace_partner_direction_' . esc_attr($locale) . '"><strong>Напрямок</strong></label><br>';
+        echo '<input type="text" id="gvspace_partner_direction_' . esc_attr($locale) . '" name="gvspace_partner_direction_' . esc_attr($locale) . '" value="' . esc_attr($direction) . '" style="width:100%" placeholder="IT-РОЗРОБКА"></p>';
+        echo '<p><label for="gvspace_partner_description_' . esc_attr($locale) . '"><strong>Короткий опис</strong></label><br>';
+        echo '<textarea id="gvspace_partner_description_' . esc_attr($locale) . '" name="gvspace_partner_description_' . esc_attr($locale) . '" rows="3" style="width:100%">' . esc_textarea($description) . '</textarea></p>';
+        echo '<p class="description">Опис видно на картках команди та партнерства. Якщо переклад порожній, на сайті лишається українська версія.</p>';
+        echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
 }
 
 add_action('save_post_gv_partner', function (int $post_id): void {
@@ -2029,7 +2064,17 @@ add_action('save_post_gv_partner', function (int $post_id): void {
         || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
         || !current_user_can('edit_post', $post_id)
     ) return;
-    gvspace_save_field_set($post_id, GVSPACE_PARTNER_FIELDS, 'gvspace_partner_', '_gvspace_partner_');
+
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        $direction_field = 'gvspace_partner_direction_' . $locale;
+        $description_field = 'gvspace_partner_description_' . $locale;
+        if (isset($_POST[$direction_field])) {
+            update_post_meta($post_id, '_gvspace_partner_direction_' . $locale, sanitize_text_field(wp_unslash($_POST[$direction_field])));
+        }
+        if (isset($_POST[$description_field])) {
+            update_post_meta($post_id, '_gvspace_partner_description_' . $locale, sanitize_textarea_field(wp_unslash($_POST[$description_field])));
+        }
+    }
 });
 
 function gvspace_render_team_member_fields(WP_Post $post): void
@@ -2754,16 +2799,16 @@ function gvspace_render_case_filter_fields(WP_Post $post): void
     echo '<p><label for="gvspace_case_direction_new">Або додайте новий напрямок</label><br>';
     echo '<input type="text" id="gvspace_case_direction_new" name="gvspace_case_direction_new" placeholder="Наприклад, МАРКЕТИНГ" style="width:100%;max-width:420px"></p>';
     echo '<p class="description">Список також можна редагувати в <a href="' . esc_url($directions_url) . '">Кейси → Напрямки</a>.</p>';
-    echo '<p><label for="gvspace_case_project_type"><strong>Тип проєкту</strong></label><br>';
+    echo '<p><label for="gvspace_case_project_type"><strong>Індустрія</strong></label><br>';
     echo '<select id="gvspace_case_project_type" name="gvspace_case_project_type" style="min-width:280px">';
-    echo '<option value="">— оберіть тип проєкту —</option>';
+    echo '<option value="">— оберіть індустрію —</option>';
     foreach (gvspace_get_case_project_type_options() as $slug => $label) {
         echo '<option value="' . esc_attr($slug) . '"' . selected($selected_type, $slug, false) . '>' . esc_html($label) . '</option>';
     }
     echo '</select></p>';
-    echo '<p><label for="gvspace_case_project_type_new">Або додайте новий тип проєкту</label><br>';
+    echo '<p><label for="gvspace_case_project_type_new">Або додайте нову індустрію</label><br>';
     echo '<input type="text" id="gvspace_case_project_type_new" name="gvspace_case_project_type_new" placeholder="Наприклад, E-COMMERCE" style="width:100%;max-width:420px"></p>';
-    echo '<p class="description">Список також можна редагувати в <a href="' . esc_url($types_url) . '">Кейси → Типи проєктів</a>.</p>';
+    echo '<p class="description">Список також можна редагувати в <a href="' . esc_url($types_url) . '">Кейси → Індустрії</a>.</p>';
 }
 
 function gvspace_render_case_gallery_field(WP_Post $post): void
@@ -3874,6 +3919,18 @@ add_action('graphql_register_types', function (): void {
             'quote' => ['type' => 'String'],
         ],
     ]);
+    register_graphql_field('TeamMemberCategory', 'localizedName', [
+        'type' => 'String',
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): string {
+            $term_id = (int) ($source->term_id ?? $source->databaseId ?? 0);
+            $term = get_term($term_id, 'gv_team_member_category');
+            if (!$term instanceof WP_Term) return '';
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
+            return gvspace_team_tab_name($term, $locale);
+        },
+    ]);
     register_graphql_field('TeamMember', 'teamMemberDetails', [
         'type' => 'GvspaceTeamMemberDetails',
         'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
@@ -3903,18 +3960,24 @@ add_action('graphql_register_types', function (): void {
     register_graphql_object_type('GvspacePartnerDetails', [
         'description' => 'Editable fields displayed on a GVSPACE partner card.',
         'fields' => [
+            'direction' => ['type' => 'String'],
+            'description' => ['type' => 'String'],
             'directionUk' => ['type' => 'String'],
             'directionEn' => ['type' => 'String'],
         ],
     ]);
     register_graphql_field('Partner', 'partnerDetails', [
         'type' => 'GvspacePartnerDetails',
-        'resolve' => static function ($source): array {
+        'args' => ['locale' => ['type' => 'String', 'defaultValue' => 'uk']],
+        'resolve' => static function ($source, array $args): array {
+            $post_id = (int) $source->databaseId;
+            $requested_locale = gvspace_sanitize_content_locale((string) ($args['locale'] ?? 'uk'));
+            $locale = $requested_locale === 'legacy' ? 'uk' : $requested_locale;
             return [
-                'directionUk' => (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction_uk', true)
-                    ?: (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction', true),
-                'directionEn' => (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction_en', true)
-                    ?: (string) get_post_meta((int) $source->databaseId, '_gvspace_partner_direction', true),
+                'direction' => gvspace_partner_localized_field($post_id, 'direction', $locale),
+                'description' => gvspace_partner_localized_field($post_id, 'description', $locale),
+                'directionUk' => gvspace_partner_localized_field($post_id, 'direction', 'uk'),
+                'directionEn' => gvspace_partner_localized_field($post_id, 'direction', 'en'),
             ];
         },
     ]);
@@ -4331,15 +4394,37 @@ register_activation_hook(__FILE__, function (): void {
 
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
 
-function gvspace_default_team_tab_options(): array
+function gvspace_default_team_tab_translations(): array
 {
     return [
-        'core-team' => 'CORE TEAM',
-        'strategy' => 'STRATEGY',
-        'marketing' => 'MARKETING',
-        'development' => 'DEVELOPMENT',
-        'content' => 'CONTENT',
+        'core-team' => ['uk' => 'ОСНОВНА КОМАНДА', 'en' => 'CORE TEAM'],
+        'strategy' => ['uk' => 'СТРАТЕГІЯ', 'en' => 'STRATEGY'],
+        'marketing' => ['uk' => 'МАРКЕТИНГ', 'en' => 'MARKETING'],
+        'development' => ['uk' => 'РОЗРОБКА', 'en' => 'DEVELOPMENT'],
+        'content' => ['uk' => 'КОНТЕНТ', 'en' => 'CONTENT'],
     ];
+}
+
+function gvspace_default_team_tab_options(): array
+{
+    $options = [];
+    foreach (gvspace_default_team_tab_translations() as $slug => $names) {
+        $options[$slug] = $names['uk'];
+    }
+    return $options;
+}
+
+function gvspace_team_tab_name(WP_Term $term, string $locale): string
+{
+    if ($locale !== 'uk') {
+        $localized = trim((string) get_term_meta($term->term_id, '_gvspace_name_' . $locale, true));
+        if ($localized !== '') return $localized;
+    }
+    $ukrainian = trim((string) get_term_meta($term->term_id, '_gvspace_name_uk', true));
+    if ($ukrainian !== '') return $ukrainian;
+    $translations = gvspace_default_team_tab_translations();
+    if (isset($translations[$term->slug]['uk'])) return $translations[$term->slug]['uk'];
+    return $term->name;
 }
 
 function gvspace_get_team_tab_options(): array
@@ -4383,14 +4468,112 @@ function gvspace_render_team_tab_metabox(WP_Post $post): void
 
 function gvspace_seed_team_tabs(): void
 {
-    foreach (gvspace_default_team_tab_options() as $slug => $name) {
-        if (!term_exists($slug, 'gv_team_member_category')) {
-            wp_insert_term($name, 'gv_team_member_category', ['slug' => $slug]);
+    if (get_option('gvspace_team_tabs_seeded') === '1') return;
+
+    $translations = gvspace_default_team_tab_translations();
+    $existing = get_terms(['taxonomy' => 'gv_team_member_category', 'hide_empty' => false]);
+    if (is_wp_error($existing)) return;
+
+    if ($existing === []) {
+        foreach ($translations as $slug => $names) {
+            $created = wp_insert_term($names['uk'], 'gv_team_member_category', ['slug' => $slug]);
+            if (is_wp_error($created)) continue;
+            update_term_meta((int) $created['term_id'], '_gvspace_name_uk', $names['uk']);
+            update_term_meta((int) $created['term_id'], '_gvspace_name_en', $names['en']);
+        }
+    } else {
+        foreach ($existing as $term) {
+            if (!$term instanceof WP_Term || !isset($translations[$term->slug])) continue;
+            $names = $translations[$term->slug];
+            if (trim((string) get_term_meta($term->term_id, '_gvspace_name_en', true)) === '') {
+                update_term_meta($term->term_id, '_gvspace_name_en', $names['en']);
+            }
+            if ($term->name === $names['en']) {
+                wp_update_term($term->term_id, 'gv_team_member_category', ['name' => $names['uk']]);
+                update_term_meta($term->term_id, '_gvspace_name_uk', $names['uk']);
+            } elseif (trim((string) get_term_meta($term->term_id, '_gvspace_name_uk', true)) === '') {
+                update_term_meta($term->term_id, '_gvspace_name_uk', $term->name);
+            }
         }
     }
+
+    update_option('gvspace_team_tabs_seeded', '1', false);
 }
 add_action('init', 'gvspace_seed_team_tabs', 19);
-add_action('admin_init', 'gvspace_seed_team_tabs');
+
+add_action('init', function (): void {
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        register_term_meta('gv_team_member_category', '_gvspace_name_' . $locale, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback' => static fn (): bool => current_user_can('manage_categories'),
+        ]);
+    }
+}, 20);
+
+function gvspace_render_team_tab_translations(?WP_Term $term, bool $table): void
+{
+    $group = 'team-tab-language';
+    $locales = GVSPACE_CONTENT_LOCALES;
+    unset($locales['uk']);
+    $active = (string) array_key_first($locales);
+    if ($table) {
+        echo '<tr class="form-field"><th scope="row"><label for="gvspace-team-tab-language">Переклад назви</label></th><td>';
+    } else {
+        echo '<div class="form-field"><label for="gvspace-team-tab-language">Переклад назви</label>';
+    }
+    echo '<select id="gvspace-team-tab-language" data-gvspace-language-select="' . esc_attr($group) . '">';
+    foreach ($locales as $locale => $label) {
+        echo '<option value="' . esc_attr($locale) . '"' . selected($active, $locale, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select>';
+    echo '<p class="description">Поле «Назва» — українська версія таба. Оберіть мову й заповніть переклад. Якщо переклад порожній, на сайті лишається українська назва.</p>';
+    if ($table) echo '</td></tr>';
+    else echo '</div>';
+
+    foreach ($locales as $locale => $label) {
+        $value = $term instanceof WP_Term ? (string) get_term_meta($term->term_id, '_gvspace_name_' . $locale, true) : '';
+        $field_id = 'gvspace_team_tab_name_' . $locale;
+        $hidden = $locale === $active ? '' : ' hidden';
+        if ($table) {
+            echo '<tr class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<th scope="row"><label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label></th><td>';
+        } else {
+            echo '<div class="form-field" data-gvspace-language-panel="' . esc_attr($group) . '" data-locale="' . esc_attr($locale) . '"' . $hidden . '>';
+            echo '<label for="' . esc_attr($field_id) . '">' . esc_html($label) . '</label>';
+        }
+        echo '<input type="text" id="' . esc_attr($field_id) . '" name="' . esc_attr($field_id) . '" value="' . esc_attr($value) . '">';
+        if ($table) echo '</td></tr>';
+        else echo '</div>';
+    }
+    gvspace_render_language_switcher_script();
+}
+
+function gvspace_save_team_tab_translation(int $term_id): void
+{
+    if (!current_user_can('manage_categories')) return;
+    $term = get_term($term_id, 'gv_team_member_category');
+    if ($term instanceof WP_Term) {
+        update_term_meta($term_id, '_gvspace_name_uk', $term->name);
+    }
+    foreach (array_keys(GVSPACE_CONTENT_LOCALES) as $locale) {
+        if ($locale === 'uk') continue;
+        $key = 'gvspace_team_tab_name_' . $locale;
+        if (!isset($_POST[$key])) continue;
+        update_term_meta($term_id, '_gvspace_name_' . $locale, sanitize_text_field(wp_unslash($_POST[$key])));
+    }
+}
+add_action('gv_team_member_category_add_form_fields', static function (): void {
+    gvspace_render_team_tab_translations(null, false);
+});
+add_action('gv_team_member_category_edit_form_fields', static function (WP_Term $term): void {
+    gvspace_render_team_tab_translations($term, true);
+});
+add_action('created_gv_team_member_category', 'gvspace_save_team_tab_translation');
+add_action('edited_gv_team_member_category', 'gvspace_save_team_tab_translation');
 
 add_action('admin_head-edit-tags.php', function (): void {
     $screen = get_current_screen();
@@ -4691,6 +4874,27 @@ add_action('pre_get_posts', function (WP_Query $query): void {
     if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'gv_team_member') return;
     if (!$query->get('orderby')) {
         $query->set('orderby', ['menu_order' => 'ASC', 'date' => 'DESC']);
+    }
+});
+
+add_filter('manage_gv_partner_posts_columns', function (array $columns): array {
+    $columns['menu_order'] = 'Порядок';
+    return $columns;
+});
+
+add_action('manage_gv_partner_posts_custom_column', function (string $column, int $post_id): void {
+    if ($column === 'menu_order') echo esc_html((string) get_post_field('menu_order', $post_id));
+}, 10, 2);
+
+add_filter('manage_edit-gv_partner_sortable_columns', function (array $columns): array {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+});
+
+add_action('pre_get_posts', function (WP_Query $query): void {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'gv_partner') return;
+    if (!$query->get('orderby')) {
+        $query->set('orderby', ['menu_order' => 'ASC', 'title' => 'ASC']);
     }
 });
 

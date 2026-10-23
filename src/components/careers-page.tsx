@@ -42,7 +42,7 @@ export async function CareersPage({ locale }: { locale: Locale }) {
             sizes="(max-width: 600px) 350px, (max-width: 900px) 420px, 531px"
           />
           <div className="container careers-hero-content">
-            <span className="mono">CAREERS</span>
+            <span className="mono">{t.heroEyebrow}</span>
             <h1>{t.heroTitle}</h1>
             <p>{t.heroDescription}</p>
           </div>

@@ -1,5 +1,6 @@
 export default {
   page: {
+    heroEyebrow: "INDUSTRIES",
     heroTitle: "Niches where we know the specifics",
     heroTitleSecond: "from the inside",
     heroDescription:

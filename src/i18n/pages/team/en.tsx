@@ -16,6 +16,7 @@ export default {
       "GVSPACE is about clarity in decisions, strong systems, and scaling what genuinely creates business value.",
   },
   page: {
+    heroEyebrow: "TEAM",
     heroTitle: "The people who build growth systems",
     heroDescription:
       "We are strategists, engineers, and marketers united around one result: manageable business growth.",

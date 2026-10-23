@@ -15,6 +15,7 @@ export default {
     eyebrow: "ЧОМУ GVSPACE",
   },
   page: {
+    heroEyebrow: "ВАКАНСІЇ",
     heroTitle: (
       <>
         Будуємо команду,

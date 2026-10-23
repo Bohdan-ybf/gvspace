@@ -94,7 +94,7 @@ export function BlogDesignPage({
             />
             <div className="container blog-hero-content">
               <div className="blog-hero-copy">
-                <span className="mono">BLOG</span>
+                <span className="mono">{t.heroEyebrow}</span>
                 <h1>{text.title}</h1>
                 <p>{text.intro}</p>
                 <div className="blog-topic-label mono">{text.chooseTopic}</div>
