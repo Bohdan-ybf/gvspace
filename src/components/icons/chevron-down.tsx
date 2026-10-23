@@ -15,7 +15,7 @@ export function ChevronDown({ className }: ChevronDownProps) {
       focusable="false"
     >
       <path
-        d="M3.35935 3.6044L8.89818e-06 -6.32798e-07L6.71868 -4.54329e-08L3.35935 3.6044Z"
+        d="M3.35925 3.60443L-8.26546e-05 2.98848e-05L6.71859 3.04721e-05L3.35925 3.60443Z"
         fill="currentColor"
       />
     </svg>

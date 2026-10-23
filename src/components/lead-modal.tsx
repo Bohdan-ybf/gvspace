@@ -17,6 +17,7 @@ import type { Locale } from "@/i18n";
 import { getTranslations } from "@/i18n/pages";
 import { lockPageScroll } from "@/lock-page-scroll";
 import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { Field, PhoneField } from "./form-field";
 import { FileUploadField } from "./file-upload-field";
 
 type LeadVariant = "lead" | "partner" | "question";
@@ -173,6 +174,7 @@ function LeadModal({
 
             <form
               className="lead-modal-form"
+              noValidate
               onSubmit={async (event) => {
                 const sent = await submit(event, formId);
                 if (!sent) return;
@@ -210,12 +212,14 @@ function LeadModal({
               {question ? (
                 <>
                   <div className="lead-modal-row">
-                    <input
-                      name="name"
-                      aria-label={question.name}
-                      placeholder={question.name}
-                      required
-                    />
+                    <Field locale={locale}>
+                      <input
+                        name="name"
+                        aria-label={question.name}
+                        placeholder={question.name}
+                        required
+                      />
+                    </Field>
                     <input
                       name="company"
                       aria-label={question.company}
@@ -223,61 +227,49 @@ function LeadModal({
                     />
                   </div>
                   <div className="lead-modal-row">
-                    <input
-                      name="email"
-                      type="email"
-                      aria-label={question.email}
-                      placeholder={question.email}
-                      required
-                    />
-                    <label className="lead-modal-phone">
+                    <Field locale={locale}>
                       <input
-                        name="phone"
-                        type="tel"
-                        inputMode="tel"
-                        aria-label={text.phone}
-                        placeholder={text.phoneShort}
+                        name="email"
+                        type="email"
+                        aria-label={question.email}
+                        placeholder={question.email}
                         required
                       />
-                      <span aria-hidden="true">*</span>
-                    </label>
+                    </Field>
+                    <PhoneField locale={locale} name="phone" aria-label={text.phone} required />
                   </div>
-                  <input
-                    name="question"
-                    aria-label={question.question}
-                    placeholder={question.question}
-                    required
-                  />
+                  <Field locale={locale}>
+                    <input
+                      name="question"
+                      aria-label={question.question}
+                      placeholder={question.question}
+                      required
+                    />
+                  </Field>
                 </>
               ) : partner ? (
                 <>
                   <div className="lead-modal-row">
-                    <input
-                      name="name"
-                      aria-label={partner.name}
-                      placeholder={partner.name}
-                      required
-                    />
-                    <label className="lead-modal-phone">
+                    <Field locale={locale}>
                       <input
-                        name="phone"
-                        type="tel"
-                        inputMode="tel"
-                        aria-label={text.phone}
-                        placeholder={text.phoneShort}
+                        name="name"
+                        aria-label={partner.name}
+                        placeholder={partner.name}
                         required
                       />
-                      <span aria-hidden="true">*</span>
-                    </label>
+                    </Field>
+                    <PhoneField locale={locale} name="phone" aria-label={text.phone} required />
                   </div>
                   <div className="lead-modal-row">
-                    <input
-                      name="email"
-                      type="email"
-                      aria-label={partner.email}
-                      placeholder={partner.email}
-                      required
-                    />
+                    <Field locale={locale}>
+                      <input
+                        name="email"
+                        type="email"
+                        aria-label={partner.email}
+                        placeholder={partner.email}
+                        required
+                      />
+                    </Field>
                     <input
                       name="company"
                       aria-label={partner.company}
@@ -294,33 +286,29 @@ function LeadModal({
               ) : (
                 <>
                   <div className="lead-modal-row">
-                    <input name="name" aria-label={text.name} placeholder={text.name} required />
-                    <input
-                      name="company"
-                      aria-label={text.company}
-                      placeholder={text.company}
-                      required
-                    />
-                  </div>
-                  <div className="lead-modal-row">
-                    <input
-                      name="email"
-                      type="email"
-                      aria-label={text.email}
-                      placeholder={text.email}
-                      required
-                    />
-                    <label className="lead-modal-phone">
+                    <Field locale={locale}>
+                      <input name="name" aria-label={text.name} placeholder={text.name} required />
+                    </Field>
+                    <Field locale={locale}>
                       <input
-                        name="phone"
-                        type="tel"
-                        inputMode="tel"
-                        aria-label={text.phone}
-                        placeholder={text.phoneShort}
+                        name="company"
+                        aria-label={text.company}
+                        placeholder={text.company}
                         required
                       />
-                      <span aria-hidden="true">*</span>
-                    </label>
+                    </Field>
+                  </div>
+                  <div className="lead-modal-row">
+                    <Field locale={locale}>
+                      <input
+                        name="email"
+                        type="email"
+                        aria-label={text.email}
+                        placeholder={text.email}
+                        required
+                      />
+                    </Field>
+                    <PhoneField locale={locale} name="phone" aria-label={text.phone} required />
                   </div>
                   <input name="source" aria-label={text.source} placeholder={text.source} />
                   <textarea

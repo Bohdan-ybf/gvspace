@@ -5,7 +5,7 @@ export default {
     nameLabel: "Ім’я",
     namePlaceholder: "Ім’я",
     phoneLabel: "Телефон",
-    phonePlaceholder: "+38 0__",
+    phonePlaceholder: "+___ ___ ___ ___",
     emailLabel: "Email",
     emailPlaceholder: "Email",
     telegramLabel: "Telegram",

@@ -15,7 +15,7 @@ function caseDateLabel(date: string | undefined, locale: string) {
 
 function caseCategoryLabel(project: CaseStudy) {
   const parts = [project.projectType, project.direction].filter(Boolean);
-  return parts.length ? parts.join(" / ") : "";
+  return parts.length ? `[ ${parts.join(" / ")} ]` : "";
 }
 
 function metricUnit(label: string) {

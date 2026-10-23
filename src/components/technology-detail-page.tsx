@@ -310,7 +310,9 @@ export async function TechnologyDetailPage({ locale, slug }: { locale: Locale; s
                     ) : null}
                     <span className="technology-detail-case-labels mono">
                       {caseDate ? <span>{caseDate}</span> : null}
-                      {caseCategories.length ? <span>{caseCategories.join(" / ")}</span> : null}
+                      {caseCategories.length ? (
+                        <span>{`[ ${caseCategories.join(" / ")} ]`}</span>
+                      ) : null}
                     </span>
                   </Link>
                   <div className="technology-detail-case-copy">

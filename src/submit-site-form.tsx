@@ -96,6 +96,12 @@ export function useSiteForm(locale: Locale) {
   ) {
     event.preventDefault();
     const form = event.currentTarget;
+    form.classList.add("is-submitted");
+    if (!form.checkValidity()) {
+      const firstInvalid = form.querySelector(":invalid");
+      if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
+      return false;
+    }
     if (sendingRef.current) return false;
     sendingRef.current = true;
     setSending(true);

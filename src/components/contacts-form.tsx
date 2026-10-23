@@ -2,6 +2,7 @@
 
 import type { Locale } from "@/i18n";
 import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { Field, PhoneField } from "./form-field";
 import { FormSentModal } from "./form-sent-modal";
 
 type ContactsFormProps = {
@@ -30,32 +31,45 @@ export function ContactsForm({
   const { sending, success, error, formKey, submit, closeSuccess } = useSiteForm(locale);
 
   return (
-    <form key={formKey} className="contacts-form" onSubmit={(event) => submit(event, "contacts")}>
+    <form
+      key={formKey}
+      className="contacts-form"
+      noValidate
+      onSubmit={(event) => submit(event, "contacts")}
+    >
       <h2 className="contact-label mono">{formLabel}</h2>
       <FormHoneypot />
       <div className="contacts-form-row">
-        <input name="name" aria-label={namePlaceholder} placeholder={namePlaceholder} required />
-        <input
+        <Field locale={locale}>
+          <input name="name" aria-label={namePlaceholder} placeholder={namePlaceholder} required />
+        </Field>
+        <PhoneField
+          locale={locale}
           name="phone"
           aria-label={phonePlaceholder}
-          inputMode="tel"
           placeholder={phonePlaceholder}
         />
       </div>
-      <input
-        name="email"
-        aria-label={emailPlaceholder}
-        type="email"
-        placeholder={emailPlaceholder}
-        required
-      />
-      <input name="topic" aria-label={topicPlaceholder} placeholder={topicPlaceholder} required />
-      <textarea
-        name="message"
-        aria-label={messagePlaceholder}
-        placeholder={messagePlaceholder}
-        required
-      />
+      <Field locale={locale}>
+        <input
+          name="email"
+          aria-label={emailPlaceholder}
+          type="email"
+          placeholder={emailPlaceholder}
+          required
+        />
+      </Field>
+      <Field locale={locale}>
+        <input name="topic" aria-label={topicPlaceholder} placeholder={topicPlaceholder} required />
+      </Field>
+      <Field locale={locale}>
+        <textarea
+          name="message"
+          aria-label={messagePlaceholder}
+          placeholder={messagePlaceholder}
+          required
+        />
+      </Field>
       <FormSubmitError message={error} />
       <button className="btn btn-primary" type="submit" disabled={sending}>
         {sending ? sendingLabel(locale) : submitLabel}

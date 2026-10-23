@@ -198,7 +198,6 @@ function MobileClarity({ text }: { text: Messages }) {
       <p>{text.clarity.description}</p>
       <LeadModalButton className="btn">
         <span>{text.clarity.action}</span>
-        <ArrowRight />
       </LeadModalButton>
     </section>
   );

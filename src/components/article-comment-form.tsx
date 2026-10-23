@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n";
 import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { Field } from "./form-field";
 import { FormSentModal } from "./form-sent-modal";
 
 type ArticleCommentFormProps = {
@@ -32,13 +33,23 @@ export function ArticleCommentForm({
 
   return (
     <>
-      <form key={formKey} onSubmit={(event) => submit(event, "comment", { article: articleTitle })}>
+      <form
+        key={formKey}
+        noValidate
+        onSubmit={(event) => submit(event, "comment", { article: articleTitle })}
+      >
         <div>
           <FormHoneypot />
-          <input name="name" aria-label={name} placeholder={name} required />
-          <input name="email" type="email" aria-label={email} placeholder={email} required />
+          <Field locale={locale}>
+            <input name="name" aria-label={name} placeholder={name} required />
+          </Field>
+          <Field locale={locale}>
+            <input name="email" type="email" aria-label={email} placeholder={email} required />
+          </Field>
         </div>
-        <textarea name="text" aria-label={text} placeholder={text} required />
+        <Field locale={locale}>
+          <textarea name="text" aria-label={text} placeholder={text} required />
+        </Field>
         <FormSubmitError message={error} />
         <div>
           <button type="submit" disabled={sending}>

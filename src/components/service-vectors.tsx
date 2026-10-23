@@ -79,7 +79,6 @@ export function ServiceVectors({ locale, text, clarity, services }: ServiceVecto
             <p>{clarity.description}</p>
             <LeadModalButton>
               <span>{clarity.action}</span>
-              <ArrowRight />
             </LeadModalButton>
           </div>
         </aside>

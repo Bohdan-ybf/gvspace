@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { getTranslations } from "@/i18n/pages";
 import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { Field, PhoneField } from "./form-field";
 import { FileUploadField } from "./file-upload-field";
 import { FormSentModal } from "./form-sent-modal";
 export function VacancyApplicationForm({
@@ -25,6 +26,7 @@ export function VacancyApplicationForm({
       <form
         key={formKey}
         className="vacancy-application-form"
+        noValidate
         onSubmit={async (event: FormEvent<HTMLFormElement>) => {
           const sent = await submit(
             event,
@@ -38,24 +40,27 @@ export function VacancyApplicationForm({
         <span className="mono">{t.eyebrow}</span>
         <h2>{t.title}</h2>
         <div>
-          <input name="name" aria-label={t.nameLabel} placeholder={t.namePlaceholder} required />
-          <input
+          <Field locale={locale}>
+            <input name="name" aria-label={t.nameLabel} placeholder={t.namePlaceholder} required />
+          </Field>
+          <PhoneField
+            locale={locale}
             name="phone"
-            type="tel"
             aria-label={t.phoneLabel}
             placeholder={t.phonePlaceholder}
-            inputMode="tel"
             required
           />
         </div>
         <div>
-          <input
-            name="email"
-            aria-label={t.emailLabel}
-            placeholder={t.emailPlaceholder}
-            type="email"
-            required
-          />
+          <Field locale={locale}>
+            <input
+              name="email"
+              aria-label={t.emailLabel}
+              placeholder={t.emailPlaceholder}
+              type="email"
+              required
+            />
+          </Field>
           <input name="telegram" aria-label={t.telegramLabel} placeholder={t.telegramPlaceholder} />
         </div>
         <input
@@ -63,12 +68,14 @@ export function VacancyApplicationForm({
           aria-label={t.portfolioLabel}
           placeholder={t.portfolioPlaceholder}
         />
-        <textarea
-          name="about"
-          aria-label={t.aboutLabel}
-          placeholder={t.aboutPlaceholder}
-          required
-        />
+        <Field locale={locale}>
+          <textarea
+            name="about"
+            aria-label={t.aboutLabel}
+            placeholder={t.aboutPlaceholder}
+            required
+          />
+        </Field>
         <FileUploadField
           className="resume-upload mono"
           label={t.resumeLabel}

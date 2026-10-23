@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Locale } from "@/i18n";
 import type { Messages } from "@/i18n/uk";
 import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { Field, PhoneField } from "./form-field";
 import { ContactMessageField } from "./contact-message-field";
 import { FileUploadField } from "./file-upload-field";
 import { FormSentModal } from "./form-sent-modal";
@@ -28,24 +29,37 @@ export function ContactSection({ text, locale }: ContactSectionProps) {
         <p>{text.intro}</p>
       </div>
 
-      <form key={formKey} onSubmit={(event) => submit(event, "contact")}>
+      <form key={formKey} noValidate onSubmit={(event) => submit(event, "contact")}>
         <FormHoneypot />
         <div>
-          <input name="name" aria-label={text.name} placeholder={text.name} required />
-          <input name="company" aria-label={text.company} placeholder={text.company} required />
+          <Field locale={locale}>
+            <input name="name" aria-label={text.name} placeholder={text.name} required />
+          </Field>
+          <Field locale={locale}>
+            <input name="company" aria-label={text.company} placeholder={text.company} required />
+          </Field>
         </div>
         <div>
-          <input
-            name="email"
-            type="email"
-            aria-label={text.email}
-            placeholder={text.email}
-            required
+          <Field locale={locale}>
+            <input
+              name="email"
+              type="email"
+              aria-label={text.email}
+              placeholder={text.email}
+              required
+            />
+          </Field>
+          <PhoneField
+            locale={locale}
+            name="phone"
+            aria-label={text.phone}
+            placeholder={text.phonePlaceholder}
           />
-          <input name="phone" aria-label={text.phone} placeholder={text.phonePlaceholder} />
         </div>
         <input name="source" aria-label={text.source} placeholder={text.source} />
-        <ContactMessageField label={text.description} placeholder={text.description} />
+        <Field locale={locale}>
+          <ContactMessageField label={text.description} placeholder={text.description} />
+        </Field>
         <FileUploadField className="contact-file" label={text.attachment} locale={locale} />
         <FormSubmitError message={error} />
         <div className="contact-actions">

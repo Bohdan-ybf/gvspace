@@ -20,6 +20,7 @@ import { Pagination, scrollToBlockTop } from "./pagination";
 import { ContentImageLabel } from "./content-image-label";
 import { contentImageLabel } from "@/content-images";
 import { FormHoneypot, FormSubmitError, sendingLabel, useSiteForm } from "@/submit-site-form";
+import { Field } from "./form-field";
 import { FormSentModal } from "./form-sent-modal";
 
 const POSTS_PER_PAGE = 6;
@@ -104,7 +105,7 @@ export function BlogDesignPage({
                     className={activeCategory === "all" ? "is-active" : ""}
                     onClick={() => selectCategory("all")}
                   >
-                    {text.all.toLocaleUpperCase("uk-UA")}
+                    {text.all}
                   </button>
                   {categories.map(({ slug, name }) => (
                     <button
@@ -113,7 +114,7 @@ export function BlogDesignPage({
                       className={activeCategory === slug ? "is-active" : ""}
                       onClick={() => selectCategory(slug)}
                     >
-                      {name.toLocaleUpperCase("uk-UA")}
+                      {name}
                     </button>
                   ))}
                 </nav>
@@ -179,18 +180,20 @@ export function BlogDesignPage({
               <p>{text.noSpam}</p>
             </div>
             <div className="blog-newsletter-aside">
-              <form key={formKey} onSubmit={(event) => submit(event, "newsletter")}>
+              <form key={formKey} noValidate onSubmit={(event) => submit(event, "newsletter")}>
                 <FormHoneypot />
                 <label className="sr-only" htmlFor="blog-email">
                   Email
                 </label>
-                <input
-                  id="blog-email"
-                  name="email"
-                  type="email"
-                  placeholder={text.email}
-                  required
-                />
+                <Field locale={locale}>
+                  <input
+                    id="blog-email"
+                    name="email"
+                    type="email"
+                    placeholder={text.email}
+                    required
+                  />
+                </Field>
                 <button type="submit" disabled={sending}>
                   {sending ? sendingLabel(locale) : text.subscribe}
                 </button>

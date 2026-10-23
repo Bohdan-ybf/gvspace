@@ -3,8 +3,14 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown } from "./icons/chevron-down";
 
-function displayLabel(value: string) {
-  return value.toLocaleUpperCase("uk-UA");
+function filterLabel(value: string) {
+  const letters = value.match(/\p{L}/gu) ?? [];
+  const isUppercase =
+    letters.length > 0 && letters.every((letter) => letter === letter.toLocaleUpperCase("uk-UA"));
+  if (!isUppercase) return value;
+
+  const lower = value.toLocaleLowerCase("uk-UA");
+  return lower.charAt(0).toLocaleUpperCase("uk-UA") + lower.slice(1);
 }
 
 export function FilterSelect({
@@ -51,7 +57,7 @@ export function FilterSelect({
         aria-controls={listId}
         onClick={() => setOpen((current) => !current)}
       >
-        <span>{displayLabel(selected ? selected.label : label)}</span>
+        <span>{filterLabel(selected ? selected.label : label)}</span>
         <ChevronDown />
       </button>
       {open ? (
@@ -67,7 +73,7 @@ export function FilterSelect({
                   setOpen(false);
                 }}
               >
-                {displayLabel(option.label)}
+                {filterLabel(option.label)}
               </button>
             </li>
           ))}

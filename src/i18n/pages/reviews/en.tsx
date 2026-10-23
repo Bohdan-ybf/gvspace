@@ -40,7 +40,7 @@ export default {
     name: "Name*",
     company: "Company",
     email: "Email*",
-    phone: "+1 (___) ___-____*",
+    phone: "+___ ___ ___ ___",
     text: "Review*",
     submit: "Send",
     privacy: "By clicking “Send”, you agree to the processing of your personal data.",
